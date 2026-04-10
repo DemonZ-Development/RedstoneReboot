@@ -22,9 +22,11 @@ public class RedstoneRebootCore {
     private static final Logger LOGGER = LoggerFactory.getLogger(BRAND);
 
     private final ServerPlatform platform;
+    private final dev.demonz.redstonereboot.common.utils.UpdateChecker updateChecker;
 
     public RedstoneRebootCore(ServerPlatform platform) {
         this.platform = platform;
+        this.updateChecker = new dev.demonz.redstonereboot.common.utils.UpdateChecker("redstonereboot", VERSION, LOGGER);
     }
 
     /**
@@ -35,6 +37,7 @@ public class RedstoneRebootCore {
         LOGGER.info("Platform: {} (MC {})", platform.getPlatformName(), platform.getMinecraftVersion());
         LOGGER.info("TPS: {}", String.format("%.1f", platform.getTPS()));
         LOGGER.info("Engine initialized successfully.");
+        updateChecker.checkForUpdates();
     }
 
     /**
@@ -99,5 +102,9 @@ public class RedstoneRebootCore {
 
     public ServerPlatform getPlatform() {
         return platform;
+    }
+
+    public dev.demonz.redstonereboot.common.utils.UpdateChecker getUpdateChecker() {
+        return updateChecker;
     }
 }

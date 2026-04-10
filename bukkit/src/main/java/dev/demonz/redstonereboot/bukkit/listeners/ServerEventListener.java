@@ -29,6 +29,12 @@ public class ServerEventListener implements Listener {
                     " §aNext restart: §e" + plugin.getRestartManager().getNextScheduledRestart() +
                     " " + plugin.getConfigManager().getTimezone());
             }
+            
+            if (plugin.getCore().getUpdateChecker().hasUpdate()) {
+                event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix() +
+                    " §aA new update for RedstoneReboot is available on Modrinth! (Latest: §av" + 
+                    plugin.getCore().getUpdateChecker().getLatestVersion() + "§a)");
+            }
         }
     }
 }
