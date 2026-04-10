@@ -18,7 +18,7 @@
 
 **Bukkit** · **Paper** · **Spigot** · **Folia** · **Fabric** · **Forge** · **NeoForge**
 
-[📖 Wiki](docs/wiki/Home.md) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/demonz)
+[📖 Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/demonz)
 
 </div>
 
@@ -133,7 +133,7 @@ emergency:
   delay: 30
 ```
 
-> 📖 See the [full configuration reference](docs/wiki/Configuration.md) for all options.
+> 📖 See the [full configuration reference](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md) for all options.
 
 ---
 
@@ -232,7 +232,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📞 Support & Community
 
-- 📖 [**Complete Wiki**](docs/wiki/Home.md)
+- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
 - 🛠️ [**Developer API Docs**](docs/api/README.md)
 - 🐛 [**Bug Reports & Feature Requests**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
 - 💬 [**Community Discussions**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions)

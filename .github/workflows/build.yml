@@ -87,7 +87,7 @@ jobs:
             - **Fabric/Forge/NeoForge**: MC 1.20.4+ · Java 17+
 
             ### Links
-            - 📖 [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
+            - 📖 [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
             - 🛠️ [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
           draft: false
           prerelease: false

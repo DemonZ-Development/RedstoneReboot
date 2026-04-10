@@ -12,7 +12,7 @@
 
 ![Minecraft](https://img.shields.io/badge/MC-1.9_--_1.21.1-22c55e?style=flat-square)
 ![Java](https://img.shields.io/badge/Java-17+-f97316?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)
 
 </div>
 
