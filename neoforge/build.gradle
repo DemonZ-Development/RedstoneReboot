@@ -1,0 +1,8 @@
+// NeoForge module — stubbed for NeoGradle integration
+dependencies {
+    implementation project(':common')
+}
+
+jar {
+    archiveBaseName = 'RedstoneReboot-NeoForge'
+}

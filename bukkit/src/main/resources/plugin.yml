@@ -1,0 +1,54 @@
+name: RedstoneReboot
+version: 1.0.0
+main: dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin
+api-version: '1.13'
+description: Advanced multi-platform server restart engine with scheduling, monitoring, and rich alerts.
+author: DemonZDevelopment
+website: https://github.com/DemonZDevelopment/RedstoneReboot
+depend: []
+softdepend: [LuckPerms, PlaceholderAPI]
+
+commands:
+  reboot:
+    description: RedstoneReboot main command
+    usage: /reboot <subcommand>
+    permission: redstonereboot.use
+    aliases: [rreboot, redstonereboot]
+
+permissions:
+  redstonereboot.*:
+    description: All RedstoneReboot permissions
+    default: op
+    children:
+      redstonereboot.use: true
+      redstonereboot.admin: true
+      redstonereboot.restart.now: true
+      redstonereboot.restart.schedule: true
+      redstonereboot.restart.cancel: true
+      redstonereboot.config.reload: true
+      redstonereboot.status: true
+      redstonereboot.notify: true
+  redstonereboot.use:
+    description: Basic plugin usage
+    default: true
+  redstonereboot.admin:
+    description: Admin permissions
+    default: op
+  redstonereboot.restart.now:
+    description: Trigger immediate restart
+    default: op
+  redstonereboot.restart.schedule:
+    description: Schedule restart
+    default: op
+  redstonereboot.restart.cancel:
+    description: Cancel restart
+    default: op
+  redstonereboot.config.reload:
+    description: Reload configuration
+    default: op
+  redstonereboot.status:
+    description: View restart status
+    default: true
+  redstonereboot.notify:
+    description: Receive restart notifications
+    default: true

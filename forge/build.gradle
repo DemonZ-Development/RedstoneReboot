@@ -1,0 +1,8 @@
+// Forge module — stubbed for ForgeGradle integration
+dependencies {
+    implementation project(':common')
+}
+
+jar {
+    archiveBaseName = 'RedstoneReboot-Forge'
+}

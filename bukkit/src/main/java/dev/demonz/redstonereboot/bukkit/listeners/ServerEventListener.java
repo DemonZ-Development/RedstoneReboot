@@ -1,0 +1,34 @@
+package dev.demonz.redstonereboot.bukkit.listeners;
+
+import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
+import dev.demonz.redstonereboot.bukkit.events.RestartEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+public class ServerEventListener implements Listener {
+    private final RedstoneRebootPlugin plugin;
+
+    public ServerEventListener(RedstoneRebootPlugin plugin) { this.plugin = plugin; }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onRestart(RestartEvent event) {
+        plugin.getLogger().info("RestartEvent — Reason: " + event.getReason().getDisplayName() +
+            " | Initiator: " + event.getInitiator() + " | Delay: " + event.getDelaySeconds() + "s");
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        if (plugin.getPermissionManager().hasAdminPermission(event.getPlayer())) {
+            if (plugin.getRestartManager().isRestartInProgress()) {
+                event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix() +
+                    " §eRestart in progress — §c" + plugin.getRestartManager().getCurrentRestartReason().getDisplayName());
+            } else if (plugin.getRestartManager().getNextScheduledRestart() != null) {
+                event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix() +
+                    " §aNext restart: §e" + plugin.getRestartManager().getNextScheduledRestart() +
+                    " " + plugin.getConfigManager().getTimezone());
+            }
+        }
+    }
+}

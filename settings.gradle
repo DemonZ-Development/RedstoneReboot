@@ -1,0 +1,8 @@
+rootProject.name = 'RedstoneReboot'
+
+include 'common'
+include 'bukkit'
+include 'folia'
+include 'fabric'
+include 'forge'
+include 'neoforge'

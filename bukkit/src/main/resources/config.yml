@@ -1,0 +1,87 @@
+# ══════════════════════════════════════════════════════════════
+# RedstoneReboot v1.0.0 — Configuration
+# ══════════════════════════════════════════════════════════════
+#
+# Advanced multi-platform server restart engine.
+# GitHub: https://github.com/DemonZDevelopment/RedstoneReboot
+# Wiki:   https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/wiki/Home.md
+
+# ── GENERAL ───────────────────────────────────────────────────
+general:
+  plugin-prefix: "§8[§cRedstone§8] §aReboot"
+  debug-mode: false
+  strict-validation: true
+
+# ── SCHEDULED RESTARTS ────────────────────────────────────────
+scheduled-restarts:
+  enabled: true
+  times:
+    - "06:00"
+    - "12:00"
+    - "18:00"
+    - "00:00"
+  timezone: "Asia/Kolkata"
+  days:
+    - "ALL"
+  warning-time: 300
+
+# ── ALERT SYSTEM ──────────────────────────────────────────────
+alerts:
+  enabled: true
+  warning-times: [3600, 1800, 900, 600, 300, 180, 120, 60, 30, 15, 10, 5, 4, 3, 2, 1]
+
+  chat:
+    enabled: true
+    format: "§8[§cRedstone§8] §eServer will restart in §c{time}§e!"
+
+  title:
+    enabled: true
+    main-title: "§c⚡ Server Restart"
+    sub-title: "§ein §c{time}"
+
+  actionbar:
+    enabled: true
+    format: "§8[§cRedstone§8] §eRestart in: §c{time}"
+
+  sound:
+    enabled: true
+    sound-name: "BLOCK_NOTE_BLOCK_PLING"
+
+# ── SERVER MONITORING ─────────────────────────────────────────
+monitoring:
+  enabled: true
+  tps-threshold: 18.0
+  memory-threshold: 85.0
+  check-interval: 30
+  consecutive-checks: 3
+
+# ── EMERGENCY RESTART ─────────────────────────────────────────
+emergency:
+  enabled: true
+  tps-threshold: 12.0
+  memory-threshold: 95.0
+  delay: 30
+
+# ── PERMISSIONS ───────────────────────────────────────────────
+permissions:
+  luckperms:
+    integration-enabled: true
+    default-permission: "redstonereboot.use"
+    admin-permission: "redstonereboot.admin"
+  fallback:
+    use-op-as-admin: true
+
+# ── PLACEHOLDERAPI ────────────────────────────────────────────
+placeholders:
+  enabled: true
+
+# ── ADVANCED ──────────────────────────────────────────────────
+advanced:
+  async-operations: true
+  thread-pool-size: 2
+  metrics-enabled: true
+
+# ══════════════════════════════════════════════════════════════
+# DO NOT MODIFY
+# ══════════════════════════════════════════════════════════════
+config-version: 1

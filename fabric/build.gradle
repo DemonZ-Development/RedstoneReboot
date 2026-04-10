@@ -1,0 +1,8 @@
+// Fabric module — stubbed for Fabric Loom integration
+dependencies {
+    implementation project(':common')
+}
+
+jar {
+    archiveBaseName = 'RedstoneReboot-Fabric'
+}
