@@ -9,7 +9,7 @@
 
 ### Steps
 
-1. Download `RedstoneReboot-Bukkit-1.0.0.jar` from the [latest release](https://github.com/DemonZDevelopment/RedstoneReboot/releases/latest)
+1. Download `RedstoneReboot-Bukkit-1.0.0.jar` from the [latest release](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest)
 2. Stop your server
 3. Place the JAR in your server's `plugins/` directory
 4. Start the server
@@ -43,7 +43,7 @@ Same as Bukkit, but download the `RedstoneReboot-Folia-1.0.0.jar` variant instea
 - **Dependencies**: Fabric API
 
 ### Steps
-1. Download `RedstoneReboot-Fabric-1.0.0.jar` from [Releases](https://github.com/DemonZDevelopment/RedstoneReboot/releases/latest)
+1. Download `RedstoneReboot-Fabric-1.0.0.jar` from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest)
 2. Place the JAR in your server's `mods/` directory alongside `fabric-api`
 3. Start the server
 4. Configuration is generated at `config/redstonereboot/config.yml`
@@ -57,7 +57,7 @@ Same as Bukkit, but download the `RedstoneReboot-Folia-1.0.0.jar` variant instea
 - **Java**: Java 17+
 
 ### Steps
-1. Download `RedstoneReboot-Forge-1.0.0.jar` from [Releases](https://github.com/DemonZDevelopment/RedstoneReboot/releases/latest)
+1. Download `RedstoneReboot-Forge-1.0.0.jar` from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest)
 2. Place the JAR in your server's `mods/` directory
 3. Start the server
 4. Configuration is generated at `config/redstonereboot/config.yml`
@@ -71,7 +71,7 @@ Same as Bukkit, but download the `RedstoneReboot-Folia-1.0.0.jar` variant instea
 - **Java**: Java 17+
 
 ### Steps
-1. Download `RedstoneReboot-NeoForge-1.0.0.jar` from [Releases](https://github.com/DemonZDevelopment/RedstoneReboot/releases/latest)
+1. Download `RedstoneReboot-NeoForge-1.0.0.jar` from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest)
 2. Place the JAR in your server's `mods/` directory
 3. Start the server
 4. Configuration is generated at `config/redstonereboot/config.yml`

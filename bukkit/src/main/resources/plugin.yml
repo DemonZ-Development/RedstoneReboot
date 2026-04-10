@@ -4,7 +4,7 @@ main: dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin
 api-version: '1.13'
 description: Advanced multi-platform server restart engine with scheduling, monitoring, and rich alerts.
 author: DemonZDevelopment
-website: https://github.com/DemonZDevelopment/RedstoneReboot
+website: https://github.com/sdemonzdevelopment-spec/RedstoneReboot
 depend: []
 softdepend: [LuckPerms, PlaceholderAPI]
 

@@ -8,8 +8,8 @@
 
 **The Most Advanced Multi-Platform Minecraft Server Restart Engine**
 
-[![GitHub Release](https://img.shields.io/github/v/release/DemonZDevelopment/RedstoneReboot?style=for-the-badge&logo=github&color=dc2626)](https://github.com/DemonZDevelopment/RedstoneReboot/releases)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/DemonZDevelopment/RedstoneReboot/build.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DemonZDevelopment/RedstoneReboot/actions)
+[![GitHub Release](https://img.shields.io/github/v/release/sdemonzdevelopment-spec/RedstoneReboot?style=for-the-badge&logo=github&color=dc2626)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/sdemonzdevelopment-spec/RedstoneReboot/build.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-17+-f97316?style=for-the-badge&logo=openjdk&logoColor=white)](https://adoptium.net)
 [![Minecraft](https://img.shields.io/badge/MC-1.9_--_1.21.1-22c55e?style=for-the-badge&logo=minecraft&logoColor=white)](https://minecraft.net)
@@ -18,7 +18,7 @@
 
 **Bukkit** · **Paper** · **Spigot** · **Folia** · **Fabric** · **Forge** · **NeoForge**
 
-[📖 Wiki](docs/wiki/Home.md) · [⬇️ Download](https://github.com/DemonZDevelopment/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/DemonZDevelopment/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/demonz)
+[📖 Wiki](docs/wiki/Home.md) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/demonz)
 
 </div>
 
@@ -91,14 +91,14 @@ RedstoneReboot isn't just a restart plugin — it's a **professional-grade serve
 ### ⬇️ Installation
 
 **Bukkit / Spigot / Paper / Folia:**
-1. Download `RedstoneReboot-Bukkit-x.x.x.jar` from [Releases](https://github.com/DemonZDevelopment/RedstoneReboot/releases)
+1. Download `RedstoneReboot-Bukkit-x.x.x.jar` from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
 2. Place in your server's `plugins/` folder
 3. Start the server — config files auto-generate
 4. Edit `plugins/RedstoneReboot/config.yml` to your needs
 5. Reload with `/reboot reload` or restart the server
 
 **Fabric / Forge / NeoForge:**
-1. Download the appropriate mod jar from [Releases](https://github.com/DemonZDevelopment/RedstoneReboot/releases)
+1. Download the appropriate mod jar from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
 2. Place in your server's `mods/` folder
 3. Start the server — config auto-generates in `config/redstonereboot/`
 
@@ -204,7 +204,7 @@ public void onRestart(RestartEvent event) {
 ## 🏗️ Building from Source
 
 ```bash
-git clone https://github.com/DemonZDevelopment/RedstoneReboot.git
+git clone https://github.com/sdemonzdevelopment-spec/RedstoneReboot.git
 cd RedstoneReboot
 ./gradlew build
 ```
@@ -234,8 +234,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 - 📖 [**Complete Wiki**](docs/wiki/Home.md)
 - 🛠️ [**Developer API Docs**](docs/api/README.md)
-- 🐛 [**Bug Reports & Feature Requests**](https://github.com/DemonZDevelopment/RedstoneReboot/issues)
-- 💬 [**Community Discussions**](https://github.com/DemonZDevelopment/RedstoneReboot/discussions)
+- 🐛 [**Bug Reports & Feature Requests**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
+- 💬 [**Community Discussions**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions)
 - 🔗 [**DemonZ Development**](https://demonzdevelopment.online)
 
 ---

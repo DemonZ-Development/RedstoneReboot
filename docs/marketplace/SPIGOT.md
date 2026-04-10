@@ -3,7 +3,7 @@
 <!-- BBCode formatted for SpigotMC Resource Description -->
 
 [CENTER]
-[IMG]https://raw.githubusercontent.com/DemonZDevelopment/RedstoneReboot/main/assets/banner.png[/IMG]
+[IMG]https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/banner.png[/IMG]
 
 [SIZE=6][B]⚡ RedstoneReboot[/B][/SIZE]
 [SIZE=4][I]Advanced Multi-Platform Server Restart Engine[/I][/SIZE]
@@ -75,10 +75,10 @@ Whether you run a small SMP or a massive network, RedstoneReboot provides the re
 [SIZE=5][B]🔗 Links[/B][/SIZE]
 
 [LIST]
-[*] [URL='https://github.com/DemonZDevelopment/RedstoneReboot'][B]GitHub Source[/B][/URL]
-[*] [URL='https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/wiki/Home.md'][B]Documentation Wiki[/B][/URL]
-[*] [URL='https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/api/README.md'][B]Developer API[/B][/URL]
-[*] [URL='https://github.com/DemonZDevelopment/RedstoneReboot/issues'][B]Bug Reports[/B][/URL]
+[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot'][B]GitHub Source[/B][/URL]
+[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md'][B]Documentation Wiki[/B][/URL]
+[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md'][B]Developer API[/B][/URL]
+[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues'][B]Bug Reports[/B][/URL]
 [*] [URL='https://demonzdevelopment.online'][B]DemonZ Development[/B][/URL]
 [/LIST]
 

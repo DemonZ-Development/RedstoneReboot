@@ -4,7 +4,7 @@
 
 <div align="center">
 
-![RedstoneReboot Banner](https://raw.githubusercontent.com/DemonZDevelopment/RedstoneReboot/main/assets/banner.png)
+![RedstoneReboot Banner](https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/banner.png)
 
 # ⚡ RedstoneReboot
 
@@ -85,9 +85,9 @@ When TPS drops below critical levels (default: 12.0) or memory exceeds 95%, Reds
 
 ## Links
 
-- 📖 [Wiki](https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/wiki/Home.md)
-- 🛠️ [Developer API](https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/api/README.md)
-- 🐛 [Issue Tracker](https://github.com/DemonZDevelopment/RedstoneReboot/issues)
+- 📖 [Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
+- 🛠️ [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+- 🐛 [Issue Tracker](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
 - 💬 [Discord](https://discord.gg/demonz)
 - 🌐 [DemonZ Development](https://demonzdevelopment.online)
 

@@ -5,7 +5,7 @@
 
 <div align="center">
 
-![RedstoneReboot](https://raw.githubusercontent.com/DemonZDevelopment/RedstoneReboot/main/assets/banner.png)
+![RedstoneReboot](https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/banner.png)
 
 </div>
 
@@ -63,10 +63,10 @@ Runs on Paper, Folia, Bukkit, Spigot — with versions spanning **1.9 through 1.
 
 ### 🔗 Links
 
-- **Source Code**: [GitHub](https://github.com/DemonZDevelopment/RedstoneReboot)
-- **Wiki**: [Documentation](https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/wiki/Home.md)
-- **Developer API**: [API Docs](https://github.com/DemonZDevelopment/RedstoneReboot/blob/main/docs/api/README.md)
-- **Issues**: [Bug Tracker](https://github.com/DemonZDevelopment/RedstoneReboot/issues)
+- **Source Code**: [GitHub](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
+- **Wiki**: [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
+- **Developer API**: [API Docs](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+- **Issues**: [Bug Tracker](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
 
 ---
 
