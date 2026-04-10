@@ -26,8 +26,19 @@ public class ConfigManager {
         }
     }
 
+    public static final int CURRENT_CONFIG_VERSION = 1;
+
     private void validateConfiguration() {
         try {
+            // Check config version
+            int version = getConfigVersion();
+            if (version < CURRENT_CONFIG_VERSION) {
+                plugin.getLogger().warning("==========================================");
+                plugin.getLogger().warning("Your config.yml is outdated! (v" + version + " < v" + CURRENT_CONFIG_VERSION + ")");
+                plugin.getLogger().warning("Please backup and regenerate your config to get the latest features.");
+                plugin.getLogger().warning("==========================================");
+            }
+
             // Validate timezone
             String timezone = getTimezone();
             try {
@@ -64,6 +75,7 @@ public class ConfigManager {
     }
 
     // ── General ──────────────────────────────────────────────────
+    public int getConfigVersion() { return config.getInt("config-version", 1); }
     public String getPrefix() { return config.getString("general.plugin-prefix", "§8[§cRedstone§8] §aReboot"); }
     public boolean isDebugMode() { return config.getBoolean("general.debug-mode", false); }
     public boolean isStrictValidationEnabled() { return config.getBoolean("general.strict-validation", true); }
