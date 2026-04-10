@@ -10,7 +10,7 @@
 
 [![GitHub Release](https://img.shields.io/github/v/release/DemonZDevelopment/RedstoneReboot?style=for-the-badge&logo=github&color=dc2626)](https://github.com/DemonZDevelopment/RedstoneReboot/releases)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/DemonZDevelopment/RedstoneReboot/build.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/DemonZDevelopment/RedstoneReboot/actions)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-17+-f97316?style=for-the-badge&logo=openjdk&logoColor=white)](https://adoptium.net)
 [![Minecraft](https://img.shields.io/badge/MC-1.9_--_1.21.1-22c55e?style=for-the-badge&logo=minecraft&logoColor=white)](https://minecraft.net)
 
@@ -242,7 +242,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📄 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
