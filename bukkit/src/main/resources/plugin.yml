@@ -1,5 +1,5 @@
 name: RedstoneReboot
-version: 1.0.0
+version: 1.2.0
 main: dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin
 api-version: '1.13'
 description: Advanced multi-platform server restart engine with scheduling, monitoring, and rich alerts.
