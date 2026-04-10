@@ -107,7 +107,7 @@ If your change affects user-facing behavior:
 ## 💡 Need Help?
 
 - Open a [Discussion](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions) for questions
-- Join our [Discord](https://discord.gg/demonz) for real-time help
+- Join our [Discord](https://discord.gg/GYsTt96ypf) for real-time help
 - Check existing [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) for known problems
 
 ---

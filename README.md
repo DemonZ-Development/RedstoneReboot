@@ -18,7 +18,7 @@
 
 **Bukkit** · **Paper** · **Spigot** · **Folia** · **Fabric** · **Forge** · **NeoForge**
 
-[📖 Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/demonz)
+[📖 Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/GYsTt96ypf)
 
 </div>
 

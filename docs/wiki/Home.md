@@ -67,4 +67,4 @@ NeoForge:             1.20.4+
 - **Bug Reports**: [GitHub Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues/new?template=bug_report.yml)
 - **Feature Requests**: [GitHub Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues/new?template=feature_request.yml)
 - **Discussions**: [GitHub Discussions](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions)
-- **Discord**: [DemonZ Discord](https://discord.gg/demonz)
+- **Discord**: [DemonZ Discord](https://discord.gg/GYsTt96ypf)

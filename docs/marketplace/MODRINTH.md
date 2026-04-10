@@ -88,7 +88,7 @@ When TPS drops below critical levels (default: 12.0) or memory exceeds 95%, Reds
 - 📖 [Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
 - 🛠️ [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
 - 🐛 [Issue Tracker](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
-- 💬 [Discord](https://discord.gg/demonz)
+- 💬 [Discord](https://discord.gg/GYsTt96ypf)
 - 🌐 [DemonZ Development](https://demonzdevelopment.online)
 
 ---

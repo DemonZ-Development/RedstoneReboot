@@ -255,6 +255,6 @@ public class MyIntegration extends JavaPlugin implements Listener {
 
 <div align="center">
 
-**Need help?** Open an issue on [GitHub](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) or join our [Discord](https://discord.gg/demonz).
+**Need help?** Open an issue on [GitHub](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) or join our [Discord](https://discord.gg/GYsTt96ypf).
 
 </div>
