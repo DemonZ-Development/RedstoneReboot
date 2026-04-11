@@ -1,7 +1,7 @@
 package dev.demonz.redstonereboot.bukkit.commands;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
-import dev.demonz.redstonereboot.bukkit.managers.RestartManager;
+import dev.demonz.redstonereboot.common.command.CommandProcessor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -11,7 +11,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,12 +20,14 @@ import java.util.List;
  */
 public class RebootCommand implements CommandExecutor, TabCompleter {
 
-    private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     private final RedstoneRebootPlugin plugin;
+    private final CommandProcessor processor;
 
     public RebootCommand(RedstoneRebootPlugin plugin) {
         this.plugin = plugin;
+        this.processor = new CommandProcessor(plugin.getCore());
     }
 
     @Override
@@ -36,11 +37,16 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
+        BukkitSender wrapper = new BukkitSender(sender);
+
         return switch (args[0].toLowerCase()) {
             case "now" -> handleNow(sender, args);
             case "schedule" -> handleSchedule(sender, args);
             case "cancel" -> handleCancel(sender);
-            case "status" -> handleStatus(sender);
+            case "status" -> {
+                processor.processStatus(wrapper);
+                yield true;
+            }
             case "info" -> handleInfo(sender);
             case "reload" -> handleReload(sender);
             case "help" -> {
@@ -79,21 +85,18 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         int delay = 60;
         if (args.length > 1) {
             try {
-                delay = Math.min(Math.max(Integer.parseInt(args[1]), 0), 3600);
+                delay = Integer.parseInt(args[1]);
+                if (delay < 0 || delay > 3600) {
+                    msg(sender, "Delay must be between 0 and 3600 seconds.", NamedTextColor.RED);
+                    return true;
+                }
             } catch (NumberFormatException exception) {
                 msg(sender, "Invalid delay.", NamedTextColor.RED);
                 return true;
             }
         }
 
-        boolean scheduled = plugin.getRestartManager()
-            .scheduleRestart(delay, RestartManager.RestartReason.MANUAL, sender.getName());
-        if (!scheduled) {
-            msg(sender, "A sooner restart is already in progress.", NamedTextColor.YELLOW);
-            return true;
-        }
-
-        msg(sender, "Server restart in " + delay + "s.", NamedTextColor.GREEN);
+        processor.processNow(new BukkitSender(sender), delay);
         return true;
     }
 
@@ -110,19 +113,11 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
 
         try {
             int delay = Integer.parseInt(args[1]);
-            if (delay <= 0 || delay > 86400) {
+            if (delay < 1 || delay > 86400) {
                 msg(sender, "Delay must be between 1 and 86400 seconds.", NamedTextColor.RED);
                 return true;
             }
-
-            boolean scheduled = plugin.getRestartManager()
-                .scheduleRestart(delay, RestartManager.RestartReason.MANUAL, sender.getName());
-            if (!scheduled) {
-                msg(sender, "A sooner restart is already in progress.", NamedTextColor.YELLOW);
-                return true;
-            }
-
-            msg(sender, "Restart scheduled in " + delay + "s.", NamedTextColor.GREEN);
+            processor.processSchedule(new BukkitSender(sender), delay);
         } catch (NumberFormatException exception) {
             msg(sender, "Invalid number.", NamedTextColor.RED);
         }
@@ -135,39 +130,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        boolean cancelled = plugin.getRestartManager().cancelRestart();
-        msg(sender, cancelled ? "Restart cancelled." : "No restart pending.",
-            cancelled ? NamedTextColor.GREEN : NamedTextColor.YELLOW);
-        return true;
-    }
-
-    private boolean handleStatus(CommandSender sender) {
-        if (sender instanceof Player player && !plugin.getPermissionManager().canViewStatus(player)) {
-            msg(sender, "No permission.", NamedTextColor.RED);
-            return true;
-        }
-
-        msg(sender, "=== RedstoneReboot Status ===", NamedTextColor.GOLD);
-        msg(sender, "Version: " + plugin.getDescription().getVersion(), NamedTextColor.GRAY);
-        msg(sender, "Timezone: " + plugin.getConfigManager().getTimezone(), NamedTextColor.GRAY);
-
-        if (plugin.getRestartManager().isRestartInProgress()) {
-            msg(sender,
-                "Status: Restart in progress (" + plugin.getRestartManager().getSecondsUntilRestart() + "s remaining)",
-                NamedTextColor.RED);
-            msg(sender,
-                "Reason: " + plugin.getRestartManager().getCurrentRestartReason().getDisplayName(),
-                NamedTextColor.GRAY);
-        } else {
-            msg(sender, "Status: Normal operation", NamedTextColor.GREEN);
-        }
-
-        if (plugin.getRestartManager().getNextScheduledRestart() != null) {
-            msg(sender,
-                "Next: " + plugin.getRestartManager().getNextScheduledRestart().format(STATUS_TIME_FORMAT)
-                    + " " + plugin.getConfigManager().getTimezone(),
-                NamedTextColor.AQUA);
-        }
+        processor.processCancel(new BukkitSender(sender));
         return true;
     }
 
@@ -218,10 +181,45 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private void msg(CommandSender sender, String text, NamedTextColor color) {
-        Component prefix = LegacyComponentSerializer.legacySection().deserialize(plugin.getConfigManager().getPrefix());
-        Component message = Component.text(text, color);
+        Component prefix = LEGACY_SERIALIZER.deserialize(plugin.getConfigManager().getPrefix());
+        Component message = prefix.append(Component.space()).append(Component.text(text, color));
+
         if (plugin.getAdventure() != null) {
-            plugin.getAdventure().sender(sender).sendMessage(prefix.append(Component.space()).append(message));
+            plugin.getAdventure().sender(sender).sendMessage(message);
+            return;
+        }
+
+        sender.sendMessage(LEGACY_SERIALIZER.serialize(message));
+    }
+
+    private class BukkitSender implements CommandProcessor.CommandSender {
+        private final CommandSender sender;
+
+        public BukkitSender(CommandSender sender) {
+            this.sender = sender;
+        }
+
+        @Override
+        public void sendMessage(String message) {
+            Component prefix = LEGACY_SERIALIZER.deserialize(plugin.getConfigManager().getPrefix());
+            Component content = LEGACY_SERIALIZER.deserialize(message);
+            Component fullMessage = prefix.append(Component.space()).append(content);
+            if (plugin.getAdventure() != null) {
+                plugin.getAdventure().sender(sender).sendMessage(fullMessage);
+                return;
+            }
+
+            sender.sendMessage(LEGACY_SERIALIZER.serialize(fullMessage));
+        }
+
+        @Override
+        public String getName() {
+            return sender.getName();
+        }
+
+        @Override
+        public boolean hasPermission(String permission) {
+            return sender.hasPermission(permission);
         }
     }
 }

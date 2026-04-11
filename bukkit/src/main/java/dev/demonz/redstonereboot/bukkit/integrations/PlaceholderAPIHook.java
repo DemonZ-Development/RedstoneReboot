@@ -1,12 +1,10 @@
 package dev.demonz.redstonereboot.bukkit.integrations;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
+import dev.demonz.redstonereboot.common.manager.RestartReason;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 
 /**
  * PlaceholderAPI expansion for RedstoneReboot.
@@ -25,17 +23,17 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
     public String onRequest(OfflinePlayer player, @NotNull String params) {
         switch (params.toLowerCase()) {
             case "next_restart":
-                LocalDateTime next = plugin.getRestartManager().getNextScheduledRestart();
+                java.time.ZonedDateTime next = plugin.getRestartManager().getNextScheduledRestart();
                 return next != null
-                    ? next.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + plugin.getConfigManager().getTimezone()
+                    ? next.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " " + plugin.getConfigManager().getTimezone()
                     : "Not scheduled";
 
             case "time_until":
-                LocalDateTime n = plugin.getRestartManager().getNextScheduledRestart();
+                java.time.ZonedDateTime n = plugin.getRestartManager().getNextScheduledRestart();
                 if (n != null) {
-                    LocalDateTime now = LocalDateTime.now(plugin.getConfigManager().getZoneId());
+                    java.time.ZonedDateTime now = java.time.ZonedDateTime.now(plugin.getConfigManager().getZoneId());
                     if (n.isAfter(now)) {
-                        long mins = ChronoUnit.MINUTES.between(now, n);
+                        long mins = java.time.temporal.ChronoUnit.MINUTES.between(now, n);
                         long h = mins / 60, m = mins % 60;
                         return h > 0 ? h + "h " + m + "m" : m > 0 ? m + "m" : "Soon";
                     }
@@ -43,24 +41,28 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
                 return "N/A";
 
             case "status":
-                return plugin.getRestartManager().isRestartInProgress() ? "Restart in progress" : "Normal operation";
+                return plugin.getRestartManager() != null && plugin.getRestartManager().isRestartInProgress() ? "Restart in progress" : "Normal operation";
 
             case "reason":
-                return plugin.getRestartManager().getCurrentRestartReason().getDisplayName();
+                return plugin.getRestartManager() != null
+                    && plugin.getRestartManager().isRestartInProgress()
+                    && plugin.getRestartManager().getCurrentRestartReason() != null
+                    ? plugin.getRestartManager().getCurrentRestartReason().getDisplayName()
+                    : "None";
 
             case "tps":
                 return plugin.getServerLoadMonitor() != null
-                    ? String.format("%.1f", plugin.getServerLoadMonitor().getLastTPS()) : "N/A";
+                    ? String.format("%.1f", plugin.getServerLoadMonitor().getLastTPS()) : "20.0";
 
             case "memory":
                 return plugin.getServerLoadMonitor() != null
-                    ? String.format("%.1f%%", plugin.getServerLoadMonitor().getLastMemoryUsage()) : "N/A";
+                    ? String.format("%.1f%%", plugin.getServerLoadMonitor().getLastMemoryUsage()) : "0.0%";
 
             case "version":
                 return plugin.getDescription().getVersion();
 
             case "timezone":
-                return plugin.getConfigManager().getTimezone();
+                return plugin.getConfigManager() != null ? plugin.getConfigManager().getTimezone() : "UTC";
 
             default: return null;
         }

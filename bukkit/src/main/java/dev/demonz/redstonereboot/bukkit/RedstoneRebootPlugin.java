@@ -6,17 +6,21 @@ import dev.demonz.redstonereboot.bukkit.listeners.ServerEventListener;
 import dev.demonz.redstonereboot.bukkit.managers.AlertManager;
 import dev.demonz.redstonereboot.bukkit.managers.ConfigManager;
 import dev.demonz.redstonereboot.bukkit.managers.PermissionManager;
-import dev.demonz.redstonereboot.bukkit.managers.RestartManager;
-import dev.demonz.redstonereboot.bukkit.scheduler.PlatformTaskScheduler;
+import dev.demonz.redstonereboot.bukkit.scheduler.BukkitSchedulerFactory;
 import dev.demonz.redstonereboot.bukkit.utils.ServerLoadMonitor;
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
+import dev.demonz.redstonereboot.common.manager.RestartManager;
+import dev.demonz.redstonereboot.common.manager.RestartReason;
 import dev.demonz.redstonereboot.common.platform.ServerPlatform;
+import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
 
 /**
  * Main entry point for RedstoneReboot on Bukkit, Paper, and Folia.
@@ -31,7 +35,6 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     private PlatformTaskScheduler taskScheduler;
     private RedstoneRebootCore core;
     private ConfigManager configManager;
-    private RestartManager restartManager;
     private AlertManager alertManager;
     private PermissionManager permissionManager;
     private ServerLoadMonitor serverLoadMonitor;
@@ -42,25 +45,25 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
         instance = this;
 
         try {
-            taskScheduler = PlatformTaskScheduler.create(this);
+            taskScheduler = BukkitSchedulerFactory.create(this);
             adventure = BukkitAudiences.create(this);
-            core = new RedstoneRebootCore(this);
             configManager = new ConfigManager(this);
+            
+            // Initialize Core first, which handles internal managers
+            core = new RedstoneRebootCore(this, taskScheduler, configManager);
+            
             permissionManager = new PermissionManager(this);
             alertManager = new AlertManager(this);
-            restartManager = new RestartManager(this);
 
             registerCommand();
             getServer().getPluginManager().registerEvents(new ServerEventListener(this), this);
 
-            restartManager.initialize();
             restartMonitoring();
             hookPlaceholderAPI();
             core.onEnable();
             logIntegrationStatus();
         } catch (Exception exception) {
-            getLogger().severe("Failed to enable RedstoneReboot: " + exception.getMessage());
-            exception.printStackTrace();
+            getLogger().log(Level.SEVERE, "Failed to enable RedstoneReboot.", exception);
             getServer().getPluginManager().disablePlugin(this);
         }
     }
@@ -68,9 +71,6 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     @Override
     public void onDisable() {
         try {
-            if (restartManager != null) {
-                restartManager.cleanup();
-            }
             stopMonitoring();
             unhookPlaceholderAPI();
             if (core != null) {
@@ -89,11 +89,12 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
     public void reloadPluginState() {
         configManager.reloadConfig();
-        restartManager.cleanup();
         stopMonitoring();
         unhookPlaceholderAPI();
 
-        restartManager.initialize();
+        core.onDisable();
+        core.onEnable();
+        
         restartMonitoring();
         hookPlaceholderAPI();
     }
@@ -112,6 +113,52 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
                 LEGACY_SERIALIZER.deserialize(title),
                 LEGACY_SERIALIZER.deserialize(subtitle)
             ));
+        }
+    }
+
+    @Override
+    public void sendAlert(String message, String title, String subtitle) {
+        if (alertManager != null) {
+            alertManager.sendAlert(message, title, subtitle);
+        } else {
+            broadcastMessage(message);
+            broadcastTitle(title, subtitle);
+        }
+    }
+
+    @Override
+    public void sendRestartAlert(int seconds, RestartReason reason) {
+        if (alertManager != null) {
+            alertManager.sendRestartAlert(seconds, reason);
+        } else {
+            ServerPlatform.super.sendRestartAlert(seconds, reason);
+        }
+    }
+
+    @Override
+    public void sendFinalRestartAlert(RestartReason reason) {
+        if (alertManager != null) {
+            alertManager.sendFinalRestartAlert(reason);
+        } else {
+            ServerPlatform.super.sendFinalRestartAlert(reason);
+        }
+    }
+
+    @Override
+    public void sendRestartCancelledAlert() {
+        if (alertManager != null) {
+            alertManager.sendRestartCancelledAlert();
+        } else {
+            ServerPlatform.super.sendRestartCancelledAlert();
+        }
+    }
+
+    @Override
+    public void sendEmergencyAlert(String reason) {
+        if (alertManager != null) {
+            alertManager.sendEmergencyAlert(reason);
+        } else {
+            ServerPlatform.super.sendEmergencyAlert(reason);
         }
     }
 
@@ -139,7 +186,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
     @Override
     public String getPlatformName() {
-        String brand = PlatformTaskScheduler.isFoliaEnvironment() ? "Folia" : Bukkit.getName();
+        String brand = BukkitSchedulerFactory.isFoliaEnvironment() ? "Folia" : Bukkit.getName();
         return brand + " (Scheduler Adapter)";
     }
 
@@ -155,7 +202,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
     @Override
     public void shutdownServer() {
-        taskScheduler.runLater(() -> Bukkit.getServer().shutdown(), 60L);
+        taskScheduler.runLater(() -> Bukkit.getServer().shutdown(), (long) configManager.getShutdownDelayTicks());
     }
 
     private void registerCommand() {
@@ -170,7 +217,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     }
 
     private void restartMonitoring() {
-        if (!configManager.isMonitoringEnabled()) {
+        if (!configManager.isMonitoringEnabled() && !configManager.isEmergencyRestartEnabled()) {
             serverLoadMonitor = null;
             return;
         }
@@ -242,7 +289,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     }
 
     public RestartManager getRestartManager() {
-        return restartManager;
+        return core.getRestartManager();
     }
 
     public AlertManager getAlertManager() {

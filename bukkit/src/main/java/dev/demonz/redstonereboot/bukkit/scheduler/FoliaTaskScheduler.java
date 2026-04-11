@@ -1,12 +1,17 @@
 package dev.demonz.redstonereboot.bukkit.scheduler;
 
+import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
+import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Method;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
-final class FoliaTaskScheduler implements PlatformTaskScheduler {
+/**
+ * Platform adapter for Folia regionized server.
+ */
+public final class FoliaTaskScheduler implements PlatformTaskScheduler {
 
     private final JavaPlugin plugin;
     private final Object globalScheduler;
@@ -33,7 +38,7 @@ final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 globalScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                initialDelayTicks,
+                Math.max(1L, initialDelayTicks),
                 periodTicks
             );
             return reflectionHandle(scheduledTask);
@@ -63,13 +68,20 @@ final class FoliaTaskScheduler implements PlatformTaskScheduler {
     }
 
     private ScheduledTaskHandle reflectionHandle(Object scheduledTask) {
-        return () -> {
-            try {
-                scheduledTask.getClass().getMethod("cancel").invoke(scheduledTask);
-            } catch (ReflectiveOperationException exception) {
-                plugin.getLogger().log(Level.WARNING, "Failed to cancel Folia scheduled task.", exception);
-            }
-        };
+        try {
+            java.lang.reflect.Method cancelMethod = scheduledTask.getClass().getMethod("cancel");
+            cancelMethod.setAccessible(true);
+            return () -> {
+                try {
+                    cancelMethod.invoke(scheduledTask);
+                } catch (ReflectiveOperationException exception) {
+                    plugin.getLogger().log(Level.WARNING, "Failed to cancel Folia scheduled task.", exception);
+                }
+            };
+        } catch (NoSuchMethodException exception) {
+            plugin.getLogger().log(Level.WARNING, "Could not find cancel method on Folia task.", exception);
+            return () -> {};
+        }
     }
 
     private void safelyRun(Runnable task) {

@@ -16,8 +16,8 @@ public class UpdateChecker {
     private final String projectId;
     private final String currentVersion;
     private final Logger logger;
-    private String latestVersion;
-    private boolean updateAvailable;
+    private volatile String latestVersion;
+    private volatile boolean updateAvailable;
 
     public UpdateChecker(String projectId, String currentVersion, Logger logger) {
         this.projectId = projectId;

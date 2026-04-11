@@ -70,12 +70,12 @@ jobs:
         with:
           name: RedstoneReboot ${{ github.ref_name }}
           body: |
-            ## ⚡ RedstoneReboot ${{ github.ref_name }}
+            ## RedstoneReboot ${{ github.ref_name }}
 
-            ### Downloads
+            ### Files
             | Platform | File |
             |----------|------|
-            | Bukkit / Spigot / Paper | `RedstoneReboot-Bukkit-*.jar` |
+            | Bukkit / Spigot / Paper / Purpur | `RedstoneReboot-Bukkit-*.jar` |
             | Folia | `RedstoneReboot-Folia-*.jar` |
             | Fabric | `RedstoneReboot-Fabric-*.jar` |
             | Forge | `RedstoneReboot-Forge-*.jar` |
@@ -84,11 +84,18 @@ jobs:
             ### Requirements
             - **Bukkit/Paper**: MC 1.9 — 1.21.1 · Java 8+ (legacy) / Java 17+ (modern)
             - **Folia**: MC 1.20+ · Java 17+
-            - **Fabric/Forge/NeoForge**: MC 1.20.4+ · Java 17+
+            - **Fabric**: MC 1.20.1+ · Java 17+ · Fabric API required
+            - **Forge**: MC 1.20.4+ · Java 17+
+            - **NeoForge**: MC 1.20.4+ · Java 17+
+
+            ### Config Paths
+            - **Plugin builds**: `plugins/RedstoneReboot/config.yml`
+            - **Mod builds**: `config/redstonereboot.properties`
 
             ### Links
-            - 📖 [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
+            - 📖 [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
             - 🛠️ [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+            - 🐛 [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
           draft: false
           prerelease: false
           files: |

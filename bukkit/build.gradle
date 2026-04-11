@@ -13,7 +13,7 @@ jar {
 
     from {
         configurations.runtimeClasspath.filter { 
-            it.name.startsWith('adventure') || it.name.startsWith('net.kyori') || it.name.startsWith('common')
+            it.name.contains('adventure') || it.name.contains('kyori') || it.name.contains('common') || it.name.contains('examination')
         }.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

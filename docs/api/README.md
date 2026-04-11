@@ -1,260 +1,178 @@
-# 🛠️ RedstoneReboot Developer API
+# RedstoneReboot Developer API
 
 <div align="center">
 <img src="../../assets/logo.png" alt="RedstoneReboot" width="96" />
 
-**Build powerful integrations with RedstoneReboot's comprehensive API**
+Current integration surface for Bukkit-side plugins that want to read RedstoneReboot state or trigger restart actions.
 </div>
 
 ---
 
-## 📦 Adding as a Dependency
+## Scope
 
-### Maven
-```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
+The currently documented integration path is the Bukkit plugin instance exposed at runtime.
 
-<dependency>
-    <groupId>com.github.DemonZDevelopment</groupId>
-    <artifactId>RedstoneReboot</artifactId>
-    <version>1.0.0</version>
-    <scope>provided</scope>
-</dependency>
-```
-
-### Gradle (Groovy)
-```groovy
-repositories {
-    maven { url 'https://jitpack.io' }
-}
-
-dependencies {
-    compileOnly 'com.github.DemonZDevelopment:RedstoneReboot:1.0.0'
-}
-```
-
-### Gradle (Kotlin DSL)
-```kotlin
-repositories {
-    maven("https://jitpack.io")
-}
-
-dependencies {
-    compileOnly("com.github.DemonZDevelopment:RedstoneReboot:1.0.0")
-}
-```
+RedstoneReboot currently exposes useful managers and status objects through `RedstoneRebootPlugin`, but this repository does **not** currently ship the custom `RestartEvent` API that older draft docs referenced.
 
 ---
 
-## 🔌 Getting the API Instance
+## Basic Hook
+
+Add RedstoneReboot as a soft dependency in your `plugin.yml`:
+
+```yaml
+softdepend: [RedstoneReboot]
+```
+
+Fetch the plugin instance at runtime:
 
 ```java
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class MyPlugin extends JavaPlugin {
-    
+public final class MyPlugin extends JavaPlugin {
+
     @Override
     public void onEnable() {
-        // Check if RedstoneReboot is installed
-        if (getServer().getPluginManager().isPluginEnabled("RedstoneReboot")) {
-            RedstoneRebootPlugin reboot = (RedstoneRebootPlugin) 
-                getServer().getPluginManager().getPlugin("RedstoneReboot");
-            
-            getLogger().info("Hooked into RedstoneReboot v" + 
-                reboot.getDescription().getVersion());
+        if (!getServer().getPluginManager().isPluginEnabled("RedstoneReboot")) {
+            return;
+        }
+
+        RedstoneRebootPlugin reboot = (RedstoneRebootPlugin) getServer()
+            .getPluginManager()
+            .getPlugin("RedstoneReboot");
+
+        if (reboot != null) {
+            getLogger().info("Hooked into RedstoneReboot " + reboot.getDescription().getVersion());
         }
     }
 }
 ```
 
-> **Important**: Add `RedstoneReboot` to your `plugin.yml` as a `softdepend`:
-> ```yaml
-> softdepend: [RedstoneReboot]
-> ```
-
 ---
 
-## 📡 Events
+## Restart Manager
 
-### RestartEvent
-
-Fired when a restart is initiated. **Cancellable**.
-
-```java
-import dev.demonz.redstonereboot.bukkit.events.RestartEvent;
-
-@EventHandler
-public void onRestart(RestartEvent event) {
-    // Get restart details
-    RestartReason reason = event.getReason();
-    String initiator = event.getInitiator();
-    int delay = event.getDelaySeconds();
-    
-    getLogger().info("Restart triggered by " + initiator + 
-        " for reason: " + reason.getDisplayName() + 
-        " in " + delay + " seconds");
-    
-    // Cancel if needed
-    if (someCondition) {
-        event.setCancelled(true, "MyPlugin: Not now!");
-    }
-}
-```
-
-### RestartReason Enum
-
-| Value | Display Name | Trigger |
-|-------|-------------|---------|
-| `SCHEDULED` | Scheduled Restart | Automatic time-based restart |
-| `MANUAL` | Manual Restart | `/reboot now` or `/reboot schedule` |
-| `EMERGENCY_TPS` | Emergency - Low TPS | TPS below emergency threshold |
-| `EMERGENCY_MEMORY` | Emergency - High Memory | Memory above emergency threshold |
-| `API` | API Restart | Triggered by another plugin via API |
-| `UNKNOWN` | Unknown | Fallback reason |
-
----
-
-## 🔁 Programmatic Restart Control
+`RedstoneRebootPlugin#getRestartManager()` gives access to the shared restart controller.
 
 ### Schedule a Restart
-```java
-RedstoneRebootPlugin plugin = getRebootPlugin();
 
-// Schedule restart in 300 seconds
-plugin.getRestartManager().scheduleRestart(
-    300,                              // delay in seconds
-    RestartManager.RestartReason.API,  // reason
-    "MyPlugin"                        // initiator name
+```java
+import dev.demonz.redstonereboot.common.manager.RestartReason;
+
+RedstoneRebootPlugin reboot = getRebootPlugin();
+
+boolean scheduled = reboot.getRestartManager().scheduleRestart(
+    300,
+    RestartReason.API,
+    "MyPlugin"
 );
 ```
 
 ### Cancel a Restart
+
 ```java
-boolean cancelled = plugin.getRestartManager().cancelRestart();
-if (cancelled) {
-    getLogger().info("Successfully cancelled the pending restart");
-}
+boolean cancelled = reboot.getRestartManager().cancelRestart();
 ```
 
-### Check Restart Status
+### Read Restart Status
+
 ```java
-// Is a restart currently counting down?
-boolean inProgress = plugin.getRestartManager().isRestartInProgress();
-
-// When is the next scheduled restart?
-LocalDateTime nextRestart = plugin.getRestartManager().getNextScheduledRestart();
-
-// Get full restart info map
-Map<String, Object> info = plugin.getRestartManager().getRestartInfo();
+boolean inProgress = reboot.getRestartManager().isRestartInProgress();
+int secondsLeft = reboot.getRestartManager().getSecondsUntilRestart();
+var nextRestart = reboot.getRestartManager().getNextScheduledRestart();
+var info = reboot.getRestartManager().getRestartInfo();
 ```
+
+### Restart Reasons
+
+Available reasons include:
+
+- `SCHEDULED`
+- `SCHEDULED_API`
+- `MANUAL`
+- `EMERGENCY_TPS`
+- `EMERGENCY_MEMORY`
+- `API`
+- `UNKNOWN`
 
 ---
 
-## 📊 Performance Monitoring API
+## Server Health Monitor
+
+`RedstoneRebootPlugin#getServerLoadMonitor()` exposes the plugin-side health monitor when monitoring is enabled.
 
 ```java
-ServerLoadMonitor monitor = plugin.getServerLoadMonitor();
+var monitor = reboot.getServerLoadMonitor();
 
 if (monitor != null) {
-    // Current TPS (capped at 20.0)
     double tps = monitor.getLastTPS();
-    
-    // Memory usage as percentage
-    double memoryPercent = monitor.getLastMemoryUsage();
-    
-    // Overall health check
+    double memory = monitor.getLastMemoryUsage();
     boolean healthy = monitor.isHealthy();
-    
-    getLogger().info(String.format(
-        "Server Health — TPS: %.1f | Memory: %.1f%% | Healthy: %s",
-        tps, memoryPercent, healthy ? "YES" : "NO"
-    ));
 }
 ```
 
 ---
 
-## 🔔 Alert API
+## Alert Manager
+
+`RedstoneRebootPlugin#getAlertManager()` can be used to send the same player-facing alerts RedstoneReboot uses internally.
 
 ```java
-AlertManager alerts = plugin.getAlertManager();
+import dev.demonz.redstonereboot.common.manager.RestartReason;
 
-// Send a custom restart alert
-alerts.sendRestartAlert(60, RestartManager.RestartReason.API);
+var alerts = reboot.getAlertManager();
 
-// Send an emergency alert
-alerts.sendEmergencyAlert("Custom emergency: database offline!");
-
-// Send cancellation notice
+alerts.sendRestartAlert(60, RestartReason.API);
+alerts.sendFinalRestartAlert(RestartReason.API);
 alerts.sendRestartCancelledAlert();
+alerts.sendEmergencyAlert("Custom emergency condition");
+alerts.sendAlert(
+    "§cCustom warning message",
+    "§cRestart Alert",
+    "§eCustom subtitle"
+);
 ```
 
 ---
 
-## 🔐 Permission API
+## Permission Manager
+
+`RedstoneRebootPlugin#getPermissionManager()` exposes Bukkit/LuckPerms-aware permission helpers.
 
 ```java
-PermissionManager perms = plugin.getPermissionManager();
+var permissions = reboot.getPermissionManager();
 
-// Check specific permissions
-boolean canRestart = perms.canRestartNow(player);
-boolean isAdmin = perms.hasAdminPermission(player);
-boolean getsNotified = perms.shouldReceiveNotifications(player);
-
-// LuckPerms availability
-boolean hasLuckPerms = perms.isLuckPermsAvailable();
+boolean canRestartNow = permissions.canRestartNow(player);
+boolean canSchedule = permissions.canScheduleRestart(player);
+boolean canCancel = permissions.canCancelRestart(player);
+boolean canReload = permissions.canReloadConfig(player);
+boolean canViewStatus = permissions.canViewStatus(player);
+boolean isAdmin = permissions.hasAdminPermission(player);
+boolean receivesNotifications = permissions.shouldReceiveNotifications(player);
+boolean hasLuckPerms = permissions.isLuckPermsAvailable();
 ```
 
 ---
 
-## 💡 Full Example Plugin
+## Config Access
+
+`RedstoneRebootPlugin#getConfigManager()` exposes the plugin configuration wrapper.
 
 ```java
-package com.example.myintegration;
+var config = reboot.getConfigManager();
 
-import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
-import dev.demonz.redstonereboot.bukkit.events.RestartEvent;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-
-public class MyIntegration extends JavaPlugin implements Listener {
-    private RedstoneRebootPlugin reboot;
-
-    @Override
-    public void onEnable() {
-        if (getServer().getPluginManager().isPluginEnabled("RedstoneReboot")) {
-            reboot = (RedstoneRebootPlugin) getServer().getPluginManager()
-                .getPlugin("RedstoneReboot");
-            getServer().getPluginManager().registerEvents(this, this);
-            getLogger().info("RedstoneReboot integration active!");
-        }
-    }
-
-    @EventHandler
-    public void onRestart(RestartEvent event) {
-        // Protect players in dungeons
-        if (isDungeonActive()) {
-            event.setCancelled(true, "MyIntegration: Dungeon in progress");
-            getLogger().info("Blocked restart — dungeon is active");
-        }
-    }
-
-    private boolean isDungeonActive() {
-        return false; // Your logic here
-    }
-}
+String timezone = config.getTimezone();
+boolean monitoringEnabled = config.isMonitoringEnabled();
+boolean emergencyEnabled = config.isEmergencyRestartEnabled();
+int warningTime = config.getScheduledWarningTime();
 ```
 
 ---
 
-<div align="center">
+## Notes
 
-**Need help?** Open an issue on [GitHub](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) or join our [Discord](https://discord.gg/GYsTt96ypf).
-
-</div>
+- The documented API above is Bukkit-side.
+- Plugin deployments use `plugins/RedstoneReboot/config.yml`.
+- Fabric, Forge, and NeoForge builds are standalone server modules and do not expose the same Bukkit integration surface.
+- If RedstoneReboot is not installed or not enabled, always null-check the plugin instance before using any managers.

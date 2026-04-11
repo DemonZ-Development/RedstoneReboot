@@ -1,5 +1,7 @@
 package dev.demonz.redstonereboot.common.platform;
 
+import dev.demonz.redstonereboot.common.manager.RestartReason;
+
 /**
  * Platform abstraction interface for RedstoneReboot.
  * <p>
@@ -27,6 +29,43 @@ public interface ServerPlatform {
      * @param subtitle the subtitle text
      */
     void broadcastTitle(String title, String subtitle);
+
+    /**
+     * Send a unified alert (chat, title, action bar, etc.) based on platform configuration.
+     *
+     * @param message  the chat message
+     * @param title    the main title
+     * @param subtitle the subtitle
+     */
+    default void sendAlert(String message, String title, String subtitle) {
+        broadcastMessage(message);
+        broadcastTitle(title, subtitle);
+    }
+
+    default void sendRestartAlert(int seconds, RestartReason reason) {
+        String time = formatDuration(seconds);
+        sendAlert(
+            "\u00A7c\u00A7lSERVER RESTART \u00A7e- Reason: \u00A7f" + reason.getDisplayName() + " \u00A7bin " + time,
+            "\u00A7c\u00A7lRestarting",
+            "\u00A7ein \u00A7f" + time
+        );
+    }
+
+    default void sendFinalRestartAlert(RestartReason reason) {
+        broadcastMessage("\u00A7c\u00A7lSERVER RESTARTING NOW! \u00A7eReason: \u00A7f" + reason.getDisplayName());
+    }
+
+    default void sendRestartCancelledAlert() {
+        broadcastMessage("\u00A7a\u00A7lRESTART CANCELLED \u00A7e- The server will remain online.");
+    }
+
+    default void sendEmergencyAlert(String reason) {
+        sendAlert(
+            "\u00A74\u00A7lEMERGENCY RESTART \u00A7c- " + reason,
+            "\u00A74\u00A7lEmergency Restart",
+            "\u00A7c" + reason
+        );
+    }
 
     /**
      * Execute a command from the server console.
@@ -70,9 +109,28 @@ public interface ServerPlatform {
     }
 
     /**
+     * Get the default OP level for commands if no permission system is present.
+     *
+     * @return permission level (0-4)
+     */
+    default int getDefaultPermissionLevel() {
+        return 2;
+    }
+
+    /**
      * Shutdown the server gracefully.
      */
     default void shutdownServer() {
         executeConsole("stop");
+    }
+
+    private static String formatDuration(int seconds) {
+        if (seconds < 60) {
+            return seconds + "s";
+        }
+        if (seconds < 3600) {
+            return (seconds / 60) + "m " + (seconds % 60) + "s";
+        }
+        return (seconds / 3600) + "h " + ((seconds % 3600) / 60) + "m";
     }
 }

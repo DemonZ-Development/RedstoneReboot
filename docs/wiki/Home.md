@@ -1,70 +1,72 @@
-# 📖 RedstoneReboot Wiki
+# RedstoneReboot Wiki
 
 <div align="center">
 <img src="../../assets/logo.png" alt="RedstoneReboot" width="128" />
 
-**Complete documentation for RedstoneReboot — The Advanced Multi-Platform Server Restart Engine**
+Practical documentation for RedstoneReboot's plugin and mod builds.
 </div>
 
 ---
 
-## 📚 Table of Contents
+## Start Here
 
-### Getting Started
-- [🏠 Home](Home.md) — Overview & quick links
-- [📥 Installation](Installation.md) — Platform-specific installation guides
-- [⚙️ Configuration](Configuration.md) — Complete config.yml reference
-
-### Features
-- [🕐 Scheduled Restarts](Scheduled-Restarts.md) — Setting up automatic restarts
-- [📊 Performance Monitoring](Performance-Monitoring.md) — TPS & memory monitoring
-- [🔔 Alert System](Alert-System.md) — Configuring notifications
-- [🚨 Emergency Restarts](Emergency-Restarts.md) — Critical condition handling
-
-### Integrations
-- [🔗 PlaceholderAPI](PlaceholderAPI.md) — Placeholder reference
-- [🔐 LuckPerms](LuckPerms.md) — Permission integration
-- [🧩 Multi-Platform](Multi-Platform.md) — Bukkit, Folia, Fabric, Forge, NeoForge
-
-### For Developers
-- [🛠️ Developer API](../../docs/api/README.md) — API reference & examples
-- [📦 Events](Events.md) — Custom event reference
-- [🤝 Contributing](../../CONTRIBUTING.md) — How to contribute
+- [Installation](Installation.md)
+- [Configuration](Configuration.md)
+- [Developer API](../api/README.md)
+- [Spigot Resource Copy](../marketplace/SPIGOT.md)
+- [Bukkit Directory Copy](../marketplace/BUKKIT.md)
+- [Hangar Description](../marketplace/HANGAR.md)
+- [Modrinth Description](../marketplace/MODRINTH.md)
 
 ---
 
-## 🏠 Overview
+## Platform Overview
 
-**RedstoneReboot** is a production-grade server restart management system supporting every major Minecraft server platform. It provides intelligent scheduling, real-time performance monitoring, multi-channel alerts, and a comprehensive developer API.
-
-### Key Capabilities
-
-| Feature | Description |
-|---------|------------|
-| **Smart Scheduling** | Multiple daily restarts with timezone & day-of-week support |
-| **Performance Monitor** | TPS + Memory tracking with automatic restart triggers |
-| **Emergency System** | Instant restart on critical server conditions |
-| **Alert Engine** | Chat, Title, ActionBar, Sound — fully customizable |
-| **Multi-Platform** | Bukkit, Spigot, Paper, Folia, Fabric, Forge, NeoForge |
-| **Developer API** | Events, hooks, and programmatic restart control |
-| **PlaceholderAPI** | 10+ placeholders for scoreboards, MOTDs, tab lists |
-| **LuckPerms** | Deep integration via reflection (no hard dependency) |
-
-### Supported Versions
-
-```
-Bukkit/Spigot/Paper:  1.9  → 1.21.1
-Folia:                1.20 → 1.21.1
-Fabric:               1.20.4+
-Forge:                1.20.4+
-NeoForge:             1.20.4+
-```
+| Platform | Type | File | Config Path |
+|---------|------|------|-------------|
+| Bukkit / Spigot / Paper / Purpur / compatible forks | Plugin | `RedstoneReboot-Bukkit-<version>.jar` | `plugins/RedstoneReboot/config.yml` |
+| Folia | Plugin | `RedstoneReboot-Folia-<version>.jar` | `plugins/RedstoneReboot/config.yml` |
+| Fabric | Mod | `RedstoneReboot-Fabric-<version>.jar` | `config/redstonereboot.properties` |
+| Forge | Mod | `RedstoneReboot-Forge-<version>.jar` | `config/redstonereboot.properties` |
+| NeoForge | Mod | `RedstoneReboot-NeoForge-<version>.jar` | `config/redstonereboot.properties` |
 
 ---
 
-## 🆘 Getting Help
+## Supported Versions
 
-- **Bug Reports**: [GitHub Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues/new?template=bug_report.yml)
-- **Feature Requests**: [GitHub Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues/new?template=feature_request.yml)
-- **Discussions**: [GitHub Discussions](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions)
-- **Discord**: [DemonZ Discord](https://discord.gg/GYsTt96ypf)
+| Platform | Minecraft Versions | Java |
+|----------|--------------------|------|
+| Bukkit-family servers | `1.9` through `1.21.1` | Java `8+` for legacy, Java `17+` for modern |
+| Folia | `1.20+` | Java `17+` |
+| Fabric | `1.20.1+` | Java `17+` |
+| Forge | `1.20.4+` | Java `17+` |
+| NeoForge | `1.20.4+` | Java `17+` |
+
+---
+
+## Core Capabilities
+
+- Scheduled restart windows with timezone support
+- Day-based scheduling rules
+- Configurable warning countdowns
+- TPS and memory monitoring
+- Emergency restart handling
+- Chat, title, action bar, and sound alerts
+- PlaceholderAPI support on plugin deployments
+- LuckPerms-aware permission handling on plugin deployments
+
+---
+
+## Release/Publishing Helpers
+
+- [Instagram Caption](../release/INSTAGRAM.md)
+- [Team Platform Announcement](../release/TEAM_PLATFORM.md)
+- [Discord Announcement](../release/DISCORD.md)
+
+---
+
+## Support
+
+- Issues: <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues>
+- Discussions: <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions>
+- Discord: <https://discord.gg/GYsTt96ypf>

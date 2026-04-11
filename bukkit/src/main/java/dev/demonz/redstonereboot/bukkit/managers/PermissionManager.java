@@ -13,6 +13,13 @@ public class PermissionManager {
     private final ConfigManager configManager;
     private Object luckPermsAPI;
     private boolean luckPermsAvailable;
+    
+    private java.lang.reflect.Method getUserManagerMethod;
+    private java.lang.reflect.Method getUserMethod;
+    private java.lang.reflect.Method getCachedDataMethod;
+    private java.lang.reflect.Method getPermissionDataMethod;
+    private java.lang.reflect.Method checkPermissionMethod;
+    private java.lang.reflect.Method asBooleanMethod;
 
     public PermissionManager(RedstoneRebootPlugin plugin) {
         this.configManager = plugin.getConfigManager();
@@ -23,6 +30,7 @@ public class PermissionManager {
                 if (provider != null) {
                     luckPermsAPI = provider.getProvider();
                     luckPermsAvailable = true;
+                    prepareReflection();
                 }
             } catch (Exception ignored) {
                 luckPermsAPI = null;
@@ -31,20 +39,30 @@ public class PermissionManager {
         }
     }
 
+    private void prepareReflection() throws Exception {
+        getUserManagerMethod = luckPermsAPI.getClass().getMethod("getUserManager");
+        Class<?> userManagerClass = getUserManagerMethod.getReturnType();
+        getUserMethod = userManagerClass.getMethod("getUser", java.util.UUID.class);
+        Class<?> userClass = getUserMethod.getReturnType();
+        getCachedDataMethod = userClass.getMethod("getCachedData");
+        Class<?> cachedDataClass = getCachedDataMethod.getReturnType();
+        getPermissionDataMethod = cachedDataClass.getMethod("getPermissionData");
+        Class<?> permissionDataClass = getPermissionDataMethod.getReturnType();
+        checkPermissionMethod = permissionDataClass.getMethod("checkPermission", String.class);
+        Class<?> resultClass = checkPermissionMethod.getReturnType();
+        asBooleanMethod = resultClass.getMethod("asBoolean");
+    }
+
     public boolean hasPermission(Player player, String permission) {
         if (luckPermsAvailable && configManager.isLuckPermsIntegrationEnabled()) {
             try {
-                Object userManager = luckPermsAPI.getClass().getMethod("getUserManager").invoke(luckPermsAPI);
-                Object user = userManager.getClass()
-                    .getMethod("getUser", java.util.UUID.class)
-                    .invoke(userManager, player.getUniqueId());
+                Object userManager = getUserManagerMethod.invoke(luckPermsAPI);
+                Object user = getUserMethod.invoke(userManager, player.getUniqueId());
                 if (user != null) {
-                    Object cachedData = user.getClass().getMethod("getCachedData").invoke(user);
-                    Object permissionData = cachedData.getClass().getMethod("getPermissionData").invoke(cachedData);
-                    Object result = permissionData.getClass()
-                        .getMethod("checkPermission", String.class)
-                        .invoke(permissionData, permission);
-                    return (Boolean) result.getClass().getMethod("asBoolean").invoke(result);
+                    Object cachedData = getCachedDataMethod.invoke(user);
+                    Object permissionData = getPermissionDataMethod.invoke(cachedData);
+                    Object result = checkPermissionMethod.invoke(permissionData, permission);
+                    return (Boolean) asBooleanMethod.invoke(result);
                 }
             } catch (Exception ignored) {
                 // Fall through to Bukkit permissions.

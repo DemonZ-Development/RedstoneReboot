@@ -24,3 +24,7 @@ Thumbs.db
 run/
 logs/
 crash-reports/
+
+# Eclipse/Other bins
+bin/
+tests/

@@ -1,5 +1,7 @@
 package dev.demonz.redstonereboot.bukkit.scheduler;
 
+import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
+import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;

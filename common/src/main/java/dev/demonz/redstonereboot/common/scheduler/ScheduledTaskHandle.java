@@ -1,7 +1,6 @@
-package dev.demonz.redstonereboot.bukkit.scheduler;
+package dev.demonz.redstonereboot.common.scheduler;
 
 @FunctionalInterface
 public interface ScheduledTaskHandle {
-
     void cancel();
 }

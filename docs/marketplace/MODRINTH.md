@@ -1,6 +1,6 @@
-# RedstoneReboot — Modrinth Project Page
+# RedstoneReboot — Modrinth Project Description
 
-<!-- Modrinth Markdown Description -->
+<!-- Modrinth Markdown description -->
 
 <div align="center">
 
@@ -8,89 +8,95 @@
 
 # ⚡ RedstoneReboot
 
-**Advanced Multi-Platform Server Restart Engine**
+**The Most Advanced Multi-Platform Minecraft Server Restart Engine**
 
-![Minecraft](https://img.shields.io/badge/MC-1.9_--_1.21.1-22c55e?style=flat-square)
-![Java](https://img.shields.io/badge/Java-17+-f97316?style=flat-square)
-![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=flat-square)
+<br/>
 
 </div>
 
 ---
 
-## About
+## 🔥 Why RedstoneReboot?
 
-RedstoneReboot is the most advanced restart management system for Minecraft servers. It provides intelligent scheduling, real-time performance monitoring, multi-channel alerts, and a comprehensive developer API.
+RedstoneReboot isn't just a restart plugin — it's a **professional-grade server lifecycle engine** built for production environments. From single-server setups to massive networks, it delivers reliability, intelligence, and elegance.
 
-Built for **production environments** — from single-server setups to massive networks.
-
-## Supported Platforms
-
-| Platform | Versions | Loader Type |
-|----------|----------|-------------|
-| Bukkit / Spigot / Paper | 1.9 — 1.21.1 | Plugin |
-| Folia | 1.20+ | Plugin |
-| Fabric | 1.20.4+ | Mod |
-| Forge | 1.20.4+ | Mod |
-| NeoForge | 1.20.4+ | Mod |
-
-## Features
-
-### 🕐 Intelligent Scheduling
-Configure multiple daily restart windows with **full timezone support**. Filter by day-of-week, set custom warning intervals, and let the system handle the rest.
-
-### 📊 Performance Monitoring
-Real-time TPS and memory tracking with automatic restart triggers. Configurable thresholds and consecutive-check requirements prevent false positives.
-
-### 🚨 Emergency Restart
-When TPS drops below critical levels (default: 12.0) or memory exceeds 95%, RedstoneReboot immediately:
-1. Warns all players with emergency alerts
-2. Saves all world data
-3. Gracefully shuts down the server
-
-### 🔔 Multi-Channel Alerts
-- **Chat Messages** — Formatted with color codes
-- **Screen Titles** — Big text with subtitle
-- **Action Bar** — Persistent bottom-screen text
-- **Sounds** — Configurable Minecraft sounds
-
-### 🔗 Integrations
-- **PlaceholderAPI** — 10+ placeholders for scoreboards, MOTDs, tab lists
-- **LuckPerms** — Permission integration via reflection
-- **Developer API** — Events, hooks, and programmatic restart control
-
-## Installation
-
-### Plugin (Bukkit/Paper/Folia)
-1. Download the Bukkit JAR from the Files tab
-2. Place in `plugins/` folder
-3. Start server — config auto-generates
-4. Edit `plugins/RedstoneReboot/config.yml`
-
-### Mod (Fabric/Forge/NeoForge)
-1. Download the appropriate mod JAR from the Files tab
-2. Place in `mods/` folder (Fabric requires Fabric API)
-3. Start server — config generates at `config/redstonereboot/`
-
-## Commands
-
-| Command | Permission |
-|---------|-----------|
-| `/reboot` | `redstonereboot.use` |
-| `/reboot now [delay]` | `redstonereboot.restart.now` |
-| `/reboot schedule <seconds>` | `redstonereboot.restart.schedule` |
-| `/reboot cancel` | `redstonereboot.restart.cancel` |
-| `/reboot status` | `redstonereboot.status` |
-| `/reboot reload` | `redstonereboot.config.reload` |
-
-## Links
-
-- 📖 [Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
-- 🛠️ [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
-- 🐛 [Issue Tracker](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
-- 💬 [Discord](https://discord.gg/GYsTt96ypf)
-- 🌐 [DemonZ Development](https://demonzdevelopment.online)
+It supports:
+- 🕐 **Intelligent Scheduling** (timezone support, daily intervals)
+- 📊 **Real-Time Performance Tracking** (TPS and memory monitors)
+- 🔔 **Rich Alerts** (chat, title, action bar, sound)
+- 🚑 **Emergency Fail-safes** (automatic triggers on critical states)
 
 ---
 
-*Made with ❤️ by [DemonZ Development](https://demonzdevelopment.online)*
+## 📦 File Selection
+
+Choose the file that matches your exact server platform.
+
+| 🖥️ Platform | Distribution Type | 📄 File |
+|-----------|------------------|------|
+| **Bukkit / Spigot / Paper / Purpur** | Plugin | `RedstoneReboot-Bukkit-<version>.jar` |
+| **Folia** | Plugin | `RedstoneReboot-Folia-<version>.jar` |
+| **Fabric** | Mod | `RedstoneReboot-Fabric-<version>.jar` |
+| **Forge** | Mod | `RedstoneReboot-Forge-<version>.jar` |
+| **NeoForge** | Mod | `RedstoneReboot-NeoForge-<version>.jar` |
+
+---
+
+## 📋 Supported Versions
+
+| Platform | Minecraft Versions | Notes |
+|----------|--------------------|-------|
+| Bukkit-family servers | `1.9` through `1.21.1` | Run on Java 8+ *(1.9-1.16)*, Java 17+ *(1.17+)* |
+| Folia | `1.20+` | Uses dedicated Region-Threaded build |
+| Fabric | `1.20.1+` | Requires Fabric API |
+| Forge | `1.20.4+` | Server-side mod |
+| NeoForge | `1.20.4+` | Server-side mod |
+
+---
+
+## ⚙️ Installation
+
+### Plugin Install (Bukkit/Folia)
+1. Download the correct plugin file.
+2. Place it in `plugins/`.
+3. Start the server.
+4. Configure `plugins/RedstoneReboot/config.yml`.
+
+### Mod Install (Fabric/Forge/NeoForge)
+1. Download the correct mod file.
+2. Place it in `mods/`.
+3. For Fabric, ensure Fabric API is present.
+4. Start the server.
+5. Configure `config/redstonereboot.properties`.
+
+---
+
+## 🎮 Commands & Integrations
+
+- **/reboot** — View status and help
+- **/reboot now [delay]** — Trigger a restart countdown
+- **/reboot schedule <seconds>** — Schedule a future restart
+- **/reboot cancel** — Cancel a pending restart
+- **/reboot status** — Show restart schedule status
+- **/reboot info** — Show health information
+- **/reboot reload** — Reload configuration
+
+Seamlessly integrates with **PlaceholderAPI** (`%redstonereboot_time_until%`, `%redstonereboot_next_restart%`, etc.) and handles **LuckPerms** permissions organically.
+
+---
+
+## 🔗 Quick Links
+
+- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
+- 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
+- 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+- 🐛 [**Bug Reports & Issues**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
+- 💬 [**Discord Support**](https://discord.gg/GYsTt96ypf)
+
+---
+
+<div align="center">
+
+Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
+
+</div>

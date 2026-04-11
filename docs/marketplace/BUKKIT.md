@@ -1,6 +1,6 @@
-# RedstoneReboot — Hangar Project Description
+# RedstoneReboot — Bukkit/Plugin Directory Copy
 
-<!-- Paper/Folia-focused marketplace copy -->
+<!-- Bukkit-oriented marketplace copy -->
 
 <div align="center">
 
@@ -18,19 +18,19 @@
 
 ## 🔥 Why RedstoneReboot?
 
-RedstoneReboot is a restart-management plugin for modern Bukkit-based servers, with dedicated support for both standard Paper-style schedulers and **Folia's region-threaded model**.
+RedstoneReboot is a restart-management plugin for modern Bukkit-based servers. It helps server owners schedule restarts, warn players before shutdown, and react to poor server health with automatic restart logic.
 
 If you need scheduled restarts, warning broadcasts, or automated restart decisions based on TPS and memory pressure, this project is aimed at production server administration.
 
 ---
 
-## 📦 Hangar Scope
+## 📦 Scope
 
-This Hangar page exclusively serves the plugin builds built for Paper and its forks:
+This Bukkit Page exclusively serves the plugin builds built for Spigot and Paper families:
 
 | 🖥️ Platform | Distribution Type | 📄 File |
 |-----------|------------------|------|
-| **Paper / Purpur / Pufferfish / Spigot**| Plugin | `RedstoneReboot-Bukkit-<version>.jar` |
+| **Bukkit / Spigot / Paper / Purpur / Pufferfish**| Plugin | `RedstoneReboot-Bukkit-<version>.jar` |
 | **Folia** | Plugin | `RedstoneReboot-Folia-<version>.jar` |
 
 > [!NOTE]  
@@ -69,7 +69,7 @@ This Hangar page exclusively serves the plugin builds built for Paper and its fo
 
 ## 📋 Supported Versions
 
-- **Paper-family servers**: `1.9` through `1.21.1` *(Requires Java 17+ for modern setups, Java 8+ for legacy).*
+- **Bukkit-family servers**: `1.9` through `1.21.1` *(Requires Java 17+ for modern setups, Java 8+ for legacy setups).*
 - **Folia**: `1.20+` *(Requires Java 17+).*
 
 ---

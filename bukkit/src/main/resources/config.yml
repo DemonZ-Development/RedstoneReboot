@@ -1,5 +1,5 @@
 # ══════════════════════════════════════════════════════════════
-# RedstoneReboot v1.0.0 — Configuration
+# RedstoneReboot v1.3.0 — Configuration
 # ══════════════════════════════════════════════════════════════
 #
 # Advanced multi-platform server restart engine.
@@ -70,6 +70,7 @@ permissions:
     admin-permission: "redstonereboot.admin"
   fallback:
     use-op-as-admin: true
+    default-level: 2 # Default permission level for commands on mod platforms (2 = User, 4 = Admin)
 
 # ── PLACEHOLDERAPI ────────────────────────────────────────────
 placeholders:
@@ -80,8 +81,9 @@ advanced:
   async-operations: true
   thread-pool-size: 2
   metrics-enabled: true
+  shutdown-delay-ticks: 60
 
 # ══════════════════════════════════════════════════════════════
 # DO NOT MODIFY
 # ══════════════════════════════════════════════════════════════
-config-version: 1
+config-version: 2

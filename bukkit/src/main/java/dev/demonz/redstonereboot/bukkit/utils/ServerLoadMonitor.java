@@ -1,8 +1,8 @@
 package dev.demonz.redstonereboot.bukkit.utils;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
-import dev.demonz.redstonereboot.bukkit.managers.RestartManager;
-import dev.demonz.redstonereboot.bukkit.scheduler.ScheduledTaskHandle;
+import dev.demonz.redstonereboot.common.manager.RestartReason;
+import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 
 /**
  * Real-time TPS and memory monitoring with automatic restart triggers.
@@ -16,8 +16,8 @@ public class ServerLoadMonitor {
     private double lastMemoryUsage;
     private int consecutiveLowTPS;
     private int consecutiveHighMemory;
-    private boolean emergencyTpsTriggered;
-    private boolean emergencyMemoryTriggered;
+    private volatile boolean emergencyTpsTriggered;
+    private volatile boolean emergencyMemoryTriggered;
 
     public ServerLoadMonitor(RedstoneRebootPlugin plugin) {
         this.plugin = plugin;
@@ -50,6 +50,11 @@ public class ServerLoadMonitor {
     }
 
     private void checkTPS() {
+        if (!plugin.getConfigManager().isMonitoringEnabled()) {
+            consecutiveLowTPS = 0;
+            return;
+        }
+
         if (plugin.getRestartManager().isRestartInProgress()) {
             consecutiveLowTPS = 0;
             return;
@@ -61,7 +66,7 @@ public class ServerLoadMonitor {
             if (consecutiveLowTPS >= plugin.getConfigManager().getConsecutiveChecks()) {
                 boolean scheduled = plugin.getRestartManager().scheduleRestart(
                     plugin.getConfigManager().getEmergencyDelay(),
-                    RestartManager.RestartReason.EMERGENCY_TPS,
+                    RestartReason.EMERGENCY_TPS,
                     "ServerMonitor"
                 );
                 if (scheduled) {
@@ -74,6 +79,11 @@ public class ServerLoadMonitor {
     }
 
     private void checkMemory() {
+        if (!plugin.getConfigManager().isMonitoringEnabled()) {
+            consecutiveHighMemory = 0;
+            return;
+        }
+
         if (plugin.getRestartManager().isRestartInProgress()) {
             consecutiveHighMemory = 0;
             return;
@@ -85,7 +95,7 @@ public class ServerLoadMonitor {
             if (consecutiveHighMemory >= plugin.getConfigManager().getConsecutiveChecks()) {
                 boolean scheduled = plugin.getRestartManager().scheduleRestart(
                     plugin.getConfigManager().getEmergencyDelay(),
-                    RestartManager.RestartReason.EMERGENCY_MEMORY,
+                    RestartReason.EMERGENCY_MEMORY,
                     "ServerMonitor"
                 );
                 if (scheduled) {
@@ -98,30 +108,40 @@ public class ServerLoadMonitor {
     }
 
     private void checkEmergency() {
-        if (!plugin.getConfigManager().isEmergencyRestartEnabled() || plugin.getRestartManager().isRestartInProgress()) {
+        if (!plugin.getConfigManager().isEmergencyRestartEnabled()) {
+            emergencyTpsTriggered = false;
+            emergencyMemoryTriggered = false;
             return;
         }
 
+        if (plugin.getRestartManager().isRestartInProgress()) {
+            return;
+        }
+
+        // Use a single flag check to avoid double-triggering in the same tick
+        boolean triggered = false;
+
         if (lastTPS < plugin.getConfigManager().getEmergencyTpsThreshold()) {
             if (!emergencyTpsTriggered) {
-                plugin.getAlertManager().sendEmergencyAlert("Critical TPS: " + String.format("%.1f", lastTPS));
+                plugin.sendEmergencyAlert("Critical TPS: " + String.format("%.1f", lastTPS));
                 plugin.getRestartManager().scheduleRestart(
                     plugin.getConfigManager().getEmergencyDelay(),
-                    RestartManager.RestartReason.EMERGENCY_TPS,
+                    RestartReason.EMERGENCY_TPS,
                     "EmergencyMonitor"
                 );
                 emergencyTpsTriggered = true;
+                triggered = true;
             }
         } else {
             emergencyTpsTriggered = false;
         }
 
-        if (lastMemoryUsage > plugin.getConfigManager().getEmergencyMemoryThreshold()) {
+        if (!triggered && lastMemoryUsage > plugin.getConfigManager().getEmergencyMemoryThreshold()) {
             if (!emergencyMemoryTriggered) {
-                plugin.getAlertManager().sendEmergencyAlert("Critical Memory: " + String.format("%.1f%%", lastMemoryUsage));
+                plugin.sendEmergencyAlert("Critical Memory: " + String.format("%.1f%%", lastMemoryUsage));
                 plugin.getRestartManager().scheduleRestart(
                     plugin.getConfigManager().getEmergencyDelay(),
-                    RestartManager.RestartReason.EMERGENCY_MEMORY,
+                    RestartReason.EMERGENCY_MEMORY,
                     "EmergencyMonitor"
                 );
                 emergencyMemoryTriggered = true;

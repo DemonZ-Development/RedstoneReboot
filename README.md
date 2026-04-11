@@ -18,7 +18,7 @@
 
 **Bukkit** · **Paper** · **Spigot** · **Folia** · **Fabric** · **Forge** · **NeoForge**
 
-[📖 Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/GYsTt96ypf)
+[📖 Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/GYsTt96ypf)
 
 </div>
 
@@ -34,7 +34,7 @@ RedstoneReboot isn't just a restart plugin — it's a **professional-grade serve
 
 <table>
 <tr>
-<td width="50%">
+<td width="50%" valign="top">
 
 ### 🕐 Intelligent Scheduling
 - Multiple daily restart windows with precise timing
@@ -43,7 +43,7 @@ RedstoneReboot isn't just a restart plugin — it's a **professional-grade serve
 - Configurable countdown warnings at every interval
 
 </td>
-<td width="50%">
+<td width="50%" valign="top">
 
 ### 📊 Real-Time Performance Monitor
 - Live **TPS tracking** with automatic restart triggers
@@ -54,7 +54,7 @@ RedstoneReboot isn't just a restart plugin — it's a **professional-grade serve
 </td>
 </tr>
 <tr>
-<td>
+<td valign="top">
 
 ### 🔔 Rich Multi-Channel Alerts
 - **Chat**, **Title**, **Action Bar**, and **Sound** alerts
@@ -63,7 +63,7 @@ RedstoneReboot isn't just a restart plugin — it's a **professional-grade serve
 - Emergency alerts with distinct styling and priority
 
 </td>
-<td>
+<td valign="top">
 
 ### 🧩 Multi-Platform Architecture
 - **Bukkit/Spigot/Paper**: Full support, 1.9 → 1.21.1
@@ -80,34 +80,39 @@ RedstoneReboot isn't just a restart plugin — it's a **professional-grade serve
 ## 🚀 Quick Start
 
 ### 📋 Requirements
-| Platform | Minimum Version | Java Version |
-|----------|----------------|-------------|
-| Paper/Spigot | 1.9+ | Java 8+ (1.9-1.16), Java 17+ (1.17+) |
-| Folia | 1.20+ | Java 17+ |
-| Fabric | 1.20.4+ | Java 17+ |
-| Forge | 1.20.4+ | Java 17+ |
-| NeoForge | 1.20.4+ | Java 17+ |
+
+| 🖥️ Platform | 📦 Minimum Version | ☕ Java Version |
+|-------------|--------------------|-----------------|
+| **Paper / Spigot** | `1.9+` | Java 8+ *(1.9-1.16)*, Java 17+ *(1.17+)* |
+| **Folia** | `1.20+` | Java 17+ |
+| **Fabric** | `1.20.4+` | Java 17+ |
+| **Forge** | `1.20.4+` | Java 17+ |
+| **NeoForge** | `1.20.4+` | Java 17+ |
 
 ### ⬇️ Installation
+
+> [!NOTE]  
+> Config files and directories are generated automatically upon your first successful startup.
 
 **Bukkit / Spigot / Paper / Folia:**
 1. Download `RedstoneReboot-Bukkit-x.x.x.jar` from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
 2. Place in your server's `plugins/` folder
-3. Start the server — config files auto-generate
+3. Start the server
 4. Edit `plugins/RedstoneReboot/config.yml` to your needs
 5. Reload with `/reboot reload` or restart the server
 
 **Fabric / Forge / NeoForge:**
 1. Download the appropriate mod jar from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
 2. Place in your server's `mods/` folder
-3. Start the server — config auto-generates in `config/redstonereboot/`
+3. Start the server 
+4. Edit `config/redstonereboot.properties`
 
 ---
 
 ## ⚙️ Configuration
 
 ```yaml
-# RedstoneReboot v1.0.0 — Core Configuration
+# RedstoneReboot v1.3.0 — Core Configuration
 scheduled-restarts:
   enabled: true
   timezone: "Asia/Kolkata"
@@ -133,7 +138,8 @@ emergency:
   delay: 30
 ```
 
-> 📖 See the [full configuration reference](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md) for all options.
+> [!TIP]  
+> See the [full configuration reference](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) for all options and advanced settings.
 
 ---
 
@@ -197,11 +203,15 @@ public void onRestart(RestartEvent event) {
 }
 ```
 
-> 📖 Full developer documentation: [Developer API Guide](docs/api/README.md)
+> [!TIP]  
+> Full developer documentation: [Developer API Guide](docs/api/README.md)
 
 ---
 
 ## 🏗️ Building from Source
+
+> [!IMPORTANT]
+> While RedstoneReboot runs on **Java 17+** (Bukkit, Paper, Fabric, Forge), you must have **Java 21+** installed to *compile* the project due to the modern NeoForge API requirements. The build system will automatically target compatibility for Java 17 where appropriate.
 
 ```bash
 git clone https://github.com/sdemonzdevelopment-spec/RedstoneReboot.git
@@ -232,7 +242,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ## 📞 Support & Community
 
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
+- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
 - 🛠️ [**Developer API Docs**](docs/api/README.md)
 - 🐛 [**Bug Reports & Feature Requests**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
 - 💬 [**Community Discussions**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions)

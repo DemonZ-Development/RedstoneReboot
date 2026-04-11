@@ -8,12 +8,26 @@ class LegacyTextUtilTest {
 
     @Test
     void stripsStandardSectionFormatting() {
-        assertEquals("RedstoneReboot Ready", LegacyTextUtil.stripLegacyFormatting("§cRedstoneReboot §aReady"));
+        assertEquals(
+            "RedstoneReboot Ready",
+            LegacyTextUtil.stripLegacyFormatting("\u00A7cRedstoneReboot \u00A7aReady")
+        );
     }
 
     @Test
     void normalizesMojibakeSectionFormatting() {
-        assertEquals("Server Restart", LegacyTextUtil.stripLegacyFormatting("Â§cServer Â§eRestart"));
+        assertEquals(
+            "Server Restart",
+            LegacyTextUtil.stripLegacyFormatting("\u00C2\u00A7cServer \u00C2\u00A7eRestart")
+        );
+    }
+
+    @Test
+    void normalizesDoubleMojibakeSectionFormatting() {
+        assertEquals(
+            "Server Restart",
+            LegacyTextUtil.stripLegacyFormatting("\u00C3\u201A\u00C2\u00A7cServer \u00C3\u201A\u00C2\u00A7eRestart")
+        );
     }
 
     @Test

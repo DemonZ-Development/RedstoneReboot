@@ -1,15 +1,32 @@
+plugins {
+    id 'fabric-loom' version '1.7.4'
+}
+
+loom {
+    serverOnlyMinecraftJar()
+}
+
 dependencies {
+    minecraft 'com.mojang:minecraft:1.20.1'
+    mappings 'net.fabricmc:yarn:1.20.1+build.10:v2'
+
     implementation project(':common')
-    compileOnly 'net.fabricmc:fabric-loader:0.15.11'
+    include project(':common')
+    
+    modImplementation 'net.fabricmc:fabric-loader:0.15.11'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.92.0+1.20.1'
+}
+
+base {
+    archivesName = 'RedstoneReboot-Fabric'
 }
 
 jar {
     archiveBaseName = 'RedstoneReboot-Fabric'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
 
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+remapJar {
+    archiveBaseName = 'RedstoneReboot-Fabric'
 }
 
 processResources {

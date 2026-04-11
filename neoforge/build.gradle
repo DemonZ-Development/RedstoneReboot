@@ -1,6 +1,29 @@
+plugins {
+    id 'net.neoforged.moddev' version '1.0.11'
+}
+
+neoForge {
+    version = '21.1.1'
+    
+    runs {
+        client {
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'redstonereboot'
+        }
+        server {
+            systemProperty 'neoforge.enabledGameTestNamespaces', 'redstonereboot'
+            programArgument '--nogui'
+        }
+    }
+
+    mods {
+        redstonereboot {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
 dependencies {
     implementation project(':common')
-    compileOnly 'net.neoforged:neoforge:20.4.193'
 }
 
 jar {

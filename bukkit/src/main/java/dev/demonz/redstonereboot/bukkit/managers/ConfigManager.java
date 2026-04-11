@@ -1,5 +1,7 @@
 package dev.demonz.redstonereboot.bukkit.managers;
 
+import dev.demonz.redstonereboot.common.platform.PlatformConfig;
+
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 
@@ -14,9 +16,9 @@ import java.util.stream.Collectors;
 /**
  * Manages plugin configuration loading, validation, and access.
  */
-public class ConfigManager {
+public class ConfigManager implements PlatformConfig {
 
-    public static final int CURRENT_CONFIG_VERSION = 1;
+    public static final int CURRENT_CONFIG_VERSION = 2;
 
     private final Plugin plugin;
     private FileConfiguration config;
@@ -126,6 +128,7 @@ public class ConfigManager {
         try {
             return ZoneId.of(getTimezone());
         } catch (Exception exception) {
+            plugin.getLogger().warning("Invalid timezone '" + getTimezone() + "' in config. Falling back to UTC.");
             return ZoneId.of("UTC");
         }
     }
@@ -223,6 +226,10 @@ public class ConfigManager {
         return Math.max(config.getInt("emergency.delay", 30), 0);
     }
 
+    public int getShutdownDelayTicks() {
+        return Math.max(config.getInt("advanced.shutdown-delay-ticks", 60), 0);
+    }
+
     public boolean isLuckPermsIntegrationEnabled() {
         return config.getBoolean("permissions.luckperms.integration-enabled", true);
     }
@@ -233,6 +240,11 @@ public class ConfigManager {
 
     public boolean isPlaceholderAPIEnabled() {
         return config.getBoolean("placeholders.enabled", true);
+    }
+
+    @Override
+    public int getDefaultPermissionLevel() {
+        return config.getInt("permissions.fallback.default-level", 2);
     }
 
     public FileConfiguration getRawConfig() {
