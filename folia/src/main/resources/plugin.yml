@@ -1,7 +1,8 @@
 name: RedstoneReboot
 version: ${version}
-main: dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin
-api-version: '1.13'
+main: dev.demonz.redstonereboot.folia.RedstoneRebootFoliaPlugin
+api-version: '1.20'
+folia-supported: true
 description: Advanced multi-platform server restart engine with scheduling, monitoring, and rich alerts.
 author: DemonZDevelopment
 website: https://github.com/sdemonzdevelopment-spec/RedstoneReboot

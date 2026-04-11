@@ -1,8 +1,19 @@
-// Forge module — stubbed for ForgeGradle integration
 dependencies {
     implementation project(':common')
+    compileOnly 'net.minecraftforge:javafmllanguage:1.20.4-49.0.49'
 }
 
 jar {
     archiveBaseName = 'RedstoneReboot-Forge'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+processResources {
+    filesMatching('META-INF/mods.toml') {
+        expand(version: project.version)
+    }
 }

@@ -1,8 +1,19 @@
-// Fabric module — stubbed for Fabric Loom integration
 dependencies {
     implementation project(':common')
+    compileOnly 'net.fabricmc:fabric-loader:0.15.11'
 }
 
 jar {
     archiveBaseName = 'RedstoneReboot-Fabric'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+processResources {
+    filesMatching('fabric.mod.json') {
+        expand(version: project.version)
+    }
 }

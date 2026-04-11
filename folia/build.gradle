@@ -1,9 +1,19 @@
-// Folia module — stubbed for future implementation
 dependencies {
-    implementation project(':common')
+    implementation project(':bukkit')
     compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
 }
 
 jar {
     archiveBaseName = 'RedstoneReboot-Folia'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+processResources {
+    filesMatching('plugin.yml') {
+        expand(version: project.version)
+    }
 }

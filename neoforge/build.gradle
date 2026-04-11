@@ -1,8 +1,19 @@
-// NeoForge module — stubbed for NeoGradle integration
 dependencies {
     implementation project(':common')
+    compileOnly 'net.neoforged:neoforge:20.4.193'
 }
 
 jar {
     archiveBaseName = 'RedstoneReboot-NeoForge'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+processResources {
+    filesMatching('META-INF/mods.toml') {
+        expand(version: project.version)
+    }
 }

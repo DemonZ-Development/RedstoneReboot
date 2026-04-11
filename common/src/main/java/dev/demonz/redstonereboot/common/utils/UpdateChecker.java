@@ -1,13 +1,12 @@
 package dev.demonz.redstonereboot.common.utils;
 
-import org.slf4j.Logger;
-
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 
 /**
  * Utility class to check for updates via the Modrinth API.
@@ -17,8 +16,8 @@ public class UpdateChecker {
     private final String projectId;
     private final String currentVersion;
     private final Logger logger;
-    private String latestVersion = null;
-    private boolean updateAvailable = false;
+    private String latestVersion;
+    private boolean updateAvailable;
 
     public UpdateChecker(String projectId, String currentVersion, Logger logger) {
         this.projectId = projectId;
@@ -39,36 +38,37 @@ public class UpdateChecker {
                 conn.setReadTimeout(5000);
                 conn.setRequestProperty("User-Agent", "DemonZDevelopment/RedstoneReboot/" + currentVersion);
 
-                if (conn.getResponseCode() == 200) {
-                    try (Scanner scanner = new Scanner(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
-                        String response = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
-                        // Modrinth API returns an array of version objects. The first one is the latest.
-                        // We do a simple string search to avoid bundling a JSON library in the common module.
-                        String versionPrefix = "\"version_number\":\"";
-                        int index = response.indexOf(versionPrefix);
-                        if (index != -1) {
-                            int startIndex = index + versionPrefix.length();
-                            int endIndex = response.indexOf("\"", startIndex);
-                            latestVersion = response.substring(startIndex, endIndex);
-
-                            if (!currentVersion.equalsIgnoreCase(latestVersion)) {
-                                updateAvailable = true;
-                                logger.info("==========================================");
-                                logger.info("A new version of RedstoneReboot is available!");
-                                logger.info("Current version: " + currentVersion);
-                                logger.info("Latest version:  " + latestVersion);
-                                logger.info("Download it at: https://modrinth.com/project/" + projectId + "/versions");
-                                logger.info("==========================================");
-                            } else {
-                                logger.info("RedstoneReboot is up to date (v" + currentVersion + ").");
-                            }
-                        }
-                    }
-                } else {
-                    logger.debug("Failed to check for updates. Response code: " + conn.getResponseCode());
+                if (conn.getResponseCode() != 200) {
+                    logger.fine("Failed to check for updates. Response code: " + conn.getResponseCode());
+                    return;
                 }
-            } catch (Exception e) {
-                logger.debug("Exception while checking for updates: " + e.getMessage());
+
+                try (Scanner scanner = new Scanner(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    String response = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
+                    String versionPrefix = "\"version_number\":\"";
+                    int index = response.indexOf(versionPrefix);
+                    if (index == -1) {
+                        return;
+                    }
+
+                    int startIndex = index + versionPrefix.length();
+                    int endIndex = response.indexOf("\"", startIndex);
+                    latestVersion = response.substring(startIndex, endIndex);
+                    updateAvailable = !currentVersion.equalsIgnoreCase(latestVersion);
+
+                    if (updateAvailable) {
+                        logger.info("==========================================");
+                        logger.info("A new version of RedstoneReboot is available!");
+                        logger.info("Current version: " + currentVersion);
+                        logger.info("Latest version:  " + latestVersion);
+                        logger.info("Download it at: https://modrinth.com/project/" + projectId + "/versions");
+                        logger.info("==========================================");
+                    } else {
+                        logger.info("RedstoneReboot is up to date (v" + currentVersion + ").");
+                    }
+                }
+            } catch (Exception exception) {
+                logger.fine("Exception while checking for updates: " + exception.getMessage());
             }
         });
     }

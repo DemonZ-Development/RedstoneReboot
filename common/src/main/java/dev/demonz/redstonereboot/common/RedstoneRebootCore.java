@@ -1,51 +1,46 @@
 package dev.demonz.redstonereboot.common;
 
 import dev.demonz.redstonereboot.common.platform.ServerPlatform;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import dev.demonz.redstonereboot.common.text.LegacyTextUtil;
+import dev.demonz.redstonereboot.common.utils.UpdateChecker;
+
+import java.util.logging.Logger;
 
 /**
- * Core engine for RedstoneReboot — platform-agnostic restart management.
- * <p>
- * This class contains all shared logic and is instantiated by each
- * platform-specific module (Bukkit, Folia, Fabric, Forge, NeoForge).
- * </p>
- *
- * @author DemonZ Development
- * @since 1.0.0
+ * Core engine for RedstoneReboot.
  */
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.3.0";
     public static final String BRAND = "RedstoneReboot";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BRAND);
+    private static final Logger LOGGER = Logger.getLogger(BRAND);
 
     private final ServerPlatform platform;
-    private final dev.demonz.redstonereboot.common.utils.UpdateChecker updateChecker;
+    private final UpdateChecker updateChecker;
 
     public RedstoneRebootCore(ServerPlatform platform) {
         this.platform = platform;
-        this.updateChecker = new dev.demonz.redstonereboot.common.utils.UpdateChecker("redstonereboot", VERSION, LOGGER);
+        this.updateChecker = new UpdateChecker("redstonereboot", VERSION, LOGGER);
     }
 
     /**
-     * Called when the platform enables the plugin/mod.
+     * Called when the platform enables the plugin or mod.
      */
     public void onEnable() {
         printStartupBanner();
-        LOGGER.info("Platform: {} (MC {})", platform.getPlatformName(), platform.getMinecraftVersion());
-        LOGGER.info("TPS: {}", String.format("%.1f", platform.getTPS()));
+        LOGGER.info("Platform: " + platform.getPlatformName() + " (MC " + platform.getMinecraftVersion() + ")");
+        LOGGER.info("TPS: " + String.format("%.1f", platform.getTPS()));
         LOGGER.info("Engine initialized successfully.");
         updateChecker.checkForUpdates();
     }
 
     /**
-     * Called when the platform disables the plugin/mod.
+     * Called when the platform disables the plugin or mod.
      */
     public void onDisable() {
         LOGGER.info("RedstoneReboot engine shutting down...");
-        LOGGER.info("Goodbye! 👋");
+        LOGGER.info("Shutdown complete.");
     }
 
     /**
@@ -54,49 +49,32 @@ public class RedstoneRebootCore {
      * @param reason the human-readable reason for the emergency
      */
     public void triggerEmergencyRestart(String reason) {
-        LOGGER.error("╔══════════════════════════════════════╗");
-        LOGGER.error("║    EMERGENCY RESTART TRIGGERED       ║");
-        LOGGER.error("║    Reason: {}", reason);
-        LOGGER.error("╚══════════════════════════════════════╝");
-        platform.broadcastTitle("§c§l⚠ EMERGENCY RESTART", "§e" + reason);
-        platform.broadcastMessage("§c§lSERVER GOING DOWN — " + reason);
+        LOGGER.severe("==========================================");
+        LOGGER.severe("EMERGENCY RESTART TRIGGERED");
+        LOGGER.severe("Reason: " + reason);
+        LOGGER.severe("==========================================");
+        platform.broadcastTitle("§c§lEMERGENCY RESTART", "§e" + reason);
+        platform.broadcastMessage("§c§lSERVER GOING DOWN - " + reason);
         platform.shutdownServer();
     }
 
-    /**
-     * Print the premium ASCII startup banner to console.
-     */
     private void printStartupBanner() {
         String[] banner = {
             "",
-            "§c  ██████╗ ███████╗██████╗ ███████╗████████╗ ██████╗ ███╗   ██╗███████╗",
-            "§c  ██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗████╗  ██║██╔════╝",
-            "§c  ██████╔╝█████╗  ██║  ██║███████╗   ██║   ██║   ██║██╔██╗ ██║█████╗  ",
-            "§c  ██╔══██╗██╔══╝  ██║  ██║╚════██║   ██║   ██║   ██║██║╚██╗██║██╔══╝  ",
-            "§c  ██║  ██║███████╗██████╔╝███████║   ██║   ╚██████╔╝██║ ╚████║███████╗",
-            "§c  ╚═╝  ╚═╝╚══════╝╚═════╝ ╚══════╝   ╚═╝    ╚═════╝ ╚═╝  ╚═══╝╚══════╝",
-            "§6  ██████╗ ███████╗██████╗  ██████╗  ██████╗ ████████╗",
-            "§6  ██╔══██╗██╔════╝██╔══██╗██╔═══██╗██╔═══██╗╚══██╔══╝",
-            "§6  ██████╔╝█████╗  ██████╔╝██║   ██║██║   ██║   ██║   ",
-            "§6  ██╔══██╗██╔══╝  ██╔══██╗██║   ██║██║   ██║   ██║   ",
-            "§6  ██║  ██║███████╗██████╔╝╚██████╔╝╚██████╔╝   ██║   ",
-            "§6  ╚═╝  ╚═╝╚══════╝╚═════╝  ╚═════╝  ╚═════╝    ╚═╝   ",
-            "",
-            "§8  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            "§7  ⚡ §fRedstoneReboot §7v" + VERSION + " §8│ §7by §cDemonZ Development",
-            "§8  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-            "§7  │ §fPlatform   §8» §a" + platform.getPlatformName(),
-            "§7  │ §fMinecraft  §8» §e" + platform.getMinecraftVersion(),
-            "§7  │ §fPlayers    §8» §b" + platform.getOnlinePlayerCount(),
-            "§7  │ §fEngine     §8» §dMulti-Platform Restart Engine",
-            "§8  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "==========================================",
+            "  RedstoneReboot v" + VERSION,
+            "  by DemonZ Development",
+            "------------------------------------------",
+            "  Platform  : " + platform.getPlatformName(),
+            "  Minecraft : " + platform.getMinecraftVersion(),
+            "  Players   : " + platform.getOnlinePlayerCount(),
+            "  Engine    : Multi-Platform Restart Engine",
+            "==========================================",
             ""
         };
 
         for (String line : banner) {
-            // Strip § color codes for SLF4J output
-            String clean = line.replaceAll("§[0-9a-fk-or]", "");
-            LOGGER.info(clean);
+            LOGGER.info(LegacyTextUtil.stripLegacyFormatting(line));
         }
     }
 
@@ -104,7 +82,7 @@ public class RedstoneRebootCore {
         return platform;
     }
 
-    public dev.demonz.redstonereboot.common.utils.UpdateChecker getUpdateChecker() {
+    public UpdateChecker getUpdateChecker() {
         return updateChecker;
     }
 }

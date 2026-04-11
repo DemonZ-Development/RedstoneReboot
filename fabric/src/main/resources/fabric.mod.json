@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "redstonereboot",
+  "version": "${version}",
+  "name": "RedstoneReboot",
+  "description": "Advanced multi-platform server restart engine.",
+  "authors": [
+    "DemonZ Development"
+  ],
+  "license": "Apache-2.0",
+  "environment": "server",
+  "entrypoints": {
+    "server": [
+      "dev.demonz.redstonereboot.fabric.RedstoneRebootFabricMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": ">=1.20.4",
+    "java": ">=17"
+  }
+}
