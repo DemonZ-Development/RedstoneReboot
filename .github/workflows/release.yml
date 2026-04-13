@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish
+        required: true
+        default: v1.3.1
+      target:
+        description: Branch or commit to release from
+        required: true
+        default: main
+      prerelease:
+        description: Mark this release as a prerelease
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag_name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+            echo "checkout_ref=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+            echo "target_commitish=${{ inputs.target }}" >> "$GITHUB_OUTPUT"
+            echo "prerelease=${{ inputs.prerelease }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag_name=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+            echo "checkout_ref=${GITHUB_REF}" >> "$GITHUB_OUTPUT"
+            echo "target_commitish=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.meta.outputs.checkout_ref }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Collect release files
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          cp bukkit/build/libs/RedstoneReboot-Bukkit-*.jar release-artifacts/
+          cp folia/build/libs/RedstoneReboot-Folia-*.jar release-artifacts/
+          cp fabric/build/libs/RedstoneReboot-Fabric-*.jar release-artifacts/
+          cp forge/build/libs/RedstoneReboot-Forge-*.jar release-artifacts/
+          cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar release-artifacts/
+          cp common/build/libs/common-*.jar release-artifacts/
+
+      - name: Upload release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: RedstoneReboot-Release-${{ steps.meta.outputs.tag_name }}
+          path: release-artifacts/*
+          retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag_name }}
+          target_commitish: ${{ steps.meta.outputs.target_commitish }}
+          name: RedstoneReboot ${{ steps.meta.outputs.tag_name }}
+          body: |
+            ## RedstoneReboot ${{ steps.meta.outputs.tag_name }}
+
+            ### Files
+            | Platform | File |
+            |----------|------|
+            | Bukkit / Spigot / Paper / Purpur | `RedstoneReboot-Bukkit-*.jar` |
+            | Folia | `RedstoneReboot-Folia-*.jar` |
+            | Fabric | `RedstoneReboot-Fabric-*.jar` |
+            | Forge | `RedstoneReboot-Forge-*.jar` |
+            | NeoForge | `RedstoneReboot-NeoForge-*.jar` |
+
+            ### Requirements
+            - **Bukkit/Paper**: MC 1.9 to 1.21.1, Java 8+ on legacy and Java 17+ on modern servers
+            - **Folia**: MC 1.20+, Java 17+
+            - **Fabric**: MC 1.20.1+, Java 17+, Fabric API required where applicable
+            - **Forge**: MC 1.20.4+, Java 17+
+            - **NeoForge**: MC 1.20.4+, Java 17+
+
+            ### Config Paths
+            - **Plugin builds**: `plugins/RedstoneReboot/config.yml`
+            - **Mod builds**: `config/redstonereboot.properties`
+
+            ### Links
+            - [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/README.md)
+            - [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+            - [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
+          draft: false
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
+          files: |
+            release-artifacts/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

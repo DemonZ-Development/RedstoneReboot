@@ -1,18 +1,13 @@
-# ══════════════════════════════════════════════════════════════
-# RedstoneReboot v1.3.0 — Configuration
-# ══════════════════════════════════════════════════════════════
-#
+# RedstoneReboot v1.3.1 Configuration
 # Advanced multi-platform server restart engine.
 # GitHub: https://github.com/sdemonzdevelopment-spec/RedstoneReboot
-# Wiki:   https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki
+# Wiki: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki
 
-# ── GENERAL ───────────────────────────────────────────────────
 general:
   plugin-prefix: "§8[§cRedstone§8] §aReboot"
   debug-mode: false
   strict-validation: true
 
-# ── SCHEDULED RESTARTS ────────────────────────────────────────
 scheduled-restarts:
   enabled: true
   times:
@@ -25,7 +20,6 @@ scheduled-restarts:
     - "ALL"
   warning-time: 300
 
-# ── ALERT SYSTEM ──────────────────────────────────────────────
 alerts:
   enabled: true
   warning-times: [3600, 1800, 900, 600, 300, 180, 120, 60, 30, 15, 10, 5, 4, 3, 2, 1]
@@ -47,7 +41,6 @@ alerts:
     enabled: true
     sound-name: "BLOCK_NOTE_BLOCK_PLING"
 
-# ── SERVER MONITORING ─────────────────────────────────────────
 monitoring:
   enabled: true
   tps-threshold: 18.0
@@ -55,14 +48,12 @@ monitoring:
   check-interval: 30
   consecutive-checks: 3
 
-# ── EMERGENCY RESTART ─────────────────────────────────────────
 emergency:
   enabled: true
   tps-threshold: 12.0
   memory-threshold: 95.0
   delay: 30
 
-# ── PERMISSIONS ───────────────────────────────────────────────
 permissions:
   luckperms:
     integration-enabled: true
@@ -70,20 +61,15 @@ permissions:
     admin-permission: "redstonereboot.admin"
   fallback:
     use-op-as-admin: true
-    default-level: 2 # Default permission level for commands on mod platforms (2 = User, 4 = Admin)
+    default-level: 2 # Default permission level for mod-platform commands.
 
-# ── PLACEHOLDERAPI ────────────────────────────────────────────
 placeholders:
   enabled: true
 
-# ── ADVANCED ──────────────────────────────────────────────────
 advanced:
   async-operations: true
   thread-pool-size: 2
   metrics-enabled: true
   shutdown-delay-ticks: 60
 
-# ══════════════════════════════════════════════════════════════
-# DO NOT MODIFY
-# ══════════════════════════════════════════════════════════════
 config-version: 2

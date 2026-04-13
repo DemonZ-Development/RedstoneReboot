@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [17, 21]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: temurin
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Upload Build Artifacts
+        if: matrix.java == 21
+        uses: actions/upload-artifact@v4
+        with:
+          name: RedstoneReboot-CI-Artifacts
+          path: |
+            bukkit/build/libs/RedstoneReboot-Bukkit-*.jar
+            folia/build/libs/RedstoneReboot-Folia-*.jar
+            fabric/build/libs/RedstoneReboot-Fabric-*.jar
+            forge/build/libs/RedstoneReboot-Forge-*.jar
+            neoforge/build/libs/RedstoneReboot-NeoForge-*.jar
+            common/build/libs/common-*.jar
+          retention-days: 14
