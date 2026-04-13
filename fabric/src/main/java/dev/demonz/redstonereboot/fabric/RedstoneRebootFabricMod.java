@@ -33,7 +33,7 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
     public void onInitializeServer() {
         scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
         Path configPath = FabricLoader.getInstance().getConfigDir().resolve("redstonereboot.properties");
-        startCore(scheduler, loadSimpleConfig(configPath));
+        startCore(scheduler, loadSimpleConfig(configPath), FabricLoader.getInstance().getConfigDir());
 
         ServerLifecycleEvents.SERVER_STARTED.register(startedServer -> this.server = startedServer);
         ServerLifecycleEvents.SERVER_STOPPING.register(stoppingServer -> {

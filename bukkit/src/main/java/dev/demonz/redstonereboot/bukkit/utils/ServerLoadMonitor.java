@@ -64,14 +64,8 @@ public class ServerLoadMonitor {
         if (lastTPS < threshold) {
             consecutiveLowTPS++;
             if (consecutiveLowTPS >= plugin.getConfigManager().getConsecutiveChecks()) {
-                boolean scheduled = plugin.getRestartManager().scheduleRestart(
-                    plugin.getConfigManager().getEmergencyDelay(),
-                    RestartReason.EMERGENCY_TPS,
-                    "ServerMonitor"
-                );
-                if (scheduled) {
-                    consecutiveLowTPS = 0;
-                }
+                triggerRestart(RestartReason.EMERGENCY_TPS, "ServerMonitor");
+                consecutiveLowTPS = 0;
             }
         } else {
             consecutiveLowTPS = 0;
@@ -93,14 +87,8 @@ public class ServerLoadMonitor {
         if (lastMemoryUsage > threshold) {
             consecutiveHighMemory++;
             if (consecutiveHighMemory >= plugin.getConfigManager().getConsecutiveChecks()) {
-                boolean scheduled = plugin.getRestartManager().scheduleRestart(
-                    plugin.getConfigManager().getEmergencyDelay(),
-                    RestartReason.EMERGENCY_MEMORY,
-                    "ServerMonitor"
-                );
-                if (scheduled) {
-                    consecutiveHighMemory = 0;
-                }
+                triggerRestart(RestartReason.EMERGENCY_MEMORY, "ServerMonitor");
+                consecutiveHighMemory = 0;
             }
         } else {
             consecutiveHighMemory = 0;
@@ -114,21 +102,13 @@ public class ServerLoadMonitor {
             return;
         }
 
-        if (plugin.getRestartManager().isRestartInProgress()) {
-            return;
-        }
-
-        // Use a single flag check to avoid double-triggering in the same tick
+        // Emergency conditions are allowed to shorten or replace an existing countdown.
         boolean triggered = false;
 
         if (lastTPS < plugin.getConfigManager().getEmergencyTpsThreshold()) {
             if (!emergencyTpsTriggered) {
                 plugin.sendEmergencyAlert("Critical TPS: " + String.format("%.1f", lastTPS));
-                plugin.getRestartManager().scheduleRestart(
-                    plugin.getConfigManager().getEmergencyDelay(),
-                    RestartReason.EMERGENCY_TPS,
-                    "EmergencyMonitor"
-                );
+                triggerRestart(RestartReason.EMERGENCY_TPS, "EmergencyMonitor");
                 emergencyTpsTriggered = true;
                 triggered = true;
             }
@@ -139,15 +119,20 @@ public class ServerLoadMonitor {
         if (!triggered && lastMemoryUsage > plugin.getConfigManager().getEmergencyMemoryThreshold()) {
             if (!emergencyMemoryTriggered) {
                 plugin.sendEmergencyAlert("Critical Memory: " + String.format("%.1f%%", lastMemoryUsage));
-                plugin.getRestartManager().scheduleRestart(
-                    plugin.getConfigManager().getEmergencyDelay(),
-                    RestartReason.EMERGENCY_MEMORY,
-                    "EmergencyMonitor"
-                );
+                triggerRestart(RestartReason.EMERGENCY_MEMORY, "EmergencyMonitor");
                 emergencyMemoryTriggered = true;
             }
-        } else {
+        } else if (!triggered) {
             emergencyMemoryTriggered = false;
+        }
+    }
+
+    private void triggerRestart(RestartReason reason, String initiator) {
+        int delay = plugin.getConfigManager().getEmergencyDelay();
+        if (delay > 0) {
+            plugin.getRestartManager().scheduleRestart(delay, reason, initiator);
+        } else {
+            plugin.getRestartManager().performImmediateRestart(reason, initiator);
         }
     }
 

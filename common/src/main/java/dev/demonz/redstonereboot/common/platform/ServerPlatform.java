@@ -68,6 +68,24 @@ public interface ServerPlatform {
     }
 
     /**
+     * Notify all players and admins that a restart has been postponed due to a backend error.
+     *
+     * @param adminDetail the technical details for administrators (log/console only)
+     */
+    default void sendPostponedAlert(String adminDetail) {
+        broadcastMessage("\u00A7c\u00A7lScheduled restart postponed. \u00A7eThe server will remain online.");
+        // Log detail using the platform logger if available, otherwise print.
+        System.out.println("[RedstoneReboot] RESTART POSTPONED - Admin Detail: " + adminDetail);
+    }
+
+    /**
+     * Reload platform-managed configuration and state if supported.
+     */
+    default void reloadPlatformState() {
+        // Default: platforms without mutable runtime config can ignore reload hooks.
+    }
+
+    /**
      * Execute a command from the server console.
      *
      * @param command the command string (without leading /)

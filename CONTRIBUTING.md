@@ -1,115 +1,75 @@
-# 🤝 Contributing to RedstoneReboot
+# Contributing to RedstoneReboot
 
-Thank you for your interest in contributing to RedstoneReboot! This document provides guidelines and information for contributors.
+This repository builds multiple platform targets from one shared restart engine. Keep changes scoped, tested, and documented.
 
-## 📋 Code of Conduct
+## Prerequisites
 
-By participating in this project, you agree to maintain a respectful and inclusive environment. Be kind, constructive, and professional in all interactions.
+- Java `21+` for a full local build
+- Git
+- A test server for the platform you touched when behavior changes need runtime verification
 
-## 🚀 Getting Started
-
-### Prerequisites
-- **Java 17+** (Eclipse Temurin recommended)
-- **Gradle 8.4+** (included via wrapper)
-- **Git**
-
-### Setup
+## Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/sdemonzdevelopment-spec/RedstoneReboot.git
 cd RedstoneReboot
-
-# Build the project
 ./gradlew build
-
-# Output JARs are in:
-# bukkit/build/libs/
-# folia/build/libs/
-# common/build/libs/
 ```
 
-## 📐 Project Structure
+Artifacts are written under each module's `build/libs/` directory.
 
-```
+## Repository Layout
+
+```text
 RedstoneReboot/
-├── common/        # Platform-agnostic core logic
-│   └── src/main/java/dev/demonz/redstonereboot/common/
-│       ├── RedstoneRebootCore.java
-│       └── platform/
-│           └── ServerPlatform.java
-├── bukkit/        # Bukkit/Spigot/Paper implementation
-│   └── src/main/java/dev/demonz/redstonereboot/bukkit/
-├── folia/         # Folia implementation
-├── fabric/        # Fabric mod (future)
-├── forge/         # Forge mod (future)
-├── neoforge/      # NeoForge mod (future)
-├── docs/          # Documentation
-│   ├── api/       # Developer API docs
-│   ├── wiki/      # User-facing wiki
-│   └── marketplace/  # Store listings
-└── assets/        # Images, banners, logos
+|- common/      Shared restart engine, scheduling, backend, and command logic
+|- bukkit/      Bukkit, Spigot, Paper, and compatible plugin entrypoint
+|- folia/       Folia plugin entrypoint and scheduler integration
+|- fabric/      Fabric server module
+|- forge/       Forge server module
+|- neoforge/    NeoForge server module
+|- wiki/        Repository-backed user documentation
+|- docs/api/    Developer integration docs
+|- docs/release/ Marketing and release copy
+|- docs/marketplace/ Store listing copy
+`- assets/      Images and branding assets
 ```
 
-## 🔧 Development Workflow
+## Workflow
 
-### Branching Strategy
-- `main` — Stable, release-ready code
-- `dev` — Active development
-- `feature/*` — New features
-- `fix/*` — Bug fixes
+1. Create a branch for the change.
+2. Keep shared logic in `common` unless a platform-specific API is required.
+3. Update platform modules only where the platform adapter actually differs.
+4. Run `./gradlew build`.
+5. Test on a server when the change affects commands, scheduling, alerts, loader startup, or shutdown behavior.
 
-### Making Changes
+## Code Guidelines
 
-1. **Fork** the repository
-2. **Create** a branch: `git checkout -b feature/my-feature`
-3. **Write** your code following our style guidelines
-4. **Test** on a local server
-5. **Commit** with conventional commits: `git commit -m 'feat: add cool feature'`
-6. **Push** and create a Pull Request
+- Keep `common` free of direct platform imports.
+- Match existing Java style and package structure.
+- Prefer small, explicit changes over broad refactors.
+- Use the logger style already present in the module you are editing.
+- Update tests when constructor signatures or shared logic change.
 
-### Commit Convention
+## Documentation Expectations
 
-We use [Conventional Commits](https://www.conventionalcommits.org/):
+If your change affects users, operators, or integrators:
 
-| Prefix | Purpose |
-|--------|---------|
-| `feat:` | New feature |
-| `fix:` | Bug fix |
-| `docs:` | Documentation only |
-| `refactor:` | Code restructuring |
-| `test:` | Adding tests |
-| `chore:` | Build/tooling changes |
+- update the relevant page in `wiki/`
+- update `docs/api/` when the Bukkit integration surface changes
+- keep README links and command/config examples aligned with the code
 
-### Code Style
+## Pull Requests
 
-- **Java 17** features are welcome (records, sealed classes, pattern matching)
-- Use **SLF4J** for logging (`LoggerFactory.getLogger(...)`)
-- Keep platform-specific code in platform modules — `common` must have zero platform imports
-- Follow existing naming conventions and package structure
+Good pull requests usually include:
 
-## 🧪 Testing
+- what changed
+- why it changed
+- how it was tested
+- any config, command, or migration impact
 
-Before submitting a PR, test your changes:
+## Need Help
 
-1. Build: `./gradlew build`
-2. Copy the output JAR to a test server
-3. Verify the feature or fix works correctly
-4. Ensure no regressions in existing functionality
-
-## 📝 Documentation
-
-If your change affects user-facing behavior:
-- Update the relevant wiki page in `docs/wiki/`
-- Update the API docs in `docs/api/` if applicable
-- Add inline Javadoc for any public API methods
-
-## 💡 Need Help?
-
-- Open a [Discussion](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions) for questions
-- Join our [Discord](https://discord.gg/GYsTt96ypf) for real-time help
-- Check existing [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) for known problems
-
----
-
-*Thank you for making RedstoneReboot better! ❤️*
+- Issues: <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues>
+- Discussions: <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions>
+- Discord: <https://discord.gg/GYsTt96ypf>

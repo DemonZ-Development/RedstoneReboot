@@ -2,216 +2,103 @@
 
 <img src="assets/banner.png" alt="RedstoneReboot Banner" width="100%" />
 
-<br/>
+# RedstoneReboot
 
-# ⚡ RedstoneReboot
+Multi-platform restart orchestration for Minecraft servers on Bukkit-family platforms, Folia, Fabric, Forge, and NeoForge.
 
-**The Most Advanced Multi-Platform Minecraft Server Restart Engine**
-
-[![GitHub Release](https://img.shields.io/github/v/release/sdemonzdevelopment-spec/RedstoneReboot?style=for-the-badge&logo=github&color=dc2626)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/sdemonzdevelopment-spec/RedstoneReboot/build.yml?branch=main&style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-17+-f97316?style=for-the-badge&logo=openjdk&logoColor=white)](https://adoptium.net)
-[![Minecraft](https://img.shields.io/badge/MC-1.9_--_1.21.1-22c55e?style=for-the-badge&logo=minecraft&logoColor=white)](https://minecraft.net)
-
-<br/>
-
-**Bukkit** · **Paper** · **Spigot** · **Folia** · **Fabric** · **Forge** · **NeoForge**
-
-[📖 Wiki](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) · [⬇️ Download](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) · [🛠️ Developer API](docs/api/README.md) · [🐛 Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) · [💬 Discord](https://discord.gg/GYsTt96ypf)
+[Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases) |
+[Build Status](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions) |
+[Wiki](wiki/README.md) |
+[Developer API](docs/api/README.md) |
+[Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues) |
+[Discord](https://discord.gg/GYsTt96ypf)
 
 </div>
 
----
+## Overview
 
-<div align="center">
-<img src="assets/features.png" alt="Features" width="80%" />
-</div>
+RedstoneReboot manages scheduled, manual, and emergency restarts with a shared core that runs across multiple server platforms. It keeps restart timing, monitoring, and alerting in one place, then hands the actual restart off to a backend that matches your environment.
 
-## 🔥 Why RedstoneReboot?
+## Key Features
 
-RedstoneReboot isn't just a restart plugin — it's a **professional-grade server lifecycle engine** built for production environments. From single-server setups to massive networks, it delivers reliability, intelligence, and elegance.
+- Scheduled restarts with timezone-aware daily windows
+- Countdown warnings and restart status commands
+- TPS and memory monitoring with emergency restart thresholds
+- Backend handoff for shutdown-only, systemd, Docker, local scripts, and Pterodactyl
+- Diagnostics via `/reboot doctor`
+- Shared common engine with platform-specific adapters
 
-<table>
-<tr>
-<td width="50%" valign="top">
+## Supported Platforms
 
-### 🕐 Intelligent Scheduling
-- Multiple daily restart windows with precise timing
-- **Global timezone support** (Asia/Kolkata, UTC, America/New_York, etc.)
-- Day-specific scheduling (weekdays, weekends, custom)
-- Configurable countdown warnings at every interval
+| Platform | Artifact | Minecraft | Runtime Java |
+|----------|----------|-----------|--------------|
+| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | `1.9` to `1.21.1` | Java `8+` on legacy servers, Java `17+` on modern servers |
+| Folia | `RedstoneReboot-Folia-<version>.jar` | `1.20+` | Java `17+` |
+| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1+` | Java `17+` |
+| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4+` | Java `17+` |
+| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.20.4+` | Java `17+` |
 
-</td>
-<td width="50%" valign="top">
+## Installation
 
-### 📊 Real-Time Performance Monitor
-- Live **TPS tracking** with automatic restart triggers
-- **Memory usage monitoring** to prevent leaks & crashes
-- Consecutive-check thresholds to avoid false positives
-- Emergency restart system for critical server states
+### Plugin builds
 
-</td>
-</tr>
-<tr>
-<td valign="top">
+1. Download the Bukkit-family or Folia jar from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases).
+2. Place it in your server's `plugins/` directory.
+3. Start the server once.
+4. Edit `plugins/RedstoneReboot/config.yml`.
+5. If you want managed restart handoff, also edit `plugins/RedstoneReboot/restart-backends.properties`.
 
-### 🔔 Rich Multi-Channel Alerts
-- **Chat**, **Title**, **Action Bar**, and **Sound** alerts
-- Fully customizable formatting with color code support
-- Permission-based notification filtering
-- Emergency alerts with distinct styling and priority
+### Mod builds
 
-</td>
-<td valign="top">
+1. Download the jar for your loader from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases).
+2. Place it in your server's `mods/` directory.
+3. Start the server once.
+4. Edit the loader-specific config generated for RedstoneReboot.
+5. Configure backend handoff if you want restart ownership beyond a normal stop.
 
-### 🧩 Multi-Platform Architecture
-- **Bukkit/Spigot/Paper**: Full support, 1.9 → 1.21.1
-- **Folia**: Async region-threaded scheduler support
-- **Fabric / Forge / NeoForge**: Server-side mod support
-- Cross-version adapter with intelligent reflection fallbacks
+Additional install details live in [wiki/Installation.md](wiki/Installation.md).
 
-</td>
-</tr>
-</table>
-
----
-
-## 🚀 Quick Start
-
-### 📋 Requirements
-
-| 🖥️ Platform | 📦 Minimum Version | ☕ Java Version |
-|-------------|--------------------|-----------------|
-| **Paper / Spigot** | `1.9+` | Java 8+ *(1.9-1.16)*, Java 17+ *(1.17+)* |
-| **Folia** | `1.20+` | Java 17+ |
-| **Fabric** | `1.20.4+` | Java 17+ |
-| **Forge** | `1.20.4+` | Java 17+ |
-| **NeoForge** | `1.20.4+` | Java 17+ |
-
-### ⬇️ Installation
-
-> [!NOTE]  
-> Config files and directories are generated automatically upon your first successful startup.
-
-**Bukkit / Spigot / Paper / Folia:**
-1. Download `RedstoneReboot-Bukkit-x.x.x.jar` from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
-2. Place in your server's `plugins/` folder
-3. Start the server
-4. Edit `plugins/RedstoneReboot/config.yml` to your needs
-5. Reload with `/reboot reload` or restart the server
-
-**Fabric / Forge / NeoForge:**
-1. Download the appropriate mod jar from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases)
-2. Place in your server's `mods/` folder
-3. Start the server 
-4. Edit `config/redstonereboot.properties`
-
----
-
-## ⚙️ Configuration
-
-```yaml
-# RedstoneReboot v1.3.0 — Core Configuration
-scheduled-restarts:
-  enabled: true
-  timezone: "Asia/Kolkata"
-  times:
-    - "00:00"   # Midnight
-    - "06:00"   # Morning
-    - "12:00"   # Noon
-    - "18:00"   # Evening
-  days:
-    - "ALL"     # Every day (or MONDAY, TUESDAY, etc.)
-
-monitoring:
-  enabled: true
-  tps-threshold: 18.0
-  memory-threshold: 85.0
-  consecutive-checks: 3
-  check-interval: 30
-
-emergency:
-  enabled: true
-  tps-threshold: 12.0
-  memory-threshold: 95.0
-  delay: 30
-```
-
-> [!TIP]  
-> See the [full configuration reference](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) for all options and advanced settings.
-
----
-
-## 🎮 Commands & Permissions
+## Commands
 
 | Command | Description | Permission |
-|---------|-------------|-----------|
-| `/reboot` | Show plugin status & help | `redstonereboot.use` |
-| `/reboot now [delay]` | Restart immediately (default 60s) | `redstonereboot.restart.now` |
-| `/reboot schedule <seconds>` | Schedule a future restart | `redstonereboot.restart.schedule` |
-| `/reboot cancel` | Cancel a pending restart | `redstonereboot.restart.cancel` |
-| `/reboot status` | Detailed server & restart status | `redstonereboot.status` |
-| `/reboot info` | Server performance details | `redstonereboot.status` |
-| `/reboot reload` | Hot-reload configuration | `redstonereboot.config.reload` |
+|---------|-------------|------------|
+| `/reboot` or `/reboot help` | Show command help | `redstonereboot.use` |
+| `/reboot status` | Show restart state and next scheduled restart | `redstonereboot.status` |
+| `/reboot info` | Show current server performance data | `redstonereboot.status` |
+| `/reboot doctor` | Show backend and environment diagnostics | `redstonereboot.doctor` |
+| `/reboot now [delay]` | Start a manual restart countdown | `redstonereboot.restart.now` |
+| `/reboot schedule <seconds>` | Schedule a restart in the future | `redstonereboot.restart.schedule` |
+| `/reboot cancel` | Cancel the active countdown | `redstonereboot.restart.cancel` |
+| `/reboot reload` | Reload config and backend state | `redstonereboot.config.reload` |
 
-| Permission Node | Description | Default |
-|-----------------|-------------|---------|
-| `redstonereboot.*` | All permissions | OP |
-| `redstonereboot.admin` | Admin access | OP |
-| `redstonereboot.use` | Basic usage | Everyone |
-| `redstonereboot.notify` | Receive restart notifications | Everyone |
+## Backend Handoff
 
----
+RedstoneReboot separates "when should the server restart?" from "who owns the final restart step?".
 
-## 📊 PlaceholderAPI
+Supported backends:
 
-Seamlessly integrates with **PlaceholderAPI** for MOTDs, scoreboards, tab lists, and more.
+- `SHUTDOWN_ONLY`: normal graceful stop, no automatic startup handoff
+- `SYSTEMD`: service-managed restarts on Linux hosts
+- `DOCKER`: container-aware restart handoff
+- `LOCALSCRIPT`: custom script-driven restart flow
+- `PTERODACTYL`: panel-owned restart requests
 
-| Placeholder | Example Output | Use Case |
-|-------------|----------------|----------|
-| `%redstonereboot_next_restart%` | `2025-12-25 18:00:00 IST` | MOTD, Info displays |
-| `%redstonereboot_time_until%` | `2h 30m` | Scoreboards, Tab lists |
-| `%redstonereboot_tps%` | `19.8` | Performance monitors |
-| `%redstonereboot_memory%` | `67.3%` | Status dashboards |
-| `%redstonereboot_status%` | `Normal operation` | Status indicators |
+See [wiki/Backends.md](wiki/Backends.md) for backend setup and [wiki/Configuration.md](wiki/Configuration.md) for config keys.
 
----
+## Developer API
 
-## 🛠️ Developer API
+The Bukkit plugin exposes integration points for other plugins. Current documentation is in [docs/api/README.md](docs/api/README.md).
 
-RedstoneReboot provides a rich API for developers to integrate with.
+Typical integrations:
 
-```java
-// Get the RedstoneReboot API
-RedstoneRebootPlugin plugin = (RedstoneRebootPlugin) Bukkit.getPluginManager()
-    .getPlugin("RedstoneReboot");
+- schedule or cancel a restart through `RestartManager`
+- inspect restart status and next scheduled restart
+- read health-monitor values when monitoring is enabled
+- reuse RedstoneReboot's alert and permission helpers
 
-// Schedule a custom restart
-plugin.getRestartManager().scheduleRestart(300, RestartReason.API, "MyPlugin");
+## Build From Source
 
-// Monitor performance
-double tps = plugin.getServerLoadMonitor().getLastTPS();
-boolean healthy = plugin.getServerLoadMonitor().isHealthy();
-
-// Listen for restart events
-@EventHandler
-public void onRestart(RestartEvent event) {
-    if (event.getReason() == RestartReason.EMERGENCY_TPS) {
-        // Handle emergency before it fires
-    }
-}
-```
-
-> [!TIP]  
-> Full developer documentation: [Developer API Guide](docs/api/README.md)
-
----
-
-## 🏗️ Building from Source
-
-> [!IMPORTANT]
-> While RedstoneReboot runs on **Java 17+** (Bukkit, Paper, Fabric, Forge), you must have **Java 21+** installed to *compile* the project due to the modern NeoForge API requirements. The build system will automatically target compatibility for Java 17 where appropriate.
+The full multi-loader build requires Java `21+` because the NeoForge module targets newer toolchains. Runtime support still varies by platform as listed above.
 
 ```bash
 git clone https://github.com/sdemonzdevelopment-spec/RedstoneReboot.git
@@ -219,50 +106,19 @@ cd RedstoneReboot
 ./gradlew build
 ```
 
-Artifacts are output to:
-- `bukkit/build/libs/RedstoneReboot-Bukkit-*.jar`
-- `folia/build/libs/RedstoneReboot-Folia-*.jar`
-- `fabric/build/libs/RedstoneReboot-Fabric-*.jar`
-- `forge/build/libs/RedstoneReboot-Forge-*.jar`
-- `neoforge/build/libs/RedstoneReboot-NeoForge-*.jar`
+Build outputs are written under each module's `build/libs/` directory.
 
----
+## Documentation Layout
 
-## 🤝 Contributing
+Repository-backed wiki content now lives at the repo root in [wiki/](wiki/README.md), so GitHub can render it directly from the main repository.
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+- [Wiki Index](wiki/README.md)
+- [Installation Guide](wiki/Installation.md)
+- [Configuration Reference](wiki/Configuration.md)
+- [Backend Guide](wiki/Backends.md)
+- [Developer API](docs/api/README.md)
+- [Contributing](CONTRIBUTING.md)
 
-1. **Fork** the repository
-2. **Create** your feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+## License
 
----
-
-## 📞 Support & Community
-
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
-- 🛠️ [**Developer API Docs**](docs/api/README.md)
-- 🐛 [**Bug Reports & Feature Requests**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
-- 💬 [**Community Discussions**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions)
-- 🔗 [**DemonZ Development**](https://demonzdevelopment.online)
-
----
-
-## 📄 License
-
-This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-
-**Crafted with ❤️ by [DemonZ Development](https://demonzdevelopment.online)**
-
-*Production-grade Minecraft infrastructure for the modern era.*
-
-[![GitHub](https://img.shields.io/badge/GitHub-DemonZDevelopment-181717?style=for-the-badge&logo=github)](https://github.com/DemonZDevelopment)
-[![Website](https://img.shields.io/badge/Web-DemonZDevelopment.online-dc2626?style=for-the-badge&logo=firefox)](https://demonzdevelopment.online)
-
-</div>
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE).

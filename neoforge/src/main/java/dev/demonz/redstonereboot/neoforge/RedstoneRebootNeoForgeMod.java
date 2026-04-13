@@ -31,7 +31,7 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
 
         scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
         Path configPath = Path.of("config", "redstonereboot.properties");
-        startCore(scheduler, loadSimpleConfig(configPath));
+        startCore(scheduler, loadSimpleConfig(configPath), Path.of("config"));
 
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);

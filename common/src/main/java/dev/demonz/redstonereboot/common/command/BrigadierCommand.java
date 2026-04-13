@@ -85,6 +85,14 @@ public class BrigadierCommand {
                 return 1;
             }));
 
+        // doctor
+        reboot.then(LiteralArgumentBuilder.<S>literal("doctor")
+            .requires(src -> factory.create(src).hasPermission("redstonereboot.doctor"))
+            .executes(ctx -> {
+                processor.processDoctor(factory.create(ctx.getSource()));
+                return 1;
+            }));
+
         // help
         reboot.then(LiteralArgumentBuilder.<S>literal("help")
             .executes(ctx -> {

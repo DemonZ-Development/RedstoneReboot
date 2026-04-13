@@ -27,6 +27,7 @@ permissions:
       redstonereboot.restart.cancel: true
       redstonereboot.config.reload: true
       redstonereboot.status: true
+      redstonereboot.doctor: true
       redstonereboot.notify: true
   redstonereboot.use:
     description: Basic plugin usage
@@ -49,6 +50,9 @@ permissions:
   redstonereboot.status:
     description: View restart status
     default: true
+  redstonereboot.doctor:
+    description: View diagnostic health report
+    default: op
   redstonereboot.notify:
     description: Receive restart notifications
     default: true

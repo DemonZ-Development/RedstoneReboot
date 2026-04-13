@@ -82,20 +82,20 @@ jobs:
             | NeoForge | `RedstoneReboot-NeoForge-*.jar` |
 
             ### Requirements
-            - **Bukkit/Paper**: MC 1.9 — 1.21.1 · Java 8+ (legacy) / Java 17+ (modern)
-            - **Folia**: MC 1.20+ · Java 17+
-            - **Fabric**: MC 1.20.1+ · Java 17+ · Fabric API required
-            - **Forge**: MC 1.20.4+ · Java 17+
-            - **NeoForge**: MC 1.20.4+ · Java 17+
+            - **Bukkit/Paper**: MC 1.9 to 1.21.1, Java 8+ on legacy and Java 17+ on modern servers
+            - **Folia**: MC 1.20+, Java 17+
+            - **Fabric**: MC 1.20.1+, Java 17+, Fabric API required where applicable
+            - **Forge**: MC 1.20.4+, Java 17+
+            - **NeoForge**: MC 1.20.4+, Java 17+
 
             ### Config Paths
             - **Plugin builds**: `plugins/RedstoneReboot/config.yml`
             - **Mod builds**: `config/redstonereboot.properties`
 
             ### Links
-            - 📖 [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/wiki/Home.md)
-            - 🛠️ [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
-            - 🐛 [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
+            - [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/README.md)
+            - [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+            - [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
           draft: false
           prerelease: false
           files: |

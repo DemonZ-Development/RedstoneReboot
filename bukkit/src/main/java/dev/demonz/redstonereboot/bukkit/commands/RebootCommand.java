@@ -48,6 +48,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
                 yield true;
             }
             case "info" -> handleInfo(sender);
+            case "doctor" -> handleDoctor(sender);
             case "reload" -> handleReload(sender);
             case "help" -> {
                 sendHelp(sender);
@@ -64,7 +65,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "reload", "help")) {
+            for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "doctor", "reload", "help")) {
                 if (candidate.startsWith(args[0].toLowerCase())) {
                     completions.add(candidate);
                 }
@@ -167,6 +168,16 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         } catch (Exception exception) {
             msg(sender, "Reload error: " + exception.getMessage(), NamedTextColor.RED);
         }
+        return true;
+    }
+
+    private boolean handleDoctor(CommandSender sender) {
+        if (sender instanceof Player player && !player.hasPermission("redstonereboot.doctor")) {
+            msg(sender, "No permission.", NamedTextColor.RED);
+            return true;
+        }
+
+        processor.processDoctor(new BukkitSender(sender));
         return true;
     }
 

@@ -89,14 +89,8 @@ public final class PlatformLoadMonitor {
         if (lastTPS < config.getTpsThreshold()) {
             consecutiveLowTPS++;
             if (consecutiveLowTPS >= config.getConsecutiveChecks()) {
-                boolean scheduled = restartManager.scheduleRestart(
-                    config.getEmergencyDelay(),
-                    RestartReason.EMERGENCY_TPS,
-                    "ServerMonitor"
-                );
-                if (scheduled) {
-                    consecutiveLowTPS = 0;
-                }
+                triggerRestart(RestartReason.EMERGENCY_TPS, "ServerMonitor");
+                consecutiveLowTPS = 0;
             }
         } else {
             consecutiveLowTPS = 0;
@@ -117,14 +111,8 @@ public final class PlatformLoadMonitor {
         if (lastMemoryUsage > config.getMemoryThreshold()) {
             consecutiveHighMemory++;
             if (consecutiveHighMemory >= config.getConsecutiveChecks()) {
-                boolean scheduled = restartManager.scheduleRestart(
-                    config.getEmergencyDelay(),
-                    RestartReason.EMERGENCY_MEMORY,
-                    "ServerMonitor"
-                );
-                if (scheduled) {
-                    consecutiveHighMemory = 0;
-                }
+                triggerRestart(RestartReason.EMERGENCY_MEMORY, "ServerMonitor");
+                consecutiveHighMemory = 0;
             }
         } else {
             consecutiveHighMemory = 0;
@@ -138,20 +126,13 @@ public final class PlatformLoadMonitor {
             return;
         }
 
-        if (restartManager.isRestartInProgress()) {
-            return;
-        }
-
+        // Emergency conditions are allowed to shorten or replace an existing countdown.
         boolean triggered = false;
 
         if (lastTPS < config.getEmergencyTpsThreshold()) {
             if (!emergencyTpsTriggered) {
                 platform.sendEmergencyAlert("Critical TPS: " + String.format("%.1f", lastTPS));
-                restartManager.scheduleRestart(
-                    config.getEmergencyDelay(),
-                    RestartReason.EMERGENCY_TPS,
-                    "EmergencyMonitor"
-                );
+                triggerRestart(RestartReason.EMERGENCY_TPS, "EmergencyMonitor");
                 emergencyTpsTriggered = true;
                 triggered = true;
             }
@@ -162,15 +143,20 @@ public final class PlatformLoadMonitor {
         if (!triggered && lastMemoryUsage > config.getEmergencyMemoryThreshold()) {
             if (!emergencyMemoryTriggered) {
                 platform.sendEmergencyAlert("Critical Memory: " + String.format("%.1f%%", lastMemoryUsage));
-                restartManager.scheduleRestart(
-                    config.getEmergencyDelay(),
-                    RestartReason.EMERGENCY_MEMORY,
-                    "EmergencyMonitor"
-                );
+                triggerRestart(RestartReason.EMERGENCY_MEMORY, "EmergencyMonitor");
                 emergencyMemoryTriggered = true;
             }
         } else if (!triggered) {
             emergencyMemoryTriggered = false;
+        }
+    }
+
+    private void triggerRestart(RestartReason reason, String initiator) {
+        int delay = config.getEmergencyDelay();
+        if (delay > 0) {
+            restartManager.scheduleRestart(delay, reason, initiator);
+        } else {
+            restartManager.performImmediateRestart(reason, initiator);
         }
     }
 }

@@ -50,7 +50,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
             configManager = new ConfigManager(this);
             
             // Initialize Core first, which handles internal managers
-            core = new RedstoneRebootCore(this, taskScheduler, configManager);
+            core = new RedstoneRebootCore(this, taskScheduler, configManager, getDataFolder().toPath());
             
             permissionManager = new PermissionManager(this);
             alertManager = new AlertManager(this);

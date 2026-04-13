@@ -1,5 +1,8 @@
 package dev.demonz.redstonereboot.common.manager;
 
+import dev.demonz.redstonereboot.common.backend.BackendRegistry;
+import dev.demonz.redstonereboot.common.backend.BackendResult;
+import dev.demonz.redstonereboot.common.backend.RestartBackend;
 import dev.demonz.redstonereboot.common.platform.PlatformConfig;
 import dev.demonz.redstonereboot.common.platform.ServerPlatform;
 import dev.demonz.redstonereboot.common.schedule.RestartScheduleCalculator;
@@ -11,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -33,9 +37,12 @@ public class RestartManager {
     private volatile RestartReason currentRestartReason = RestartReason.UNKNOWN;
     private volatile String restartInitiator = "System";
     private final AtomicInteger secondsUntilRestart = new AtomicInteger(-1);
+    private final BackendRegistry backendRegistry;
+    private final AtomicBoolean controllerRestartPending = new AtomicBoolean(false);
+    private long lockoutEndTime = 0;
 
-    public RestartManager(Logger logger, ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config) {
-        this(logger, platform, scheduler, config, () -> ZonedDateTime.now(config.getZoneId()));
+    public RestartManager(Logger logger, ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, BackendRegistry backendRegistry) {
+        this(logger, platform, scheduler, config, backendRegistry, () -> ZonedDateTime.now(config.getZoneId()));
     }
 
     RestartManager(
@@ -43,12 +50,14 @@ public class RestartManager {
         ServerPlatform platform,
         PlatformTaskScheduler scheduler,
         PlatformConfig config,
+        BackendRegistry backendRegistry,
         Supplier<ZonedDateTime> nowSupplier
     ) {
         this.logger = logger;
         this.platform = platform;
         this.scheduler = scheduler;
         this.config = config;
+        this.backendRegistry = backendRegistry;
         this.nowSupplier = nowSupplier;
     }
 
@@ -112,6 +121,16 @@ public class RestartManager {
             return false;
         }
 
+        if (isLockoutActive()) {
+            logger.warning("Restart request from " + initiator + " blocked: Lockout state active.");
+            return false;
+        }
+
+        if (controllerRestartPending.get()) {
+            logger.warning("Restart request from " + initiator + " blocked: A controller-owned restart is already pending.");
+            return false;
+        }
+
         if (isRestartInProgress()) {
             cancelCurrentCountdown(false);
             logger.warning("Replacing existing restart countdown with a sooner one (" + normalizedDelay + "s).");
@@ -127,6 +146,18 @@ public class RestartManager {
 
         startCountdown(normalizedDelay);
         return true;
+    }
+
+    public synchronized void performImmediateRestart(RestartReason reason, String initiator) {
+        if (isLockoutActive() || controllerRestartPending.get()) {
+            logger.warning("Immediate restart blocked: Another restart is pending or lockout is active.");
+            return;
+        }
+
+        cancelCurrentCountdown(false);
+        this.currentRestartReason = reason;
+        this.restartInitiator = initiator;
+        executeRestart();
     }
 
     private synchronized void startCountdown(int seconds) {
@@ -157,16 +188,60 @@ public class RestartManager {
     }
 
     private void executeRestart() {
+        if (controllerRestartPending.get()) return;
+
         RestartReason reason = currentRestartReason;
+        RestartBackend backend = backendRegistry.getActiveBackend();
+        
         cancelCurrentCountdown(false);
+
         try {
-            if (config.isAlertsEnabled()) {
-                platform.sendFinalRestartAlert(reason);
+            // Phase 2: Handoff
+            backend.prepare();
+            BackendResult result = backend.execute();
+
+            if (result == BackendResult.ACCEPTED) {
+                if (backend.isControllerOwned()) {
+                    if (config.isAlertsEnabled()) {
+                        platform.sendFinalRestartAlert(reason);
+                    }
+                    controllerRestartPending.set(true);
+                    logger.info("Restart accepted by Controller (" + backend.getName() + "). Local process ownership relinquished.");
+                    
+                    // Safety timeout: 5 minutes later, if we are still running, clear the flag.
+                    scheduler.runLater(() -> {
+                        if (controllerRestartPending.compareAndSet(true, false)) {
+                            logger.warning("[Reboot] Safety timeout: Panel handoff duration exceeded. Relinquishing process ownership...");
+                        }
+                    }, 6000L); // 5 minutes (300 seconds * 20 ticks)
+                } else {
+                    // Supervisor-backed: Phase 3: Local Shutdown
+                    if (config.isAlertsEnabled()) {
+                        platform.sendFinalRestartAlert(reason);
+                    }
+                    platform.shutdownServer();
+                }
+            } else if (result == BackendResult.FAILED) {
+                String detail = "Backend " + backend.getName() + " explicitly failed the restart request.";
+                platform.sendPostponedAlert(detail);
+                logger.severe("RESTART FAILED: " + detail);
+            } else if (result == BackendResult.UNKNOWN) {
+                int duration = backendRegistry.getConfig().getLockoutDuration();
+                this.lockoutEndTime = System.currentTimeMillis() + (duration * 1000L);
+                
+                String detail = "Backend " + backend.getName() + " returned UNKNOWN status (Timeout?). Entering " + duration + "s lockout.";
+                platform.sendPostponedAlert(detail);
+                logger.warning("RESTART STATE UNKNOWN: " + detail);
             }
-            platform.shutdownServer();
+
         } catch (Exception exception) {
             logger.log(Level.SEVERE, "Restart execution error", exception);
+            platform.sendPostponedAlert("Internal error during backend execution: " + exception.getMessage());
         }
+    }
+
+    public boolean isLockoutActive() {
+        return System.currentTimeMillis() < lockoutEndTime;
     }
 
     public synchronized boolean cancelRestart() {

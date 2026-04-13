@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -33,6 +34,8 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
     private final AtomicBoolean started = new AtomicBoolean(false);
     private PlatformTaskScheduler scheduler;
     private PlatformLoadMonitor loadMonitor;
+    private Path runtimeConfigPath;
+    private SimplePlatformConfig mutableConfig;
     protected volatile RedstoneRebootCore core;
 
     protected AbstractBootstrapServerPlatform(Logger logger, String platformName, String minecraftVersion) {
@@ -45,14 +48,18 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         return logger;
     }
 
-    protected final void startCore(PlatformTaskScheduler scheduler, PlatformConfig config) {
+    protected final void startCore(PlatformTaskScheduler scheduler, PlatformConfig config, Path dataFolder) {
         if (started.compareAndSet(false, true)) {
             this.scheduler = scheduler;
-            core = new RedstoneRebootCore(this, scheduler, config);
+            core = new RedstoneRebootCore(this, scheduler, config, dataFolder);
+            if (config instanceof SimplePlatformConfig simpleConfig) {
+                this.mutableConfig = simpleConfig;
+            }
         }
     }
 
     protected final SimplePlatformConfig loadSimpleConfig(Path configPath) {
+        this.runtimeConfigPath = configPath;
         SimplePlatformConfig config = new SimplePlatformConfig();
 
         try {
@@ -109,6 +116,20 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         }
 
         return config;
+    }
+
+    @Override
+    public void reloadPlatformState() {
+        if (runtimeConfigPath == null || mutableConfig == null) {
+            return;
+        }
+
+        SimplePlatformConfig reloadedConfig = loadSimpleConfig(runtimeConfigPath);
+        copyConfig(reloadedConfig, mutableConfig);
+
+        stopPlatformMonitoring();
+        startPlatformMonitoring();
+        logger.info("Reloaded platform config from " + runtimeConfigPath);
     }
 
     protected final void startPlatformMonitoring() {
@@ -272,5 +293,27 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             })
             .filter(java.util.Objects::nonNull)
             .toList();
+    }
+
+    private void copyConfig(SimplePlatformConfig source, SimplePlatformConfig target) {
+        target.setScheduledRestartsEnabled(source.isScheduledRestartsEnabled());
+        target.setScheduledTimes(new ArrayList<>(source.getScheduledTimes()));
+        target.setScheduledDays(new ArrayList<>(source.getScheduledDays()));
+        target.setTimezone(source.getTimezone());
+        target.setScheduledWarningTime(source.getScheduledWarningTime());
+        target.setWarningTimes(new ArrayList<>(source.getWarningTimes()));
+        target.setAlertsEnabled(source.isAlertsEnabled());
+        target.setMonitoringEnabled(source.isMonitoringEnabled());
+        target.setTpsThreshold(source.getTpsThreshold());
+        target.setMemoryThreshold(source.getMemoryThreshold());
+        target.setCheckInterval(source.getCheckInterval());
+        target.setConsecutiveChecks(source.getConsecutiveChecks());
+        target.setEmergencyRestartEnabled(source.isEmergencyRestartEnabled());
+        target.setEmergencyTpsThreshold(source.getEmergencyTpsThreshold());
+        target.setEmergencyMemoryThreshold(source.getEmergencyMemoryThreshold());
+        target.setEmergencyDelay(source.getEmergencyDelay());
+        target.setShutdownDelayTicks(source.getShutdownDelayTicks());
+        target.setUseOpAsAdminEnabled(source.isUseOpAsAdminEnabled());
+        target.setDefaultPermissionLevel(source.getDefaultPermissionLevel());
     }
 }

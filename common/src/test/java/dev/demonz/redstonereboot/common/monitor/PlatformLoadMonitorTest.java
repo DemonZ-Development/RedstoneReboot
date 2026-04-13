@@ -1,7 +1,9 @@
-package dev.demonz.redstonereboot.common.manager;
+package dev.demonz.redstonereboot.common.monitor;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
 import dev.demonz.redstonereboot.common.backend.BackendRegistry;
+import dev.demonz.redstonereboot.common.manager.RestartManager;
+import dev.demonz.redstonereboot.common.manager.RestartReason;
 import dev.demonz.redstonereboot.common.platform.ServerPlatform;
 import dev.demonz.redstonereboot.common.platform.SimplePlatformConfig;
 import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
@@ -9,8 +11,6 @@ import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -18,57 +18,49 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class RestartManagerTest {
+class PlatformLoadMonitorTest {
 
     @Test
-    void clampsScheduledCountdownWhenServerStartsInsideWarningWindow() {
-        ZonedDateTime now = ZonedDateTime.of(2026, 4, 11, 17, 58, 0, 0, ZoneId.of("Asia/Kolkata"));
+    void emergencyCheckCanShortenExistingCountdown() {
+        FakePlatform platform = new FakePlatform();
+        platform.setTps(5.0);
+
         SimplePlatformConfig config = new SimplePlatformConfig();
-        config.setScheduledRestartsEnabled(true);
-        config.setScheduledTimes(List.of("18:00"));
-        config.setScheduledDays(List.of("ALL"));
-        config.setTimezone("Asia/Kolkata");
-        config.setScheduledWarningTime(300);
+        config.setMonitoringEnabled(false);
+        config.setEmergencyRestartEnabled(true);
+        config.setEmergencyDelay(30);
+        config.setEmergencyTpsThreshold(12.0);
 
         FakeScheduler scheduler = new FakeScheduler();
         RestartManager manager = new RestartManager(
-            Logger.getLogger("RestartManagerTest"),
-            new FakePlatform(),
+            Logger.getLogger("PlatformLoadMonitorTest"),
+            platform,
             scheduler,
             config,
-            backendRegistry(),
-            () -> now
+            backendRegistry()
         );
 
-        manager.scheduleRestarts();
-        scheduler.runRepeatingTask(0);
+        manager.scheduleRestart(120, RestartReason.MANUAL, "tester");
+
+        PlatformLoadMonitor monitor = new PlatformLoadMonitor(
+            Logger.getLogger("PlatformLoadMonitorTest"),
+            platform,
+            scheduler,
+            config,
+            manager
+        );
+
+        monitor.startMonitoring();
+        scheduler.runRepeatingTask(1);
 
         assertTrue(manager.isRestartInProgress());
-        assertEquals(120, manager.getSecondsUntilRestart());
-    }
-
-    @Test
-    void cancelRestartResetsReasonToUnknown() {
-        FakeScheduler scheduler = new FakeScheduler();
-        RestartManager manager = new RestartManager(
-            Logger.getLogger("RestartManagerTest"),
-            new FakePlatform(),
-            scheduler,
-            new SimplePlatformConfig(),
-            backendRegistry(),
-            () -> ZonedDateTime.now(ZoneId.of("UTC"))
-        );
-
-        manager.scheduleRestart(30, RestartReason.MANUAL, "tester");
-        manager.cancelRestart();
-
-        assertEquals(RestartReason.UNKNOWN, manager.getCurrentRestartReason());
-        assertEquals(-1, manager.getSecondsUntilRestart());
+        assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
+        assertEquals(30, manager.getSecondsUntilRestart());
     }
 
     private static BackendRegistry backendRegistry() {
-        Logger logger = Logger.getLogger("RestartManagerTest");
-        return new BackendRegistry(logger, new BackendConfig(Path.of("build", "tmp", "RestartManagerTest"), logger));
+        Logger logger = Logger.getLogger("PlatformLoadMonitorTest");
+        return new BackendRegistry(logger, new BackendConfig(Path.of("build", "tmp", "PlatformLoadMonitorTest"), logger));
     }
 
     private static final class FakeScheduler implements PlatformTaskScheduler {
@@ -96,6 +88,8 @@ class RestartManagerTest {
     }
 
     private static final class FakePlatform implements ServerPlatform {
+        private double tps = 20.0;
+
         @Override
         public void broadcastMessage(String message) {
         }
@@ -110,7 +104,11 @@ class RestartManagerTest {
 
         @Override
         public double getTPS() {
-            return 20.0;
+            return tps;
+        }
+
+        void setTps(double tps) {
+            this.tps = tps;
         }
     }
 }
