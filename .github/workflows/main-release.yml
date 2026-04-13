@@ -1,0 +1,136 @@
+name: Main Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or commit to publish to the main release channel
+        required: true
+        default: main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: main-release
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Resolve publish ref
+        id: meta
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "checkout_ref=${{ inputs.ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "checkout_ref=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.meta.outputs.checkout_ref }}
+          fetch-depth: 0
+
+      - name: Resolve commit SHA
+        id: commit
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Read project version
+        id: version
+        shell: bash
+        run: |
+          version="$(sed -n "s/.*version = '\([^']*\)'.*/\1/p" build.gradle | head -n 1)"
+          if [ -z "$version" ]; then
+            echo "Unable to determine project version from build.gradle" >&2
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
+
+      - name: Collect release files
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          cp bukkit/build/libs/RedstoneReboot-Bukkit-*.jar release-artifacts/
+          cp folia/build/libs/RedstoneReboot-Folia-*.jar release-artifacts/
+          cp fabric/build/libs/RedstoneReboot-Fabric-*.jar release-artifacts/
+          cp forge/build/libs/RedstoneReboot-Forge-*.jar release-artifacts/
+          cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar release-artifacts/
+          cp common/build/libs/common-*.jar release-artifacts/
+
+      - name: Upload main release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: RedstoneReboot-Main-Release
+          path: release-artifacts/*
+          retention-days: 30
+
+      - name: Move main tag to current commit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f main
+          git push origin refs/tags/main --force
+
+      - name: Publish main release channel
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: main
+          target_commitish: ${{ steps.commit.outputs.sha }}
+          name: RedstoneReboot Main (${{ steps.version.outputs.value }})
+          body: |
+            ## RedstoneReboot Main
+
+            Rolling prerelease channel built from `main`.
+
+            - Version: `${{ steps.version.outputs.value }}`
+            - Commit: `${{ steps.commit.outputs.sha }}`
+
+            ### Files
+            | Platform | File |
+            |----------|------|
+            | Bukkit / Spigot / Paper / Purpur | `RedstoneReboot-Bukkit-*.jar` |
+            | Folia | `RedstoneReboot-Folia-*.jar` |
+            | Fabric | `RedstoneReboot-Fabric-*.jar` |
+            | Forge | `RedstoneReboot-Forge-*.jar` |
+            | NeoForge | `RedstoneReboot-NeoForge-*.jar` |
+            | Common | `common-*.jar` |
+
+            ### Links
+            - [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/README.md)
+            - [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+            - [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
+          draft: false
+          prerelease: true
+          generate_release_notes: false
+          make_latest: false
+          overwrite_files: true
+          files: |
+            release-artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

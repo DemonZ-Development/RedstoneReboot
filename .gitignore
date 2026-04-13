@@ -24,7 +24,15 @@ Thumbs.db
 run/
 logs/
 crash-reports/
+*.log
+*.lck
+*.tmp
 
 # Eclipse/Other bins
 bin/
-tests/
+
+# Local test harnesses
+test-servers/
+test_servers/
+tests/runtime/
+tests/servers/
