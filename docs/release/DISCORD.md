@@ -16,7 +16,7 @@ This release adds bStats metrics integration, fixes PlaceholderAPI MOTD compatib
 
 **Docs and links:**
 - **GitHub:** <https://github.com/sdemonzdevelopment-spec/RedstoneReboot>
-- **Wiki:** <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md>
+- **Wiki:** <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki>
 - **bStats:** <https://bstats.org/plugin/bukkit/RedstoneReboot/30751>
 - **Issues:** <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues>
 

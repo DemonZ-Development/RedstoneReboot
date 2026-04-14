@@ -122,7 +122,7 @@ jobs:
             | Common | `common-*.jar` |
 
             ### Links
-            - [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/README.md)
+            - [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
             - [Developer API](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
             - [Issues](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
           draft: false

@@ -101,7 +101,7 @@ Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE
 [SIZE=5][B]🔗 Helpful Links[/B][/SIZE]
 
 [LIST]
-[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md'][B]Documentation Wiki[/B][/URL]
+[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki'][B]Documentation Wiki[/B][/URL]
 [*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot'][B]GitHub Repository[/B][/URL]
 [*] [URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751'][B]bStats Metrics[/B][/URL]
 [*] [URL='https://discord.gg/GYsTt96ypf'][B]Discord Support[/B][/URL]

@@ -123,7 +123,7 @@ RedstoneReboot separates the **"when to restart"** from the **"how to restart"**
 
 ## 📖 Documentation
 
-- 📚 [**Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md) — Installation, configuration, backends, and troubleshooting
+- 📚 [**Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) — Installation, configuration, backends, and troubleshooting
 - 🛠️ [**Developer API**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md) — Bukkit API for plugin developers
 - 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) — Server usage statistics
 - 💬 [**Discord**](https://discord.gg/GYsTt96ypf) — Support and community

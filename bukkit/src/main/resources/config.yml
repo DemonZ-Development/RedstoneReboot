@@ -1,7 +1,7 @@
 # RedstoneReboot v1.3.3 Configuration
 # Advanced multi-platform server restart engine.
 # GitHub: https://github.com/sdemonzdevelopment-spec/RedstoneReboot
-# Wiki: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md
+# Wiki: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki
 
 general:
   plugin-prefix: "§8[§cRedstone§8] §aReboot"

@@ -110,7 +110,7 @@ This page serves the plugin builds for Bukkit, Spigot, Paper, and Folia:
 
 ## 🔗 Quick Links
 
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md)
+- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
 - 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
 - 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
 - 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
