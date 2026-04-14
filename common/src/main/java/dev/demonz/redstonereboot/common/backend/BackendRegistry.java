@@ -6,6 +6,16 @@ import java.util.logging.Logger;
 
 /**
  * Registry for managing and discovering restart backends.
+ * <p>
+ * Reads the {@code restart-backends.properties} file via {@link BackendConfig}
+ * and instantiates the appropriate {@link RestartBackend} implementation.
+ * Supports hot-reload through {@link #initialize()} which can be called
+ * after configuration changes.
+ * </p>
+ *
+ * @see BackendConfig
+ * @see RestartBackend
+ * @since 1.0.0
  */
 public class BackendRegistry {
 
@@ -18,6 +28,13 @@ public class BackendRegistry {
         this.config = config;
     }
 
+    /**
+     * Load (or reload) the backend configuration and instantiate the active backend.
+     * <p>
+     * Safe to call multiple times — each call re-reads {@code restart-backends.properties}
+     * and replaces the active backend instance.
+     * </p>
+     */
     public void initialize() {
         config.load();
         String type = config.getActiveBackend();
@@ -48,6 +65,12 @@ public class BackendRegistry {
         logger.info("Active Restart Backend: " + activeBackend.getName() + " [" + activeBackend.getState() + "]");
     }
 
+    /**
+     * Get the currently active restart backend.
+     *
+     * @return the active backend, falling back to {@link dev.demonz.redstonereboot.common.backend.impl.ShutdownOnlyBackend}
+     *         if none is initialized
+     */
     public RestartBackend getActiveBackend() {
         if (activeBackend == null) {
             return new ShutdownOnlyBackend(logger);
@@ -55,6 +78,7 @@ public class BackendRegistry {
         return activeBackend;
     }
 
+    /** @return the underlying backend configuration */
     public BackendConfig getConfig() {
         return config;
     }

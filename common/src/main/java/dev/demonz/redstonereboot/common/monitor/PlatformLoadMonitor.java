@@ -10,7 +10,15 @@ import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 import java.util.logging.Logger;
 
 /**
- * Shared health monitor for non-Bukkit platforms.
+ * Shared health monitor for non-Bukkit platforms (Fabric, Forge, NeoForge).
+ * <p>
+ * Periodically samples TPS and memory usage, compares against configured thresholds,
+ * and triggers automatic or emergency restarts when conditions degrade. Uses the
+ * consecutive-check pattern to avoid false positives from transient spikes.
+ * </p>
+ *
+ * @see dev.demonz.redstonereboot.common.platform.PlatformConfig
+ * @since 1.0.0
  */
 public final class PlatformLoadMonitor {
 
@@ -42,6 +50,10 @@ public final class PlatformLoadMonitor {
         this.restartManager = restartManager;
     }
 
+    /**
+     * Start the health monitoring loop. Cancels any existing monitor first.
+     * The check interval is read from the platform configuration.
+     */
     public void startMonitoring() {
         stopMonitoring();
         long intervalTicks = Math.max(config.getCheckInterval(), 1) * 20L;
@@ -49,6 +61,9 @@ public final class PlatformLoadMonitor {
         logger.info("Load monitoring active (interval: " + config.getCheckInterval() + "s)");
     }
 
+    /**
+     * Stop the health monitoring loop and release the scheduled task.
+     */
     public void stopMonitoring() {
         if (monitorTask != null) {
             monitorTask.cancel();
@@ -56,10 +71,12 @@ public final class PlatformLoadMonitor {
         }
     }
 
+    /** @return the most recently sampled TPS value */
     public double getLastTPS() {
         return lastTPS;
     }
 
+    /** @return the most recently sampled memory usage as a percentage (0–100) */
     public double getLastMemoryUsage() {
         return lastMemoryUsage;
     }

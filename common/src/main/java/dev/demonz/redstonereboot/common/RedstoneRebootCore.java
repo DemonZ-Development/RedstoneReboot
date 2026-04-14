@@ -15,11 +15,19 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * Core engine for RedstoneReboot.
+ * Core engine for RedstoneReboot — the platform-agnostic restart orchestrator.
+ * <p>
+ * Initializes and manages the {@link BackendRegistry}, {@link RestartManager},
+ * {@link UpdateChecker}, and environment detection. Each platform (Bukkit, Fabric,
+ * Forge, NeoForge) creates a single instance and delegates lifecycle events to
+ * {@link #onEnable()} and {@link #onDisable()}.
+ * </p>
+ *
+ * @since 1.0.0
  */
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.3.1";
+    public static final String VERSION = "1.3.2";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
@@ -76,6 +84,13 @@ public class RedstoneRebootCore {
         LOGGER.info("Shutdown complete.");
     }
 
+    /**
+     * Reload all runtime state: platform config, backend registry, and restart schedules.
+     * <p>
+     * Called by {@code /reboot reload} — allows VPS admins to change backend configuration
+     * in {@code restart-backends.properties} without a full server restart.
+     * </p>
+     */
     public void reloadRuntimeState() {
         platform.reloadPlatformState();
         backendRegistry.initialize();
@@ -121,26 +136,32 @@ public class RedstoneRebootCore {
         }
     }
 
+    /** @return the platform abstraction for the current server environment */
     public ServerPlatform getPlatform() {
         return platform;
     }
 
+    /** @return the update checker that polls Modrinth for new versions */
     public UpdateChecker getUpdateChecker() {
         return updateChecker;
     }
 
+    /** @return the central restart manager handling scheduling, countdowns, and execution */
     public RestartManager getRestartManager() {
         return restartManager;
     }
 
+    /** @return the backend registry managing the active restart backend */
     public BackendRegistry getBackendRegistry() {
         return backendRegistry;
     }
 
+    /** @return the platform task scheduler used for tick-based scheduling */
     public PlatformTaskScheduler getScheduler() {
         return scheduler;
     }
 
+    /** @return the platform configuration providing scheduling, monitoring, and emergency settings */
     public PlatformConfig getConfig() {
         return config;
     }

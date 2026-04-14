@@ -2,19 +2,27 @@
 
 RedstoneReboot `<version>` is finalized on the code/build side.
 
-What is done:
+## What Shipped
 
-- shared Java logic audited and stabilized
-- Bukkit, Folia, Fabric, Forge, and NeoForge builds verified
-- marketplace docs refreshed for Spigot, Bukkit, Hangar, and Modrinth
-- release/support copy prepared for Instagram and Discord
-- repo cleaned of generated builds, caches, logs, and local test-server runtime files
+- bStats metrics integration (Bukkit builds, plugin ID `30751`)
+- PlaceholderAPI null-safety for MOTD compatibility
+- `/reboot doctor` added to in-game help
+- Full README rewrite with badges, quick start, placeholder table
+- All 4 marketplace docs rewritten (SpigotMC, Modrinth, Hangar, Bukkit)
+- Release copy refreshed for Discord and Instagram
+- 3 new wiki pages: FAQ, Permissions, Placeholders
+- Javadoc coverage improved across all core interfaces
+- GitHub community files: PR template, Security policy, Code of Conduct, Funding
+- `.gitignore` hardened, CI workflow updated with test reporting
 
-Primary push path:
+## Distribution
 
-- `C:\Users\satya\.antigravity\dmzrestart\redstonereboot-multi`
+- **GitHub:** https://github.com/sdemonzdevelopment-spec/RedstoneReboot
+- **bStats:** https://bstats.org/plugin/bukkit/RedstoneReboot/30751
+- **Discord:** https://discord.gg/GYsTt96ypf
+- **Instagram:** https://instagram.com/demonzdevelopment
 
-Operational note:
+## Notes
 
-- the primary repo is now the clean source-of-truth folder for manual push and release handling
-- generated artifacts were intentionally removed after verification, so release jars will need to be rebuilt when packaging/publishing
+- Generated artifacts were intentionally removed after verification — release JARs will need to be rebuilt when packaging/publishing
+- Marketplace page copies are ready for paste in `docs/marketplace/`

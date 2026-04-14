@@ -10,7 +10,15 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
- * Handles loading and saving of the restart-backends.yml (properties format for simplicity in common).
+ * Handles loading and saving of the {@code restart-backends.properties} backend configuration file.
+ * <p>
+ * This file controls which restart backend is active, its connection parameters, and lockout
+ * behavior. It is automatically generated with safe defaults on first run and can be reloaded
+ * at runtime via {@code /reboot reload}.
+ * </p>
+ *
+ * @see BackendRegistry
+ * @since 1.0.0
  */
 public class BackendConfig {
 

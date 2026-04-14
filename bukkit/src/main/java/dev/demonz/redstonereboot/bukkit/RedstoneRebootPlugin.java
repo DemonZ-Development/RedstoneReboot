@@ -14,6 +14,8 @@ import dev.demonz.redstonereboot.common.manager.RestartReason;
 import dev.demonz.redstonereboot.common.platform.ServerPlatform;
 import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
@@ -60,6 +62,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
             restartMonitoring();
             hookPlaceholderAPI();
+            initializeMetrics();
             core.onEnable();
             logIntegrationStatus();
         } catch (Exception exception) {
@@ -256,6 +259,32 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
         }
     }
 
+    private void initializeMetrics() {
+        if (!configManager.getRawConfig().getBoolean("advanced.metrics-enabled", true)) {
+            return;
+        }
+
+        try {
+            Metrics metrics = new Metrics(this, 30751);
+
+            metrics.addCustomChart(new SimplePie("active_backend",
+                () -> core != null ? core.getBackendRegistry().getActiveBackend().getName() : "Unknown"));
+
+            metrics.addCustomChart(new SimplePie("scheduled_restarts",
+                () -> configManager.isScheduledRestartsEnabled() ? "Enabled" : "Disabled"));
+
+            metrics.addCustomChart(new SimplePie("monitoring_enabled",
+                () -> configManager.isMonitoringEnabled() ? "Enabled" : "Disabled"));
+
+            metrics.addCustomChart(new SimplePie("platform_type",
+                () -> taskScheduler.isFolia() ? "Folia" : "Bukkit"));
+
+            getLogger().info("bStats metrics initialized (ID: 30751).");
+        } catch (Exception exception) {
+            getLogger().fine("bStats initialization skipped: " + exception.getMessage());
+        }
+    }
+
     private void logIntegrationStatus() {
         getLogger().info("==========================================");
         getLogger().info("Scheduling    : " + (configManager.isScheduledRestartsEnabled() ? "ENABLED" : "DISABLED"));
@@ -264,6 +293,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
         getLogger().info("Scheduler     : " + (taskScheduler.isFolia() ? "FOLIA GLOBAL" : "BUKKIT"));
         getLogger().info("LuckPerms     : " + (permissionManager.isLuckPermsAvailable() ? "HOOKED" : "NOT FOUND"));
         getLogger().info("PlaceholderAPI: " + (placeholderHook != null ? "HOOKED" : "NOT FOUND"));
+        getLogger().info("bStats        : " + (configManager.getRawConfig().getBoolean("advanced.metrics-enabled", true) ? "ENABLED (ID: 30751)" : "DISABLED"));
         getLogger().info("Timezone      : " + configManager.getTimezone());
         getLogger().info("==========================================");
     }

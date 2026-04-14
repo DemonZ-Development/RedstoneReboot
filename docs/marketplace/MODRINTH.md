@@ -10,7 +10,7 @@
 
 **The Most Advanced Multi-Platform Minecraft Server Restart Engine**
 
-<br/>
+[![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 </div>
 
@@ -18,19 +18,26 @@
 
 ## 🔥 Why RedstoneReboot?
 
-RedstoneReboot isn't just a restart plugin — it's a **professional-grade server lifecycle engine** built for production environments. From single-server setups to massive networks, it delivers reliability, intelligence, and elegance.
+RedstoneReboot is a **production-grade server lifecycle engine** that provides precise control over when, why, and how your server restarts. Backed by real-time health monitoring, intelligent scheduling, and a pluggable backend handoff system.
 
-It supports:
-- 🕐 **Intelligent Scheduling** (timezone support, daily intervals)
-- 📊 **Real-Time Performance Tracking** (TPS and memory monitors)
-- 🔔 **Rich Alerts** (chat, title, action bar, sound)
-- 🚑 **Emergency Fail-safes** (automatic triggers on critical states)
+From a single survival server to a fleet behind Pterodactyl — it delivers reliability, intelligence, and elegance.
+
+### Key Capabilities
+
+- 🕐 **Intelligent Scheduling** — Multiple daily restart windows with global timezone support and day-of-week filters
+- 📊 **Health Monitoring** — Real-time TPS and memory tracking with consecutive-check false-positive protection
+- 🚑 **Emergency Fail-safes** — Automatic restart triggers on critical TPS or memory breach
+- 🔔 **Rich Alerts** — Chat, title, action bar, and configurable sound notifications
+- 🔌 **Backend Handoff** — Delegate to Pterodactyl, Systemd, Docker, or local wrapper scripts
+- 🔄 **Hot-Reload** — Change backend config and `/reboot reload` — no full server restart needed
+- 🧩 **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit builds)
+- 📈 **bStats Metrics** — Anonymous usage telemetry ([view stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
 
 ---
 
 ## 📦 File Selection
 
-Choose the file that matches your exact server platform.
+Choose the file that matches your server platform:
 
 | 🖥️ Platform | Distribution Type | 📄 File |
 |-----------|------------------|------|
@@ -46,8 +53,8 @@ Choose the file that matches your exact server platform.
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
-| Bukkit-family servers | `1.9` through `1.21.1` | Run on Java 8+ *(1.9-1.16)*, Java 17+ *(1.17+)* |
-| Folia | `1.20+` | Uses dedicated Region-Threaded build |
+| Bukkit-family servers | `1.9` through `1.21.1` | Java 8+ *(legacy)*, Java 17+ *(modern)* |
+| Folia | `1.20+` | Dedicated region-threaded build |
 | Fabric | `1.20.1+` | Requires Fabric API |
 | Forge | `1.20.4+` | Server-side mod |
 | NeoForge | `1.20.4+` | Server-side mod |
@@ -59,29 +66,48 @@ Choose the file that matches your exact server platform.
 ### Plugin Install (Bukkit/Folia)
 1. Download the correct plugin file.
 2. Place it in `plugins/`.
-3. Start the server.
-4. Configure `plugins/RedstoneReboot/config.yml`.
+3. Start the server — config files are generated automatically.
+4. Configure `plugins/RedstoneReboot/config.yml` and `restart-backends.properties`.
+5. Run `/reboot reload` to apply.
 
 ### Mod Install (Fabric/Forge/NeoForge)
 1. Download the correct mod file.
-2. Place it in `mods/`.
-3. For Fabric, ensure Fabric API is present.
-4. Start the server.
-5. Configure `config/redstonereboot.properties`.
+2. Place it in `mods/` (Fabric requires Fabric API).
+3. Start the server.
+4. Configure `config/redstonereboot.properties` and `config/restart-backends.properties`.
+5. Run `/reboot reload` to apply.
 
 ---
 
-## 🎮 Commands & Integrations
+## 🎮 Commands
 
-- **/reboot** — View status and help
-- **/reboot now [delay]** — Trigger a restart countdown
-- **/reboot schedule <seconds>** — Schedule a future restart
-- **/reboot cancel** — Cancel a pending restart
-- **/reboot status** — Show restart schedule status
-- **/reboot info** — Show health information
-- **/reboot reload** — Reload configuration
+| Command | Description |
+|---------|-------------|
+| `/reboot` | View status and help |
+| `/reboot now [delay]` | Trigger a restart countdown |
+| `/reboot schedule <seconds>` | Schedule a future restart |
+| `/reboot cancel` | Cancel a pending restart |
+| `/reboot status` | Show restart schedule status |
+| `/reboot info` | Show health information |
+| `/reboot doctor` | Run backend & environment diagnostics |
+| `/reboot reload` | Hot-reload all configuration |
 
-Seamlessly integrates with **PlaceholderAPI** (`%redstonereboot_time_until%`, `%redstonereboot_next_restart%`, etc.) and handles **LuckPerms** permissions organically.
+---
+
+## 🔗 PlaceholderAPI (Bukkit Builds)
+
+| Placeholder | Example Output |
+|-------------|----------------|
+| `%redstonereboot_next_restart%` | `2026-04-15 06:00:00 Asia/Kolkata` |
+| `%redstonereboot_time_until%` | `2h 30m` |
+| `%redstonereboot_status%` | `Normal operation` |
+| `%redstonereboot_reason%` | `Scheduled Restart` |
+| `%redstonereboot_tps%` | `19.8` |
+| `%redstonereboot_memory%` | `62.4%` |
+| `%redstonereboot_version%` | `1.3.2` |
+| `%redstonereboot_timezone%` | `Asia/Kolkata` |
+
+> MOTD compatible as of v1.3.2+.
 
 ---
 
@@ -90,6 +116,7 @@ Seamlessly integrates with **PlaceholderAPI** (`%redstonereboot_time_until%`, `%
 - 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
 - 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
 - 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
+- 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 - 🐛 [**Bug Reports & Issues**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
 - 💬 [**Discord Support**](https://discord.gg/GYsTt96ypf)
 

@@ -8,6 +8,9 @@ This folder is the repository-backed wiki for RedstoneReboot. It lives at the re
 - [Installation](Installation.md)
 - [Configuration](Configuration.md)
 - [Backends](Backends.md)
+- [Permissions](Permissions.md)
+- [Placeholders](Placeholders.md)
+- [FAQ](FAQ.md)
 - [Developer API](../docs/api/README.md)
 
 ## Why This Folder Exists

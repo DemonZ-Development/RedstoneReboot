@@ -10,7 +10,7 @@ For Bukkit-family and Folia builds, the main file is:
 plugins/RedstoneReboot/config.yml
 ```
 
-Mod loaders expose equivalent values through their own generated config format.
+Mod loaders (Fabric, Forge, NeoForge) expose equivalent values through `config/redstonereboot.properties`.
 
 ### General
 
@@ -128,7 +128,9 @@ advanced:
   shutdown-delay-ticks: 60
 ```
 
-The current shared runtime actively reads `shutdown-delay-ticks` for plugin shutdown timing. The other keys are reserved for broader runtime behavior and future expansion.
+- `metrics-enabled`: enables anonymous usage statistics via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) (Bukkit builds only). Set to `false` to opt out.
+- `shutdown-delay-ticks`: ticks to wait after saving worlds before executing the shutdown sequence.
+- `async-operations` and `thread-pool-size` are reserved for broader runtime behavior and future expansion.
 
 ## Backend Config
 

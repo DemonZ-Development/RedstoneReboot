@@ -1,9 +1,13 @@
 # Instagram Release Caption
 
-RedstoneReboot `<version>` is ready.
+RedstoneReboot `<version>` is live.
 
-Scheduled restarts, server-health monitoring, emergency restart handling, and multi-platform support are all in one release. Bukkit, Paper, Folia, Fabric, Forge, and NeoForge builds are now aligned, cleaned up, and ready for deployment.
+bStats metrics, PlaceholderAPI MOTD compatibility, live backend hot-reload, and a full documentation overhaul — across Bukkit, Paper, Folia, Fabric, Forge, and NeoForge.
 
 If you run a production Minecraft server and want restart automation that feels deliberate instead of risky, this is the release to grab.
 
-#Minecraft #MinecraftServer #PaperMC #SpigotMC #Folia #FabricMC #Forge #NeoForge #PluginDev #ServerAdmin #DemonZDevelopment
+📊 bstats.org/plugin/bukkit/RedstoneReboot/30751
+💬 discord.gg/GYsTt96ypf
+🔗 github.com/sdemonzdevelopment-spec/RedstoneReboot
+
+#Minecraft #MinecraftServer #PaperMC #SpigotMC #Folia #FabricMC #Forge #NeoForge #PluginDev #ServerAdmin #DemonZDevelopment #bStats #OpenSource

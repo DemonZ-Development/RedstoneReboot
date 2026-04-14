@@ -74,8 +74,8 @@ public interface ServerPlatform {
      */
     default void sendPostponedAlert(String adminDetail) {
         broadcastMessage("\u00A7c\u00A7lScheduled restart postponed. \u00A7eThe server will remain online.");
-        // Log detail using the platform logger if available, otherwise print.
-        System.out.println("[RedstoneReboot] RESTART POSTPONED - Admin Detail: " + adminDetail);
+        java.util.logging.Logger.getLogger("RedstoneReboot")
+            .warning("RESTART POSTPONED - Admin Detail: " + adminDetail);
     }
 
     /**

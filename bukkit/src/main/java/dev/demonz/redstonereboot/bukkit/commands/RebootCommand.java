@@ -188,6 +188,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         msg(sender, "/reboot now [delay] - Restart now", NamedTextColor.GRAY);
         msg(sender, "/reboot schedule <seconds> - Schedule restart", NamedTextColor.GRAY);
         msg(sender, "/reboot cancel - Cancel restart", NamedTextColor.GRAY);
+        msg(sender, "/reboot doctor - Backend diagnostics", NamedTextColor.GRAY);
         msg(sender, "/reboot reload - Reload config", NamedTextColor.GRAY);
     }
 

@@ -11,6 +11,13 @@ import java.util.List;
 
 /**
  * Shared command processing logic for all platforms.
+ * <p>
+ * Implements the handler logic for each subcommand of {@code /reboot}.
+ * Platform-specific command adapters (Bukkit {@code CommandExecutor}, Brigadier)
+ * delegate to this processor after wrapping their command source into a {@link CommandSender}.
+ * </p>
+ *
+ * @since 1.0.0
  */
 public class CommandProcessor {
 

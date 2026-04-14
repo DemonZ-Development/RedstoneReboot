@@ -21,7 +21,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Shared logic for managing scheduled, manual, and emergency restarts.
+ * Central manager for scheduling, counting down, and executing server restarts.
+ * <p>
+ * Handles scheduled restarts, manual restarts, emergency restarts, backend execution
+ * with lockout protection, and player-facing countdown alerts. Thread-safe for
+ * concurrent access from monitoring threads and command handlers.
+ * </p>
+ *
+ * @see RestartReason
+ * @see dev.demonz.redstonereboot.common.backend.BackendRegistry
+ * @since 1.0.0
  */
 public class RestartManager {
 
@@ -61,6 +70,9 @@ public class RestartManager {
         this.nowSupplier = nowSupplier;
     }
 
+    /**
+     * Initialize the restart manager and start the scheduling loop.
+     */
     public void initialize() {
         scheduleRestarts();
         logger.info("RestartManager initialized - Timezone: " + config.getTimezone());
@@ -111,6 +123,18 @@ public class RestartManager {
         }
     }
 
+    /**
+     * Schedule a restart with a countdown delay.
+     * <p>
+     * If a shorter restart is already in progress, this request is ignored.
+     * If the backend is in lockout, the request is rejected.
+     * </p>
+     *
+     * @param delay     countdown in seconds before the restart executes
+     * @param reason    the reason for the restart
+     * @param initiator identifier of who/what triggered the restart
+     * @return {@code true} if the restart was accepted and scheduled
+     */
     public synchronized boolean scheduleRestart(int delay, RestartReason reason, String initiator) {
         int normalizedDelay = Math.max(delay, 0);
         int currentRemaining = getSecondsUntilRestart();

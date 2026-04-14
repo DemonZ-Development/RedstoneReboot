@@ -14,6 +14,9 @@ Repository-backed documentation for installing, configuring, and operating Redst
 - [Installation](Installation.md)
 - [Configuration](Configuration.md)
 - [Backends](Backends.md)
+- [Permissions](Permissions.md)
+- [Placeholders](Placeholders.md)
+- [FAQ](FAQ.md)
 - [Developer API](../docs/api/README.md)
 
 ## What RedstoneReboot Covers
@@ -30,11 +33,17 @@ Repository-backed documentation for installing, configuring, and operating Redst
 |----------|------|----------------|
 | Bukkit / Spigot / Paper / Purpur | Plugin | `plugins/RedstoneReboot/config.yml` |
 | Folia | Plugin | `plugins/RedstoneReboot/config.yml` |
-| Fabric | Mod | loader-generated RedstoneReboot config |
-| Forge | Mod | loader-generated RedstoneReboot config |
-| NeoForge | Mod | loader-generated RedstoneReboot config |
+| Fabric | Mod | `config/redstonereboot.properties` |
+| Forge | Mod | `config/redstonereboot.properties` |
+| NeoForge | Mod | `config/redstonereboot.properties` |
 
 Backend handoff is configured separately through `restart-backends.properties`.
+
+## Integrations
+
+- **PlaceholderAPI**: 8 placeholders for scoreboards, tab lists, and MOTD — see [Placeholders](Placeholders.md)
+- **LuckPerms**: Full permission resolution — see [Permissions](Permissions.md)
+- **bStats**: Anonymous usage metrics at [bstats.org/plugin/bukkit/RedstoneReboot/30751](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 ## Repository Docs
 

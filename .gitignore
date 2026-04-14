@@ -36,3 +36,14 @@ test-servers/
 test_servers/
 tests/runtime/
 tests/servers/
+
+# Secrets
+*.env
+
+# Additional build outputs
+out/
+*.class
+release-artifacts/
+
+# Tool metadata
+.antigravityignore
