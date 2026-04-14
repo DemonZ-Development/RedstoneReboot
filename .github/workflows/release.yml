@@ -8,7 +8,7 @@ on:
       tag:
         description: Release tag to publish
         required: true
-        default: v1.3.2
+        default: v1.3.3
       target:
         description: Branch or commit to release from
         required: true

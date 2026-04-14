@@ -1,0 +1,24 @@
+# Handle line endings automatically for files detected as text
+# and perform LF normalization (normalize to LF in repo).
+* text=auto eol=lf
+
+# Explicitly set text files
+*.java text eol=lf
+*.gradle text eol=lf
+*.properties text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+*.txt text eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf
+
+# Binary files
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

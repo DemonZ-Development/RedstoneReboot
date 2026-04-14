@@ -11,7 +11,6 @@
 [![License](https://img.shields.io/github/license/sdemonzdevelopment-spec/RedstoneReboot)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?logo=openjdk)](https://adoptium.net/)
 [![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
-[![Discord](https://img.shields.io/discord/1234567890?label=Discord&logo=discord&color=5865F2)](https://discord.gg/GYsTt96ypf)
 
 **Bukkit** · **Paper** · **Purpur** · **Folia** · **Fabric** · **Forge** · **NeoForge**
 
@@ -99,10 +98,10 @@ RedstoneReboot integrates with [PlaceholderAPI](https://www.spigotmc.org/resourc
 | `%redstonereboot_reason%` | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.3.2` |
+| `%redstonereboot_version%` | `1.3.3` |
 | `%redstonereboot_timezone%` | `Asia/Kolkata` |
 
-> **MOTD Compatible** — v1.3.2+ includes null-safety fixes for server-list MOTD plugins.
+> **MOTD Compatible** — v1.3.3+ includes null-safety fixes for server-list MOTD plugins.
 
 ---
 
@@ -124,7 +123,7 @@ RedstoneReboot separates the **"when to restart"** from the **"how to restart"**
 
 ## 📖 Documentation
 
-- 📚 [**Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) — Installation, configuration, backends, and troubleshooting
+- 📚 [**Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md) — Installation, configuration, backends, and troubleshooting
 - 🛠️ [**Developer API**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md) — Bukkit API for plugin developers
 - 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) — Server usage statistics
 - 💬 [**Discord**](https://discord.gg/GYsTt96ypf) — Support and community

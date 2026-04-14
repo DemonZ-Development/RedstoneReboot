@@ -51,7 +51,7 @@ It runs a diagnostic that shows:
 
 ### My placeholders aren't working in MOTD
 
-Make sure you are running RedstoneReboot **v1.3.2+**, which includes null-safety fixes for MOTD compatibility. Earlier versions could fail silently when MOTD plugins requested placeholders during server-list pings before the server fully started.
+Make sure you are running RedstoneReboot **v1.3.3+**, which includes null-safety fixes for MOTD compatibility. Earlier versions could fail silently when MOTD plugins requested placeholders during server-list pings before the server fully started.
 
 Also verify that `placeholders.enabled` is set to `true` in `config.yml` and that PlaceholderAPI is installed.
 

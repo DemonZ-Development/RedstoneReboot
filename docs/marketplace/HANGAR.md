@@ -113,7 +113,7 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ## 🔗 Quick Links
 
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
+- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md)
 - 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
 - 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
 - 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)

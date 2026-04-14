@@ -104,16 +104,16 @@ Choose the file that matches your server platform:
 | `%redstonereboot_reason%` | `Scheduled Restart` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.3.2` |
+| `%redstonereboot_version%` | `1.3.3` |
 | `%redstonereboot_timezone%` | `Asia/Kolkata` |
 
-> MOTD compatible as of v1.3.2+.
+> MOTD compatible as of v1.3.3+.
 
 ---
 
 ## 🔗 Quick Links
 
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
+- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md)
 - 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
 - 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
 - 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)

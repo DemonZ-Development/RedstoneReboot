@@ -78,7 +78,7 @@ This page provides builds for [B]Bukkit-family servers and Folia[/B]. [I](Fabric
 [CODE]%redstonereboot_version%[/CODE] — Plugin version
 [CODE]%redstonereboot_timezone%[/CODE] — Configured timezone
 
-[I]Requires PlaceholderAPI. MOTD compatible as of v1.3.2+.[/I]
+[I]Requires PlaceholderAPI. MOTD compatible as of v1.3.3+.[/I]
 
 [HR][/HR]
 
@@ -101,7 +101,7 @@ Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE
 [SIZE=5][B]🔗 Helpful Links[/B][/SIZE]
 
 [LIST]
-[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki'][B]Documentation Wiki[/B][/URL]
+[*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/wiki/Home.md'][B]Documentation Wiki[/B][/URL]
 [*] [URL='https://github.com/sdemonzdevelopment-spec/RedstoneReboot'][B]GitHub Repository[/B][/URL]
 [*] [URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751'][B]bStats Metrics[/B][/URL]
 [*] [URL='https://discord.gg/GYsTt96ypf'][B]Discord Support[/B][/URL]

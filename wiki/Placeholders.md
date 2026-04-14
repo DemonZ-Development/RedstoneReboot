@@ -17,7 +17,7 @@ RedstoneReboot provides a PlaceholderAPI expansion for Bukkit-family and Folia s
 | `%redstonereboot_reason%` | Reason for the current restart | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | Last recorded server TPS | `19.8` |
 | `%redstonereboot_memory%` | Current memory usage percentage | `62.4%` |
-| `%redstonereboot_version%` | Installed RedstoneReboot version | `1.3.2` |
+| `%redstonereboot_version%` | Installed RedstoneReboot version | `1.3.3` |
 | `%redstonereboot_timezone%` | Configured timezone | `Asia/Kolkata` |
 
 ## Usage Examples
@@ -39,7 +39,7 @@ RedstoneReboot provides a PlaceholderAPI expansion for Bukkit-family and Folia s
 &7Next restart in %redstonereboot_time_until%
 ```
 
-> **Note:** MOTD compatibility requires RedstoneReboot v1.3.2+ which includes null-safety fixes for server-list pings.
+> **Note:** MOTD compatibility requires RedstoneReboot v1.3.3+ which includes null-safety fixes for server-list pings.
 
 ## Notes
 
