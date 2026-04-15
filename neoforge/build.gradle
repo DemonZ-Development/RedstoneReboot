@@ -28,11 +28,7 @@ dependencies {
 
 jar {
     archiveBaseName = 'RedstoneReboot-NeoForge'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+    from project(':common').sourceSets.main.output
 }
 
 processResources {
