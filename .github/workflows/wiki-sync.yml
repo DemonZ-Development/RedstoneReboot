@@ -1,0 +1,48 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches: [main]
+    paths: ['wiki/**']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wiki-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v4
+        with:
+          path: main
+
+      - name: Stage wiki content
+        run: |
+          mkdir -p staging
+          cp -r main/wiki/*.md staging/
+
+      - name: Checkout wiki repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: wiki
+
+      - name: Sync files
+        run: |
+          cp staging/*.md wiki/
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to sync"
+            exit 0
+          fi
+          git commit -m "Sync wiki from main repo (${{ github.sha }})"
+          git push
