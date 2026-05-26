@@ -14,7 +14,7 @@ jar {
 
     from {
         configurations.runtimeClasspath.filter { 
-            it.name.contains('adventure') || it.name.contains('kyori') || it.name.contains('common') || it.name.contains('examination') || it.name.contains('bstats')
+            it.name.contains('adventure') || it.name.contains('kyori') || it.name.contains('common') || it.name.contains('examination') || it.name.contains('bstats') || it.name.contains('json-simple')
         }.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

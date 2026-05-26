@@ -55,7 +55,7 @@ public class BackendConfig {
         properties.setProperty("ptero-id", "");
         
         properties.setProperty("systemd-service", "minecraft");
-        properties.setProperty("localscript-file", "start.sh");
+        properties.setProperty("localscript-file", "");
 
         try (OutputStream out = Files.newOutputStream(configPath)) {
             properties.store(out, "RedstoneReboot Backend Configuration");
@@ -67,7 +67,12 @@ public class BackendConfig {
     }
 
     public int getLockoutDuration() {
-        return Integer.parseInt(properties.getProperty("lockout-duration-seconds", "300"));
+        try {
+            return Integer.parseInt(properties.getProperty("lockout-duration-seconds", "300").trim());
+        } catch (NumberFormatException exception) {
+            logger.warning("Invalid lockout-duration-seconds in properties. Defaulting to 300 seconds.");
+            return 300;
+        }
     }
 
     public String getProperty(String key) {
@@ -75,7 +80,13 @@ public class BackendConfig {
         if (val != null && val.startsWith("${env.") && val.endsWith("}")) {
             String envVar = val.substring(6, val.length() - 1);
             String envVal = System.getenv(envVar);
-            return envVal != null ? envVal : "";
+            // Only use env var value if it is set and non-empty;
+            // otherwise fall back to the original literal string so that the
+            // user's explicit config value is not silently blanked.
+            if (envVal != null && !envVal.isEmpty()) {
+                return envVal;
+            }
+            return val;
         }
         return val != null ? val : "";
     }

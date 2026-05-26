@@ -3,6 +3,7 @@ package dev.demonz.redstonereboot.bukkit.utils;
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
 import dev.demonz.redstonereboot.common.manager.RestartReason;
 import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
+import java.util.Locale;
 
 /**
  * Real-time TPS and memory monitoring with automatic restart triggers.
@@ -11,13 +12,13 @@ public class ServerLoadMonitor {
 
     private final RedstoneRebootPlugin plugin;
 
-    private ScheduledTaskHandle monitorTask;
-    private double lastTPS = 20.0D;
-    private double lastMemoryUsage;
-    private int consecutiveLowTPS;
-    private int consecutiveHighMemory;
-    private volatile boolean emergencyTpsTriggered;
-    private volatile boolean emergencyMemoryTriggered;
+    private volatile ScheduledTaskHandle monitorTask;
+    private volatile double lastTPS = 20.0D;
+    private volatile double lastMemoryUsage;
+    private volatile int consecutiveLowTPS;
+    private volatile int consecutiveHighMemory;
+    private final java.util.concurrent.atomic.AtomicBoolean emergencyTpsTriggered = new java.util.concurrent.atomic.AtomicBoolean(false);
+    private final java.util.concurrent.atomic.AtomicBoolean emergencyMemoryTriggered = new java.util.concurrent.atomic.AtomicBoolean(false);
 
     public ServerLoadMonitor(RedstoneRebootPlugin plugin) {
         this.plugin = plugin;
@@ -55,7 +56,8 @@ public class ServerLoadMonitor {
             return;
         }
 
-        if (plugin.getRestartManager().isRestartInProgress()) {
+        dev.demonz.redstonereboot.common.manager.RestartManager rm = plugin.getRestartManager();
+        if (rm == null || rm.isRestartInProgress()) {
             consecutiveLowTPS = 0;
             return;
         }
@@ -78,7 +80,8 @@ public class ServerLoadMonitor {
             return;
         }
 
-        if (plugin.getRestartManager().isRestartInProgress()) {
+        dev.demonz.redstonereboot.common.manager.RestartManager rm = plugin.getRestartManager();
+        if (rm == null || rm.isRestartInProgress()) {
             consecutiveHighMemory = 0;
             return;
         }
@@ -97,42 +100,43 @@ public class ServerLoadMonitor {
 
     private void checkEmergency() {
         if (!plugin.getConfigManager().isEmergencyRestartEnabled()) {
-            emergencyTpsTriggered = false;
-            emergencyMemoryTriggered = false;
+            emergencyTpsTriggered.set(false);
+            emergencyMemoryTriggered.set(false);
             return;
         }
 
-        // Emergency conditions are allowed to shorten or replace an existing countdown.
         boolean triggered = false;
 
         if (lastTPS < plugin.getConfigManager().getEmergencyTpsThreshold()) {
-            if (!emergencyTpsTriggered) {
-                plugin.sendEmergencyAlert("Critical TPS: " + String.format("%.1f", lastTPS));
+            if (emergencyTpsTriggered.compareAndSet(false, true)) {
+                plugin.sendEmergencyAlert("Critical TPS: " + String.format(Locale.ROOT, "%.1f", lastTPS));
                 triggerRestart(RestartReason.EMERGENCY_TPS, "EmergencyMonitor");
-                emergencyTpsTriggered = true;
                 triggered = true;
             }
         } else {
-            emergencyTpsTriggered = false;
+            emergencyTpsTriggered.set(false);
         }
 
         if (!triggered && lastMemoryUsage > plugin.getConfigManager().getEmergencyMemoryThreshold()) {
-            if (!emergencyMemoryTriggered) {
-                plugin.sendEmergencyAlert("Critical Memory: " + String.format("%.1f%%", lastMemoryUsage));
+            if (emergencyMemoryTriggered.compareAndSet(false, true)) {
+                plugin.sendEmergencyAlert("Critical Memory: " + String.format(Locale.ROOT, "%.1f%%", lastMemoryUsage));
                 triggerRestart(RestartReason.EMERGENCY_MEMORY, "EmergencyMonitor");
-                emergencyMemoryTriggered = true;
             }
         } else if (!triggered) {
-            emergencyMemoryTriggered = false;
+            emergencyMemoryTriggered.set(false);
         }
     }
 
     private void triggerRestart(RestartReason reason, String initiator) {
         int delay = plugin.getConfigManager().getEmergencyDelay();
+        dev.demonz.redstonereboot.common.manager.RestartManager rm = plugin.getRestartManager();
+        if (rm == null) {
+            return;
+        }
         if (delay > 0) {
-            plugin.getRestartManager().scheduleRestart(delay, reason, initiator);
+            rm.scheduleRestart(delay, reason, initiator);
         } else {
-            plugin.getRestartManager().performImmediateRestart(reason, initiator);
+            rm.performImmediateRestart(reason, initiator);
         }
     }
 

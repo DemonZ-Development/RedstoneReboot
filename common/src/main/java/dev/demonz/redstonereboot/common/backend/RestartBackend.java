@@ -34,6 +34,12 @@ public interface RestartBackend {
     boolean isControllerOwned();
 
     /**
+     * Release any resources held by this backend (e.g., HTTP clients, connections).
+     * Called when the backend is replaced during a reload.
+     */
+    default void cleanup() {}
+
+    /**
      * Verification states for the 'doctor' diagnostic tool.
      */
     enum BackendState {

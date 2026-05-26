@@ -34,7 +34,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     private static RedstoneRebootPlugin instance;
 
     private BukkitAudiences adventure;
-    private PlatformTaskScheduler taskScheduler;
+    private volatile PlatformTaskScheduler taskScheduler;
     private RedstoneRebootCore core;
     private ConfigManager configManager;
     private AlertManager alertManager;
@@ -60,10 +60,10 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
             registerCommand();
             getServer().getPluginManager().registerEvents(new ServerEventListener(this), this);
 
+            core.onEnable();
             restartMonitoring();
             hookPlaceholderAPI();
             initializeMetrics();
-            core.onEnable();
             logIntegrationStatus();
         } catch (Exception exception) {
             getLogger().log(Level.SEVERE, "Failed to enable RedstoneReboot.", exception);
@@ -91,15 +91,26 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     }
 
     public void reloadPluginState() {
-        configManager.reloadConfig();
-        stopMonitoring();
-        unhookPlaceholderAPI();
+        try {
+            configManager.reloadConfig();
+            stopMonitoring();
+            unhookPlaceholderAPI();
 
-        core.onDisable();
-        core.onEnable();
-        
-        restartMonitoring();
-        hookPlaceholderAPI();
+            core.onDisable();
+            core.onEnable();
+
+            restartMonitoring();
+            hookPlaceholderAPI();
+        } catch (Exception exception) {
+            getLogger().log(Level.SEVERE, "Reload failed — attempting to restore previous state.", exception);
+            if (core != null) {
+                try { core.onDisable(); } catch (Exception e) { getLogger().log(Level.WARNING, "Recovery: core.onDisable() failed", e); }
+                try { core.onEnable(); } catch (Exception e) { getLogger().log(Level.WARNING, "Recovery: core.onEnable() failed", e); }
+            }
+            try { restartMonitoring(); } catch (Exception e) { getLogger().log(Level.WARNING, "Recovery: restartMonitoring() failed", e); }
+            try { hookPlaceholderAPI(); } catch (Exception e) { getLogger().log(Level.WARNING, "Recovery: hookPlaceholderAPI() failed", e); }
+            throw exception;
+        }
     }
 
     @Override
@@ -189,8 +200,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
     @Override
     public String getPlatformName() {
-        String brand = BukkitSchedulerFactory.isFoliaEnvironment() ? "Folia" : Bukkit.getName();
-        return brand + " (Scheduler Adapter)";
+        return BukkitSchedulerFactory.isFoliaEnvironment() ? "Folia" : Bukkit.getName();
     }
 
     @Override
@@ -220,8 +230,8 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     }
 
     private void restartMonitoring() {
+        stopMonitoring();
         if (!configManager.isMonitoringEnabled() && !configManager.isEmergencyRestartEnabled()) {
-            serverLoadMonitor = null;
             return;
         }
 
@@ -319,7 +329,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     }
 
     public RestartManager getRestartManager() {
-        return core.getRestartManager();
+        return core != null ? core.getRestartManager() : null;
     }
 
     public AlertManager getAlertManager() {

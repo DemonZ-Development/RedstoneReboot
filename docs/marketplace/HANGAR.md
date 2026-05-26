@@ -64,10 +64,12 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-## 📋 Supported Versions
-
-- **Paper-family servers**: `1.9` through `1.21.1` *(Java 17+ for modern, Java 8+ for legacy).*
-- **Folia**: `1.20+` *(Java 17+).*
+### 🌍 Platform Compatibility
+- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 1.21.x+
+- **Folia**: 1.20.1+
+- **Fabric**: 1.20.1+
+- **Forge**: 1.20.4+
+- **NeoForge**: 1.20.4+
 
 ---
 

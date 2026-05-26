@@ -24,6 +24,16 @@ public interface PlatformTaskScheduler {
     ScheduledTaskHandle runRepeating(Runnable task, long initialDelayTicks, long periodTicks);
 
     /**
+     * Schedule a task to run repeatedly at a fixed interval asynchronously (off the server tick thread).
+     *
+     * @param task              the runnable to execute
+     * @param initialDelayTicks initial delay before the first execution, in server ticks
+     * @param periodTicks       interval between subsequent executions, in server ticks
+     * @return a handle that can cancel the scheduled task
+     */
+    ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks);
+
+    /**
      * Schedule a task to run once after a delay.
      *
      * @param task       the runnable to execute
@@ -33,9 +43,19 @@ public interface PlatformTaskScheduler {
     ScheduledTaskHandle runLater(Runnable task, long delayTicks);
 
     /**
+     * Schedule a task to run once after a delay asynchronously (off the server tick thread).
+     *
+     * @param task       the runnable to execute
+     * @param delayTicks delay before execution, in server ticks
+     * @return a handle that can cancel the scheduled task
+     */
+    ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks);
+
+    /**
      * Check whether the current runtime is a Folia environment.
      *
      * @return {@code true} if running on a Folia-based server
      */
     boolean isFolia();
 }
+

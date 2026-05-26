@@ -26,12 +26,13 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
     private final JavaPlatformScheduler scheduler;
 
     public RedstoneRebootNeoForgeMod() {
-        super(Logger.getLogger("RedstoneReboot/NeoForge"), "NeoForge", "1.21.1");
+        super(Logger.getLogger("RedstoneReboot/NeoForge"), "NeoForge", resolveMinecraftVersion());
         registerShutdownHook("RedstoneReboot-NeoForge-Shutdown");
 
         scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
-        Path configPath = Path.of("config", "redstonereboot.properties");
-        startCore(scheduler, loadSimpleConfig(configPath), Path.of("config"));
+        Path configDir = net.neoforged.fml.loading.FMLPaths.CONFIGDIR.get();
+        Path configPath = configDir.resolve("redstonereboot.properties");
+        startCore(scheduler, loadSimpleConfig(configPath), configDir);
 
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(this::onServerStopping);
@@ -143,10 +144,23 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
 
         @Override
         public boolean hasPermission(String permission) {
+            if (permission == null) {
+                return false;
+            }
+            if (permission.equals("redstonereboot.status") || permission.equals("redstonereboot.use") || permission.equals("redstonereboot.notify")) {
+                return true;
+            }
             if (mod.core.getConfig().isUseOpAsAdminEnabled() && source.hasPermission(4)) {
                 return true;
             }
             return source.hasPermission(mod.core.getConfig().getDefaultPermissionLevel());
         }
+    }
+
+    private static String resolveMinecraftVersion() {
+        return net.neoforged.fml.ModList.get()
+            .getModContainerById("minecraft")
+            .map(container -> container.getModInfo().getVersion().toString())
+            .orElse("Unknown");
     }
 }

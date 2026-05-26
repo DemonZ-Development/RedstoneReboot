@@ -28,8 +28,29 @@ final class BukkitTaskScheduler implements PlatformTaskScheduler {
     }
 
     @Override
+    public ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks) {
+        BukkitTask scheduled = Bukkit.getScheduler().runTaskTimerAsynchronously(
+            plugin,
+            () -> safelyRun(task),
+            initialDelayTicks,
+            periodTicks
+        );
+        return scheduled::cancel;
+    }
+
+    @Override
     public ScheduledTaskHandle runLater(Runnable task, long delayTicks) {
         BukkitTask scheduled = Bukkit.getScheduler().runTaskLater(plugin, () -> safelyRun(task), delayTicks);
+        return scheduled::cancel;
+    }
+
+    @Override
+    public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
+        BukkitTask scheduled = Bukkit.getScheduler().runTaskLaterAsynchronously(
+            plugin,
+            () -> safelyRun(task),
+            delayTicks
+        );
         return scheduled::cancel;
     }
 

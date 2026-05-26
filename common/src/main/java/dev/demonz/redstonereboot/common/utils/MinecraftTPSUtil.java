@@ -9,6 +9,7 @@ import java.util.logging.Logger;
  */
 public final class MinecraftTPSUtil {
 
+    private static final Object LOCK = new Object();
     private static Field tickTimesField;
     private static boolean reflectionFailed = false;
 
@@ -20,34 +21,38 @@ public final class MinecraftTPSUtil {
      * @return Calculated TPS (0.0 to 20.0)
      */
     public static double calculateTPS(Object server, Logger logger) {
-        if (server == null || reflectionFailed) return 20.0;
+        if (server == null) return 20.0;
 
-        try {
-            if (tickTimesField == null) {
-                tickTimesField = findTickTimesField(server.getClass());
+        synchronized (LOCK) {
+            if (reflectionFailed) return 20.0;
+
+            try {
                 if (tickTimesField == null) {
-                    reflectionFailed = true;
-                    logger.warning("Could not find tickTimes field on " + server.getClass().getName());
-                    return 20.0;
+                    tickTimesField = findTickTimesField(server.getClass());
+                    if (tickTimesField == null) {
+                        reflectionFailed = true;
+                        logger.warning("Could not find tickTimes field on " + server.getClass().getName());
+                        return 20.0;
+                    }
+                    tickTimesField.setAccessible(true);
                 }
-                tickTimesField.setAccessible(true);
+
+                long[] times = (long[]) tickTimesField.get(server);
+                if (times == null || times.length == 0) return 20.0;
+
+                long sum = 0;
+                for (long t : times) {
+                    sum += t;
+                }
+
+                double avgNanos = (double) sum / times.length;
+                return Math.min(20.0, 1000000000.0 / avgNanos);
+
+            } catch (Exception e) {
+                reflectionFailed = true;
+                logger.log(Level.WARNING, "Failed to extract TPS via reflection", e);
+                return 20.0;
             }
-
-            long[] times = (long[]) tickTimesField.get(server);
-            if (times == null || times.length == 0) return 20.0;
-
-            long sum = 0;
-            for (long t : times) {
-                sum += t;
-            }
-
-            double avgNanos = (double) sum / times.length;
-            return Math.min(20.0, 1000000000.0 / avgNanos);
-
-        } catch (Exception e) {
-            reflectionFailed = true;
-            logger.log(Level.WARNING, "Failed to extract TPS via reflection", e);
-            return 20.0;
         }
     }
 

@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Main command handler for /reboot.
@@ -142,17 +143,26 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         }
 
         msg(sender, "=== Server Performance ===", NamedTextColor.GOLD);
+        
+        double tps;
+        double memoryUsage;
+        boolean healthy;
+        
         if (plugin.getServerLoadMonitor() != null) {
-            msg(sender, String.format("TPS: %.1f", plugin.getServerLoadMonitor().getLastTPS()), NamedTextColor.YELLOW);
-            msg(sender,
-                String.format("Memory: %.1f%%", plugin.getServerLoadMonitor().getLastMemoryUsage()),
-                NamedTextColor.YELLOW);
-            msg(sender,
-                "Health: " + (plugin.getServerLoadMonitor().isHealthy() ? "HEALTHY" : "POOR"),
-                plugin.getServerLoadMonitor().isHealthy() ? NamedTextColor.GREEN : NamedTextColor.RED);
+            tps = plugin.getServerLoadMonitor().getLastTPS();
+            memoryUsage = plugin.getServerLoadMonitor().getLastMemoryUsage();
+            healthy = plugin.getServerLoadMonitor().isHealthy();
         } else {
-            msg(sender, "Monitoring: DISABLED", NamedTextColor.GRAY);
+            tps = plugin.getTPS();
+            Runtime runtime = Runtime.getRuntime();
+            memoryUsage = (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
+            healthy = tps >= plugin.getConfigManager().getTpsThreshold() 
+                   && memoryUsage <= plugin.getConfigManager().getMemoryThreshold();
         }
+
+        msg(sender, String.format(Locale.ROOT, "TPS: %.1f", tps), NamedTextColor.YELLOW);
+        msg(sender, String.format(Locale.ROOT, "Memory: %.1f%%", memoryUsage), NamedTextColor.YELLOW);
+        msg(sender, "Health: " + (healthy ? "HEALTHY" : "POOR"), healthy ? NamedTextColor.GREEN : NamedTextColor.RED);
         return true;
     }
 
@@ -172,7 +182,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleDoctor(CommandSender sender) {
-        if (sender instanceof Player player && !player.hasPermission("redstonereboot.doctor")) {
+        if (sender instanceof Player player && !plugin.getPermissionManager().hasPermission(player, "redstonereboot.doctor") && !plugin.getPermissionManager().hasAdminPermission(player)) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -213,15 +223,13 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
 
         @Override
         public void sendMessage(String message) {
-            Component prefix = LEGACY_SERIALIZER.deserialize(plugin.getConfigManager().getPrefix());
             Component content = LEGACY_SERIALIZER.deserialize(message);
-            Component fullMessage = prefix.append(Component.space()).append(content);
             if (plugin.getAdventure() != null) {
-                plugin.getAdventure().sender(sender).sendMessage(fullMessage);
+                plugin.getAdventure().sender(sender).sendMessage(content);
                 return;
             }
 
-            sender.sendMessage(LEGACY_SERIALIZER.serialize(fullMessage));
+            sender.sendMessage(LEGACY_SERIALIZER.serialize(content));
         }
 
         @Override

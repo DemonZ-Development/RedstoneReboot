@@ -21,7 +21,7 @@ public class BackendRegistry {
 
     private final Logger logger;
     private final BackendConfig config;
-    private RestartBackend activeBackend;
+    private volatile RestartBackend activeBackend;
 
     public BackendRegistry(Logger logger, BackendConfig config) {
         this.logger = logger;
@@ -39,6 +39,11 @@ public class BackendRegistry {
         config.load();
         String type = config.getActiveBackend();
 
+        // Clean up any previous backend instance before replacing
+        if (activeBackend != null) {
+            activeBackend.cleanup();
+        }
+
         switch (type) {
             case "PTERODACTYL":
                 activeBackend = new PterodactylBackend(
@@ -55,7 +60,7 @@ public class BackendRegistry {
                 activeBackend = new DockerBackend(logger);
                 break;
             case "LOCALSCRIPT":
-                activeBackend = new LocalScriptBackend(logger);
+                activeBackend = new LocalScriptBackend(logger, config.getProperty("localscript-file"));
                 break;
             default:
                 activeBackend = new ShutdownOnlyBackend(logger);

@@ -1,7 +1,21 @@
-# RedstoneReboot v1.3.3 Configuration
+# RedstoneReboot v1.4.0 Configuration
 # Advanced multi-platform server restart engine.
 # GitHub: https://github.com/sdemonzdevelopment-spec/RedstoneReboot
 # Wiki: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki
+#
+# === Migration Guide ===
+# v1.3.3 -> v1.4.0:
+#   - Removed: permissions.luckperms.default-permission (unused)
+#   - Removed: permissions.luckperms.admin-permission (unused)
+#   - Removed: advanced.async-operations (unused)
+#   - Removed: advanced.thread-pool-size (unused)
+# No action required — stale keys are ignored by the parser.
+#
+# === Getting Started ===
+# Set up your restart schedule under `scheduled-restarts:`.
+# Configure a backend (Pterodactyl, Systemd, Docker, or LocalScript) via
+# the `restart-backends.properties` file in the plugin data folder.
+# Tutorial: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki/Getting-Started
 
 general:
   plugin-prefix: "§8[§cRedstone§8] §aReboot"
@@ -15,7 +29,7 @@ scheduled-restarts:
     - "12:00"
     - "18:00"
     - "00:00"
-  timezone: "Asia/Kolkata"
+  timezone: "Europe/London"
   days:
     - "ALL"
   warning-time: 300
@@ -57,8 +71,6 @@ emergency:
 permissions:
   luckperms:
     integration-enabled: true
-    default-permission: "redstonereboot.use"
-    admin-permission: "redstonereboot.admin"
   fallback:
     use-op-as-admin: true
     default-level: 2 # Default permission level for mod-platform commands.
@@ -67,8 +79,6 @@ placeholders:
   enabled: true
 
 advanced:
-  async-operations: true
-  thread-pool-size: 2
   metrics-enabled: true
   shutdown-delay-ticks: 60
 

@@ -41,9 +41,30 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
     }
 
     @Override
+    public ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks) {
+        ScheduledFuture<?> future = executor.scheduleAtFixedRate(
+            () -> runSafely(task),
+            initialDelayTicks * 50,
+            periodTicks * 50,
+            TimeUnit.MILLISECONDS
+        );
+        return () -> future.cancel(false);
+    }
+
+    @Override
     public ScheduledTaskHandle runLater(Runnable task, long delayTicks) {
         ScheduledFuture<?> future = executor.schedule(
             () -> dispatchSafely(task),
+            delayTicks * 50,
+            TimeUnit.MILLISECONDS
+        );
+        return () -> future.cancel(false);
+    }
+
+    @Override
+    public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
+        ScheduledFuture<?> future = executor.schedule(
+            () -> runSafely(task),
             delayTicks * 50,
             TimeUnit.MILLISECONDS
         );

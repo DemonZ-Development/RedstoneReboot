@@ -6,11 +6,11 @@ Use the build that matches your server platform. Do not mix Bukkit, Folia, Fabri
 
 | Platform | Artifact | Minecraft | Runtime Java |
 |----------|----------|-----------|--------------|
-| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | `1.9` to `1.21.1` | Java `8+` on legacy, Java `17+` on modern |
-| Folia | `RedstoneReboot-Folia-<version>.jar` | `1.20+` | Java `17+` |
-| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1+` | Java `17+` |
-| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4+` | Java `17+` |
-| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.20.4+` | Java `17+` |
+| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | `1.9` to `1.21.x+` | Java `8+` on legacy, Java `17/21` on modern |
+| Folia | `RedstoneReboot-Folia-<version>.jar` | `1.20.1+` | Java `17/21` |
+| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1+` | Java `17/21` |
+| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4+` | Java `17/21` |
+| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.20.4+` | Java `17/21` |
 
 ## Bukkit, Spigot, Paper, and Similar Servers
 

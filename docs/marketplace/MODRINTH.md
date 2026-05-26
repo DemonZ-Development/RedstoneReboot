@@ -8,7 +8,7 @@
 
 # ⚡ RedstoneReboot
 
-**The Most Advanced Multi-Platform Minecraft Server Restart Engine**
+**A Multi-Platform Minecraft Server Restart Engine**
 
 [![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
@@ -31,13 +31,22 @@ From a single survival server to a fleet behind Pterodactyl — it delivers reli
 - 🔌 **Backend Handoff** — Delegate to Pterodactyl, Systemd, Docker, or local wrapper scripts
 - 🔄 **Hot-Reload** — Change backend config and `/reboot reload` — no full server restart needed
 - 🧩 **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit builds)
-- 📈 **bStats Metrics** — Anonymous usage telemetry ([view stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
+- 📈 **bStats Metrics** — Anonymous usage telemetry ([view live stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
 
 ---
 
 ## 📦 File Selection
 
 Choose the file that matches your server platform:
+
+### 🌍 Platform Compatibility
+- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 1.21.x+
+- **Folia**: 1.20.1+
+- **Fabric**: 1.20.1+
+- **Forge**: 1.20.4+
+- **NeoForge**: 1.20.4+
+
+---
 
 | 🖥️ Platform | Distribution Type | 📄 File |
 |-----------|------------------|------|
@@ -98,14 +107,14 @@ Choose the file that matches your server platform:
 
 | Placeholder | Example Output |
 |-------------|----------------|
-| `%redstonereboot_next_restart%` | `2026-04-15 06:00:00 Asia/Kolkata` |
+| `%redstonereboot_next_restart%` | `2026-04-15 06:00:00 Europe/London` |
 | `%redstonereboot_time_until%` | `2h 30m` |
 | `%redstonereboot_status%` | `Normal operation` |
 | `%redstonereboot_reason%` | `Scheduled Restart` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.3.3` |
-| `%redstonereboot_timezone%` | `Asia/Kolkata` |
+| `%redstonereboot_version%` | `1.4.0` |
+| `%redstonereboot_timezone%` | `Europe/London` |
 
 > MOTD compatible as of v1.3.3+.
 
@@ -124,6 +133,10 @@ Choose the file that matches your server platform:
 
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="128"/>
+<br>
 Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
+<br>
+<i>Premium Minecraft infrastructure, engineered for scale.</i>
 
 </div>

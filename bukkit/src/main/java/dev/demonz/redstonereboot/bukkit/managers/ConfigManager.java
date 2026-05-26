@@ -45,7 +45,7 @@ public class ConfigManager implements PlatformConfig {
         try {
             ZoneId.of(getTimezone());
         } catch (Exception exception) {
-            throw new RuntimeException("Invalid timezone '" + getTimezone() + "'. Use a valid ZoneId like 'Asia/Kolkata' or 'UTC'.");
+            throw new RuntimeException("Invalid timezone '" + getTimezone() + "'. Use a valid ZoneId like 'Europe/London' or 'UTC'.");
         }
 
         for (String time : getScheduledTimes()) {
@@ -86,18 +86,33 @@ public class ConfigManager implements PlatformConfig {
         if (getEmergencyDelay() < 0) {
             throw new RuntimeException("Emergency delay must not be negative.");
         }
+        int permLevel = getDefaultPermissionLevel();
+        if (permLevel < 0 || permLevel > 4) {
+            throw new RuntimeException("default-permission-level must be 0-4 (got " + permLevel + ").");
+        }
     }
 
     public void reloadConfig() {
         plugin.reloadConfig();
-        config = plugin.getConfig();
+        org.bukkit.configuration.file.FileConfiguration newConfig = plugin.getConfig();
         if (isStrictValidationEnabled()) {
-            validateConfiguration();
+            // Validate against the new config before swapping the reference.
+            // If validation throws, the old config remains active.
+            org.bukkit.configuration.file.FileConfiguration oldConfig = this.config;
+            this.config = newConfig;
+            try {
+                validateConfiguration();
+            } catch (RuntimeException e) {
+                this.config = oldConfig;
+                throw e;
+            }
+        } else {
+            config = newConfig;
         }
     }
 
     public int getConfigVersion() {
-        return config.getInt("config-version", 1);
+        return config.getInt("config-version", CURRENT_CONFIG_VERSION);
     }
 
     public String getPrefix() {
@@ -113,7 +128,7 @@ public class ConfigManager implements PlatformConfig {
     }
 
     public boolean isScheduledRestartsEnabled() {
-        return config.getBoolean("scheduled-restarts.enabled", false);
+        return config.getBoolean("scheduled-restarts.enabled", true);
     }
 
     public List<String> getScheduledTimes() {
@@ -191,7 +206,7 @@ public class ConfigManager implements PlatformConfig {
     }
 
     public boolean isMonitoringEnabled() {
-        return config.getBoolean("monitoring.enabled", false);
+        return config.getBoolean("monitoring.enabled", true);
     }
 
     public double getTpsThreshold() {
@@ -211,7 +226,7 @@ public class ConfigManager implements PlatformConfig {
     }
 
     public boolean isEmergencyRestartEnabled() {
-        return config.getBoolean("emergency.enabled", false);
+        return config.getBoolean("emergency.enabled", true);
     }
 
     public double getEmergencyTpsThreshold() {

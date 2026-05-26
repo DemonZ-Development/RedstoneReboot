@@ -22,6 +22,7 @@ public class AlertManager {
     private final RedstoneRebootPlugin plugin;
     private final ConfigManager configManager;
     private final PermissionManager permissionManager;
+    private volatile boolean soundWarningLogged = false;
 
     public AlertManager(RedstoneRebootPlugin plugin) {
         this.plugin = plugin;
@@ -42,17 +43,19 @@ public class AlertManager {
 
         if (configManager.isChatAlertsEnabled()) {
             Component message = LEGACY_SERIALIZER.deserialize(
-                configManager.getChatAlertFormat()
-                    .replace("{time}", timeString)
-                    .replace("{reason}", reason.getDisplayName())
+                translateAlternateColorCodes(
+                    configManager.getChatAlertFormat()
+                        .replace("{time}", timeString)
+                        .replace("{reason}", reason.getDisplayName())
+                )
             );
             sendChat(recipients, message);
         }
 
         if (configManager.isTitleAlertsEnabled()) {
             Title title = Title.title(
-                LEGACY_SERIALIZER.deserialize(configManager.getTitleMainText()),
-                LEGACY_SERIALIZER.deserialize(configManager.getTitleSubText().replace("{time}", timeString)),
+                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(configManager.getTitleMainText())),
+                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(configManager.getTitleSubText().replace("{time}", timeString))),
                 Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(2000), Duration.ofMillis(500))
             );
             showTitle(recipients, title);
@@ -60,9 +63,11 @@ public class AlertManager {
 
         if (configManager.isActionBarAlertsEnabled()) {
             Component actionBar = LEGACY_SERIALIZER.deserialize(
-                configManager.getActionBarFormat()
-                    .replace("{time}", timeString)
-                    .replace("{reason}", reason.getDisplayName())
+                translateAlternateColorCodes(
+                    configManager.getActionBarFormat()
+                        .replace("{time}", timeString)
+                        .replace("{reason}", reason.getDisplayName())
+                )
             );
             sendActionBar(recipients, actionBar);
         }
@@ -81,7 +86,7 @@ public class AlertManager {
         }
 
         Component message = LEGACY_SERIALIZER.deserialize(
-            configManager.getPrefix() + " §cServer is restarting NOW! Reason: §e" + reason.getDisplayName()
+            translateAlternateColorCodes(configManager.getPrefix() + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName())
         );
         sendChat(recipients, message);
         if (configManager.isActionBarAlertsEnabled()) {
@@ -101,7 +106,7 @@ public class AlertManager {
         }
 
         Component message = LEGACY_SERIALIZER.deserialize(
-            configManager.getPrefix() + " §aScheduled restart has been CANCELLED!"
+            translateAlternateColorCodes(configManager.getPrefix() + " &aScheduled restart has been CANCELLED!")
         );
         sendChat(recipients, message);
         if (configManager.isActionBarAlertsEnabled()) {
@@ -120,7 +125,7 @@ public class AlertManager {
         }
 
         Component message = LEGACY_SERIALIZER.deserialize(
-            configManager.getPrefix() + " §4§lEMERGENCY RESTART§r§c - " + reason
+            translateAlternateColorCodes(configManager.getPrefix() + " &4&lEMERGENCY RESTART&r&c - " + reason)
         );
         sendChat(recipients, message);
         if (configManager.isActionBarAlertsEnabled()) {
@@ -147,20 +152,20 @@ public class AlertManager {
         }
 
         if (configManager.isChatAlertsEnabled()) {
-            sendChat(recipients, LEGACY_SERIALIZER.deserialize(message));
+            sendChat(recipients, LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(message)));
         }
 
         if (configManager.isTitleAlertsEnabled()) {
             Title configuredTitle = Title.title(
-                LEGACY_SERIALIZER.deserialize(title),
-                LEGACY_SERIALIZER.deserialize(subtitle),
+                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(title)),
+                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(subtitle)),
                 Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(1500), Duration.ofMillis(500))
             );
             showTitle(recipients, configuredTitle);
         }
 
         if (configManager.isActionBarAlertsEnabled()) {
-            sendActionBar(recipients, LEGACY_SERIALIZER.deserialize(subtitle));
+            sendActionBar(recipients, LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(subtitle)));
         }
 
         playConfiguredSound(recipients);
@@ -216,7 +221,24 @@ public class AlertManager {
                 player.playSound(player.getLocation(), sound, 1.0f, 1.0f);
             }
         } catch (IllegalArgumentException ignored) {
+            if (!soundWarningLogged) {
+                plugin.getLogger().warning("Invalid sound name '" + configManager.getSoundName() 
+                    + "' configured in config.yml. Sound alerts will not play.");
+                soundWarningLogged = true;
+            }
         }
+    }
+
+    private String translateAlternateColorCodes(String text) {
+        if (text == null) return "";
+        char[] b = text.toCharArray();
+        for (int i = 0; i < b.length - 1; i++) {
+            if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
+                b[i] = '§';
+                b[i + 1] = Character.toLowerCase(b[i + 1]);
+            }
+        }
+        return new String(b);
     }
 
     private String formatTime(int seconds) {

@@ -62,11 +62,11 @@ public class PterodactylBackend extends ControllerBackend {
                 return BackendResult.FAILED;
             }
         } catch (java.net.http.HttpTimeoutException e) {
-            logger.warning("Pterodactyl API timeout. Restart state is UNKNOWN.");
-            return BackendResult.UNKNOWN;
+            logger.warning("Pterodactyl API timeout. Treating as FAILED.");
+            return BackendResult.FAILED;
         } catch (Exception e) {
             logger.warning("Pterodactyl API error: " + e.getMessage());
-            return BackendResult.UNKNOWN;
+            return BackendResult.FAILED;
         }
     }
 
@@ -92,9 +92,17 @@ public class PterodactylBackend extends ControllerBackend {
                 ? BackendState.FULL
                 : BackendState.ASSISTED;
         } catch (Exception exception) {
-            logger.fine("Pterodactyl backend verification skipped: " + exception.getMessage());
+            logger.warning("Pterodactyl backend verification failed: " + exception.getMessage());
             return BackendState.ASSISTED;
         }
+    }
+
+    @Override
+    public void cleanup() {
+        // HttpClient does not implement AutoCloseable before Java 21.
+        // The JDK's internal SelectorManager thread is a daemon thread and
+        // will be reclaimed by the GC when this instance is no longer referenced.
+        logger.fine("PterodactylBackend cleanup called.");
     }
 
     private boolean isBlank(String str) {

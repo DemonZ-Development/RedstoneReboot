@@ -48,6 +48,11 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
     }
 
     @Override
+    public ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks) {
+        return runRepeating(task, initialDelayTicks, periodTicks);
+    }
+
+    @Override
     public ScheduledTaskHandle runLater(Runnable task, long delayTicks) {
         try {
             Object scheduledTask = runDelayedMethod.invoke(
@@ -63,11 +68,19 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
     }
 
     @Override
+    public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
+        return runLater(task, delayTicks);
+    }
+
+    @Override
     public boolean isFolia() {
         return true;
     }
 
     private ScheduledTaskHandle reflectionHandle(Object scheduledTask) {
+        if (scheduledTask == null) {
+            return () -> {};
+        }
         try {
             java.lang.reflect.Method cancelMethod = scheduledTask.getClass().getMethod("cancel");
             cancelMethod.setAccessible(true);
