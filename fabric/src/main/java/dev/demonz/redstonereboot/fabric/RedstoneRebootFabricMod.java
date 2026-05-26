@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatform implements DedicatedServerModInitializer {
 
     private JavaPlatformScheduler scheduler;
-    private MinecraftServer server;
+    private volatile MinecraftServer server;
 
     public RedstoneRebootFabricMod() {
         super(Logger.getLogger("RedstoneReboot/Fabric"), "Fabric", resolveMinecraftVersion());
@@ -136,6 +136,12 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
 
         @Override
         public boolean hasPermission(String permission) {
+            if (permission == null) {
+                return false;
+            }
+            if (permission.equals("redstonereboot.status") || permission.equals("redstonereboot.use") || permission.equals("redstonereboot.notify")) {
+                return true;
+            }
             if (mod.core.getConfig().isUseOpAsAdminEnabled() && source.hasPermissionLevel(4)) {
                 return true;
             }

@@ -35,7 +35,7 @@ scheduled-restarts:
     - "12:00"
     - "18:00"
     - "00:00"
-  timezone: "Asia/Kolkata"
+  timezone: "Europe/London"
   days:
     - "ALL"
   warning-time: 300
@@ -45,6 +45,8 @@ scheduled-restarts:
 - `timezone`: any valid Java `ZoneId`
 - `days`: `ALL` or weekday names such as `MONDAY`
 - `warning-time`: how early the countdown can begin
+
+> **Supported Timezones:** Any valid Java `ZoneId` — e.g. `Europe/London`, `America/New_York`, `Asia/Singapore`, `UTC`, `Australia/Sydney`. Avoid short abbreviations like `IST` or `EST`; use full `Region/City` format. See [Java SE timezone list](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/ZoneId.html#of(java.lang.String, java.util.Map)) for all valid IDs.
 
 ### Alerts
 
@@ -100,8 +102,6 @@ emergency:
 permissions:
   luckperms:
     integration-enabled: true
-    default-permission: "redstonereboot.use"
-    admin-permission: "redstonereboot.admin"
   fallback:
     use-op-as-admin: true
     default-level: 2
@@ -122,15 +122,12 @@ Only Bukkit-family plugin deployments use PlaceholderAPI integration.
 
 ```yaml
 advanced:
-  async-operations: true
-  thread-pool-size: 2
   metrics-enabled: true
   shutdown-delay-ticks: 60
 ```
 
 - `metrics-enabled`: enables anonymous usage statistics via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) (Bukkit builds only). Set to `false` to opt out.
 - `shutdown-delay-ticks`: ticks to wait after saving worlds before executing the shutdown sequence.
-- `async-operations` and `thread-pool-size` are reserved for broader runtime behavior and future expansion.
 
 ## Backend Config
 

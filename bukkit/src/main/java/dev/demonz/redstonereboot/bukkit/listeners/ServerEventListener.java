@@ -18,25 +18,32 @@ public class ServerEventListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
-        if (!plugin.getPermissionManager().hasAdminPermission(event.getPlayer())) {
+        if (plugin.getPermissionManager() == null || !plugin.getPermissionManager().hasAdminPermission(event.getPlayer())) {
             return;
         }
 
-        if (plugin.getRestartManager().isRestartInProgress()) {
-            event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix()
-                + " §eRestart in progress - §c"
-                + plugin.getRestartManager().getCurrentRestartReason().getDisplayName());
-        } else if (plugin.getRestartManager().getNextScheduledRestart() != null) {
-            event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix()
-                + " §aNext restart: §e"
-                + plugin.getRestartManager().getNextScheduledRestart().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
-                + " " + plugin.getConfigManager().getTimezone());
+        dev.demonz.redstonereboot.common.manager.RestartManager restartManager = plugin.getRestartManager();
+        if (restartManager != null) {
+            if (restartManager.isRestartInProgress()) {
+                event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix()
+                    + " §eRestart in progress - §c"
+                    + (restartManager.getCurrentRestartReason() != null ? restartManager.getCurrentRestartReason().getDisplayName() : "Unknown"));
+            } else {
+                java.time.ZonedDateTime nextRestart = restartManager.getNextScheduledRestart();
+                if (nextRestart != null) {
+                    event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix()
+                        + " §aNext restart: §e"
+                        + nextRestart.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                        + " " + plugin.getConfigManager().getTimezone());
+                }
+            }
         }
 
-        if (plugin.getCore().getUpdateChecker().hasUpdate()) {
+        dev.demonz.redstonereboot.common.RedstoneRebootCore core = plugin.getCore();
+        if (core != null && core.getUpdateChecker() != null && core.getUpdateChecker().hasUpdate()) {
             event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix()
                 + " §aA new update for RedstoneReboot is available on Modrinth! Latest: v"
-                + plugin.getCore().getUpdateChecker().getLatestVersion());
+                + core.getUpdateChecker().getLatestVersion());
         }
     }
 }

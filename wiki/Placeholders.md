@@ -11,14 +11,14 @@ RedstoneReboot provides a PlaceholderAPI expansion for Bukkit-family and Folia s
 
 | Placeholder | Description | Example Output |
 |-------------|-------------|----------------|
-| `%redstonereboot_next_restart%` | Next scheduled restart date and time | `2026-04-15 06:00:00 Asia/Kolkata` |
+| `%redstonereboot_next_restart%` | Next scheduled restart date and time | `2026-04-15 06:00:00 Europe/London` |
 | `%redstonereboot_time_until%` | Time remaining until next restart | `2h 30m` |
 | `%redstonereboot_status%` | Current server restart status | `Normal operation` or `Restart in progress` |
 | `%redstonereboot_reason%` | Reason for the current restart | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | Last recorded server TPS | `19.8` |
 | `%redstonereboot_memory%` | Current memory usage percentage | `62.4%` |
-| `%redstonereboot_version%` | Installed RedstoneReboot version | `1.3.3` |
-| `%redstonereboot_timezone%` | Configured timezone | `Asia/Kolkata` |
+| `%redstonereboot_version%` | Installed RedstoneReboot version | `1.4.0` |
+| `%redstonereboot_timezone%` | Configured timezone | `Europe/London` |
 
 ## Usage Examples
 

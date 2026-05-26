@@ -26,12 +26,13 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
     private final JavaPlatformScheduler scheduler;
 
     public RedstoneRebootForgeMod() {
-        super(Logger.getLogger("RedstoneReboot/Forge"), "Forge", "1.20.4");
+        super(Logger.getLogger("RedstoneReboot/Forge"), "Forge", resolveMinecraftVersion());
         registerShutdownHook("RedstoneReboot-Forge-Shutdown");
 
         scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
-        Path configPath = Path.of("config", "redstonereboot.properties");
-        startCore(scheduler, loadSimpleConfig(configPath), Path.of("config"));
+        Path configDir = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get();
+        Path configPath = configDir.resolve("redstonereboot.properties");
+        startCore(scheduler, loadSimpleConfig(configPath), configDir);
 
         MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
         MinecraftForge.EVENT_BUS.addListener(this::onServerStopping);
@@ -143,10 +144,23 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
 
         @Override
         public boolean hasPermission(String permission) {
+            if (permission == null) {
+                return false;
+            }
+            if (permission.equals("redstonereboot.status") || permission.equals("redstonereboot.use") || permission.equals("redstonereboot.notify")) {
+                return true;
+            }
             if (mod.core.getConfig().isUseOpAsAdminEnabled() && source.hasPermission(4)) {
                 return true;
             }
             return source.hasPermission(mod.core.getConfig().getDefaultPermissionLevel());
         }
+    }
+
+    private static String resolveMinecraftVersion() {
+        return net.minecraftforge.fml.ModList.get()
+            .getModContainerById("minecraft")
+            .map(container -> container.getModInfo().getVersion().toString())
+            .orElse("Unknown");
     }
 }

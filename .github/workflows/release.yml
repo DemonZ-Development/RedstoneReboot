@@ -8,7 +8,7 @@ on:
       tag:
         description: Release tag to publish
         required: true
-        default: v1.3.3
+        default: v1.4.0
       target:
         description: Branch or commit to release from
         required: true
@@ -104,8 +104,8 @@ jobs:
             | NeoForge | `RedstoneReboot-NeoForge-*.jar` |
 
             ### Requirements
-            - **Bukkit/Paper**: MC 1.9 to 1.21.1, Java 8+ on legacy and Java 17+ on modern servers
-            - **Folia**: MC 1.20+, Java 17+
+            - **Bukkit/Paper**: MC 1.9 to 1.21.x+, Java 8+ on legacy and Java 17+ on modern servers
+            - **Folia**: MC 1.20.1+, Java 17+
             - **Fabric**: MC 1.20.1+, Java 17+, Fabric API required where applicable
             - **Forge**: MC 1.20.4+, Java 17+
             - **NeoForge**: MC 1.20.4+, Java 17+

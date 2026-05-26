@@ -18,7 +18,7 @@ Yes. The Bukkit build includes an automatic Folia scheduler bridge that detects 
 
 ### My timezone isn't working
 
-Use a valid Java `ZoneId` string such as `Asia/Kolkata`, `America/New_York`, or `UTC`. Short abbreviations like `IST` or `EST` are ambiguous and may not resolve correctly. Run `/reboot status` after startup to confirm the active timezone.
+Use a valid Java `ZoneId` string such as `Europe/London`, `America/New_York`, or `UTC`. Short abbreviations like `IST` or `EST` are ambiguous and may not resolve correctly. Run `/reboot status` after startup to confirm the active timezone.
 
 ### Can I change the backend without restarting the server?
 

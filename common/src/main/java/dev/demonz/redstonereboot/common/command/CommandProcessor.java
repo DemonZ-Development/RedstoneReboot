@@ -8,6 +8,7 @@ import dev.demonz.redstonereboot.common.manager.RestartReason;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Shared command processing logic for all platforms.
@@ -21,7 +22,7 @@ import java.util.List;
  */
 public class CommandProcessor {
 
-    private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.ROOT);
     private final RedstoneRebootCore core;
 
     public CommandProcessor(RedstoneRebootCore core) {
@@ -56,7 +57,13 @@ public class CommandProcessor {
     }
 
     public void processNow(CommandSender sender, int delay) {
-        boolean scheduled = core.getRestartManager().scheduleRestart(delay, RestartReason.MANUAL, sender.getName());
+        RestartManager rm = core.getRestartManager();
+        String failureReason = getRestartFailureReason(rm);
+        if (failureReason != null) {
+            sender.sendMessage("\u00A7e" + failureReason);
+            return;
+        }
+        boolean scheduled = rm.scheduleRestart(delay, RestartReason.MANUAL, sender.getName());
         if (scheduled) {
             sender.sendMessage("\u00A7aRestart triggered by " + sender.getName() + " in " + delay + "s.");
         } else {
@@ -65,12 +72,28 @@ public class CommandProcessor {
     }
 
     public void processSchedule(CommandSender sender, int delay) {
-        boolean scheduled = core.getRestartManager().scheduleRestart(delay, RestartReason.SCHEDULED_API, sender.getName());
+        RestartManager rm = core.getRestartManager();
+        String failureReason = getRestartFailureReason(rm);
+        if (failureReason != null) {
+            sender.sendMessage("\u00A7e" + failureReason);
+            return;
+        }
+        boolean scheduled = rm.scheduleRestart(delay, RestartReason.SCHEDULED_API, sender.getName());
         if (scheduled) {
             sender.sendMessage("\u00A7aManual restart scheduled in " + delay + "s.");
         } else {
             sender.sendMessage("\u00A7eA sooner restart is already in progress.");
         }
+    }
+
+    private String getRestartFailureReason(RestartManager rm) {
+        if (rm.isLockoutActive()) {
+            return "Cannot restart: Lockout is active. Wait for the lockout to expire.";
+        }
+        if (rm.isControllerRestartPending()) {
+            return "Cannot restart: A controller-owned restart (e.g. Pterodactyl) is already pending.";
+        }
+        return null;
     }
 
     public void processCancel(CommandSender sender) {
@@ -85,11 +108,11 @@ public class CommandProcessor {
     public void processInfo(CommandSender sender) {
         sender.sendMessage("\u00A76=== Server Performance ===");
         sender.sendMessage("\u00A77Platform: \u00A7f" + core.getPlatform().getPlatformName());
-        sender.sendMessage("\u00A77TPS: \u00A7f" + String.format("%.1f", core.getPlatform().getTPS()));
+        sender.sendMessage("\u00A77TPS: \u00A7f" + String.format(Locale.ROOT, "%.1f", core.getPlatform().getTPS()));
 
         Runtime runtime = Runtime.getRuntime();
         double memoryUsage = (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0;
-        sender.sendMessage("\u00A77Memory: \u00A7f" + String.format("%.1f%%", memoryUsage));
+        sender.sendMessage("\u00A77Memory: \u00A7f" + String.format(Locale.ROOT, "%.1f%%", memoryUsage));
         sender.sendMessage("\u00A77Players: \u00A7f" + core.getPlatform().getOnlinePlayerCount());
 
         RestartManager rm = core.getRestartManager();
@@ -134,16 +157,15 @@ public class CommandProcessor {
             sender.sendMessage("\u00A7e[!] Script generated, but no 'Wired' proof found.");
             sender.sendMessage("\u00A7e    Add \u00A7f-Dredstonereboot.active=true \u00A7eto startup.");
         } else if (state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
-            sender.sendMessage("\u00A77[i] No automated restart active. Graceful stop only.");
+            sender.sendMessage("\u00A77[i] Server will stop gracefully. Restart relies on your hosting environment (Pterodactyl, systemd, Docker, etc.). To manage the restart yourself, configure a backend in restart-backends.properties.");
         }
 
         List<String> detected = EnvironmentDetector.detectPotentialBackends();
         if (!detected.isEmpty()) {
             sender.sendMessage("\u00A77Detected Env: \u00A7f" + String.join(", ", detected));
             if (!detected.contains(backend.getName().toUpperCase())
-                && !backend.getName().equals("ShutdownOnly")
                 && !backend.getName().equals("LocalScript")) {
-                sender.sendMessage("\u00A7c[!] Potential Mismatch: Backend vs Environment.");
+                sender.sendMessage("\u00A7c[!] Potential Mismatch: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Set active-backend in restart-backends.properties.");
             }
         } else {
             sender.sendMessage("\u00A77Detected Env: \u00A7fGeneric VPS/Local");

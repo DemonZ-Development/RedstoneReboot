@@ -12,6 +12,7 @@ import dev.demonz.redstonereboot.common.utils.UpdateChecker;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -27,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.3.3";
+    public static final String VERSION = "1.4.0";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
@@ -56,7 +57,7 @@ public class RedstoneRebootCore {
     public void onEnable() {
         printStartupBanner();
         LOGGER.info("Platform: " + platform.getPlatformName() + " (MC " + platform.getMinecraftVersion() + ")");
-        LOGGER.info("TPS: " + String.format("%.1f", platform.getTPS()));
+        LOGGER.info("TPS: " + String.format(Locale.ROOT, "%.1f", platform.getTPS()));
 
         backendRegistry.initialize();
         restartManager.initialize();
@@ -73,6 +74,7 @@ public class RedstoneRebootCore {
 
         LOGGER.info("Engine initialized successfully.");
         updateChecker.checkForUpdates();
+        updateChecker.startPeriodicChecks(scheduler);
     }
 
     /**
@@ -81,6 +83,7 @@ public class RedstoneRebootCore {
     public void onDisable() {
         LOGGER.info("RedstoneReboot engine shutting down...");
         restartManager.cleanup();
+        updateChecker.stopPeriodicChecks();
         LOGGER.info("Shutdown complete.");
     }
 
@@ -103,6 +106,10 @@ public class RedstoneRebootCore {
      * @param reason the human-readable reason for the emergency
      */
     public void triggerEmergencyRestart(String reason) {
+        triggerEmergencyRestart(reason, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS);
+    }
+
+    public void triggerEmergencyRestart(String reason, dev.demonz.redstonereboot.common.manager.RestartReason restartReason) {
         LOGGER.severe("==========================================");
         LOGGER.severe("EMERGENCY RESTART TRIGGERED");
         LOGGER.severe("Reason: " + reason);
@@ -110,9 +117,9 @@ public class RedstoneRebootCore {
         platform.sendEmergencyAlert(reason);
         int delay = config.getEmergencyDelay();
         if (delay > 0) {
-            restartManager.scheduleRestart(delay, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS, "Emergency: " + reason);
+            restartManager.scheduleRestart(delay, restartReason, "Emergency: " + reason);
         } else {
-            restartManager.performImmediateRestart(dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS, "Emergency: " + reason);
+            restartManager.performImmediateRestart(restartReason, "Emergency: " + reason);
         }
     }
 

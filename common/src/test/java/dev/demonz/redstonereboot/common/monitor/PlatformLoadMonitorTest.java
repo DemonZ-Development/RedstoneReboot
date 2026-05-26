@@ -73,8 +73,18 @@ class PlatformLoadMonitorTest {
         }
 
         @Override
+        public ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks) {
+            return runRepeating(task, initialDelayTicks, periodTicks);
+        }
+
+        @Override
         public ScheduledTaskHandle runLater(Runnable task, long delayTicks) {
             return () -> { };
+        }
+
+        @Override
+        public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
+            return runLater(task, delayTicks);
         }
 
         @Override

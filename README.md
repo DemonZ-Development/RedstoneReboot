@@ -4,7 +4,7 @@
 
 # ⚡ RedstoneReboot
 
-**The Most Advanced Multi-Platform Minecraft Server Restart Engine**
+**A Multi-Platform Minecraft Server Restart Engine**
 
 [![CI](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions/workflows/ci.yml/badge.svg)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/sdemonzdevelopment-spec/RedstoneReboot?color=green&label=latest)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest)
@@ -63,11 +63,11 @@ Whether you're running a single Paper server, a Folia network, or a fleet of mod
 
 | Platform | Type | Minecraft Versions | Java |
 |----------|------|--------------------|------|
-| Bukkit / Spigot / Paper / Purpur | Plugin | 1.9 – 1.21.1 | 8+ (legacy), 17+ (modern) |
-| Folia | Plugin | 1.20+ | 17+ |
-| Fabric | Mod | 1.20.1+ | 17+ |
-| Forge | Mod | 1.20.4+ | 17+ |
-| NeoForge | Mod | 1.20.4+ | 17+ |
+| Bukkit / Spigot / Paper / Purpur | Plugin | - **Bukkit/Paper**: MC 1.9 to 1.21.x+, Java 8+ on legacy and Java 17+ on modern servers
+- **Folia**: MC 1.20.1+, Java 17+
+- **Fabric**: MC 1.20.1+, Java 17+, Fabric API required where applicable
+- **Forge**: MC 1.20.4+, Java 17+
+- **NeoForge**: MC 1.20.4+, Java 17+ |
 
 ---
 
@@ -92,14 +92,14 @@ RedstoneReboot integrates with [PlaceholderAPI](https://www.spigotmc.org/resourc
 
 | Placeholder | Output |
 |-------------|--------|
-| `%redstonereboot_next_restart%` | `2026-04-15 06:00:00 Asia/Kolkata` |
+| `%redstonereboot_next_restart%` | `2026-04-15 06:00:00 Europe/London` |
 | `%redstonereboot_time_until%` | `2h 30m` |
 | `%redstonereboot_status%` | `Normal operation` or `Restart in progress` |
 | `%redstonereboot_reason%` | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.3.3` |
-| `%redstonereboot_timezone%` | `Asia/Kolkata` |
+| `%redstonereboot_version%` | `1.4.0` |
+| `%redstonereboot_timezone%` | `Europe/London` |
 
 > **MOTD Compatible** — v1.3.3+ includes null-safety fixes for server-list MOTD plugins.
 

@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -18,6 +19,7 @@ public class UpdateChecker {
     private final Logger logger;
     private volatile String latestVersion;
     private volatile boolean updateAvailable;
+    private volatile dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle periodicCheckTask;
 
     public UpdateChecker(String projectId, String currentVersion, Logger logger) {
         this.projectId = projectId;
@@ -29,17 +31,25 @@ public class UpdateChecker {
      * Fetches the latest version asynchronously.
      */
     public CompletableFuture<Void> checkForUpdates() {
+        return checkForUpdates(false);
+    }
+
+    /**
+     * Fetches the latest version asynchronously with option to suppress "up-to-date" success logs.
+     */
+    public CompletableFuture<Void> checkForUpdates(boolean silent) {
         return CompletableFuture.runAsync(() -> {
+            HttpURLConnection conn = null;
             try {
                 URL url = java.net.URI.create("https://api.modrinth.com/v2/project/" + projectId + "/version").toURL();
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 conn.setConnectTimeout(5000);
                 conn.setReadTimeout(5000);
                 conn.setRequestProperty("User-Agent", "DemonZDevelopment/RedstoneReboot/" + currentVersion);
 
                 if (conn.getResponseCode() != 200) {
-                    logger.fine("Failed to check for updates. Response code: " + conn.getResponseCode());
+                    logger.warning("Update check failed. Modrinth returned HTTP " + conn.getResponseCode());
                     return;
                 }
 
@@ -63,14 +73,31 @@ public class UpdateChecker {
                         logger.info("Latest version:  " + latestVersion);
                         logger.info("Download it at: https://modrinth.com/project/" + projectId + "/versions");
                         logger.info("==========================================");
-                    } else {
+                    } else if (!silent) {
                         logger.info("RedstoneReboot is up to date (v" + currentVersion + ").");
                     }
                 }
             } catch (Exception exception) {
-                logger.fine("Exception while checking for updates: " + exception.getMessage());
+                logger.warning("Update check failed: " + exception.getMessage());
+            } finally {
+                if (conn != null) {
+                    conn.disconnect();
+                }
             }
         });
+    }
+
+    public void startPeriodicChecks(dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler scheduler) {
+        stopPeriodicChecks();
+        // Use 6-hour initial delay to avoid racing with the initial checkForUpdates() call in onEnable()
+        periodicCheckTask = scheduler.runRepeating(() -> checkForUpdates(true), 432000L, 432000L);
+    }
+
+    public void stopPeriodicChecks() {
+        if (periodicCheckTask != null) {
+            periodicCheckTask.cancel();
+            periodicCheckTask = null;
+        }
     }
 
     public boolean hasUpdate() {

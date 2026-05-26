@@ -8,7 +8,15 @@
 [SIZE=6][B][COLOR=#DC2626]⚡ RedstoneReboot[/COLOR][/B][/SIZE]
 [SIZE=4][I]The most advanced multi-platform Minecraft server restart engine.[/I][/SIZE]
 
-[B]Bukkit[/B] · [B]Spigot[/B] · [B]Paper[/B] · [B]Purpur[/B] · [B]Pufferfish[/B] · [B]Folia[/B]
+[SIZE=5][B]🌍 Platform Compatibility[/B][/SIZE]
+
+[LIST]
+[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: 1.9.x to 1.21.x+
+[*] [B]Folia[/B]: 1.20.1+
+[*] [B]Fabric[/B]: 1.20.1+
+[*] [B]Forge[/B]: 1.20.4+
+[*] [B]NeoForge[/B]: 1.20.4+
+[/LIST]
 [/CENTER]
 
 [HR][/HR]

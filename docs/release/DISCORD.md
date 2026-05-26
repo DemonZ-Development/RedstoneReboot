@@ -12,7 +12,11 @@ This release adds bStats metrics integration, fixes PlaceholderAPI MOTD compatib
 - 🕐 Scheduled restarts with global timezone support
 - 📊 TPS and memory-based restart automation
 - 🚑 Emergency restart handling & memory leak prevention
-- 📦 Builds for Bukkit, Paper, Folia, Fabric, Forge, and NeoForge
+- **Supported Platforms:**
+- **Bukkit/Paper:** 1.9.x - 1.21.x+
+- **Folia:** 1.20.1+
+- **Fabric:** 1.20.1+
+- **Forge/NeoForge:** 1.20.4+
 
 **Docs and links:**
 - **GitHub:** <https://github.com/sdemonzdevelopment-spec/RedstoneReboot>

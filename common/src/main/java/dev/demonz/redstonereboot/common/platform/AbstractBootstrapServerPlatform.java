@@ -32,10 +32,10 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
     private final String platformName;
     private final String minecraftVersion;
     private final AtomicBoolean started = new AtomicBoolean(false);
-    private PlatformTaskScheduler scheduler;
-    private PlatformLoadMonitor loadMonitor;
-    private Path runtimeConfigPath;
-    private SimplePlatformConfig mutableConfig;
+    private volatile PlatformTaskScheduler scheduler;
+    private volatile PlatformLoadMonitor loadMonitor;
+    private volatile Path runtimeConfigPath;
+    private volatile SimplePlatformConfig mutableConfig;
     protected volatile RedstoneRebootCore core;
 
     protected AbstractBootstrapServerPlatform(Logger logger, String platformName, String minecraftVersion) {
@@ -98,19 +98,19 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             applyBoolean(props, "alerts-enabled", config::setAlertsEnabled);
 
             applyBoolean(props, "monitoring-enabled", config::setMonitoringEnabled);
-            applyDouble(props, "tps-threshold", config::setTpsThreshold);
-            applyDouble(props, "memory-threshold", config::setMemoryThreshold);
-            applyInteger(props, "check-interval", config::setCheckInterval);
-            applyInteger(props, "consecutive-checks", config::setConsecutiveChecks);
+            applyDouble(props, "tps-threshold", value -> config.setTpsThreshold(clamp(value, 0.0, 20.0)));
+            applyDouble(props, "memory-threshold", value -> config.setMemoryThreshold(clamp(value, 0.0, 100.0)));
+            applyInteger(props, "check-interval", value -> config.setCheckInterval(Math.max(value, 1)));
+            applyInteger(props, "consecutive-checks", value -> config.setConsecutiveChecks(Math.max(value, 1)));
 
             applyBoolean(props, "emergency-enabled", config::setEmergencyRestartEnabled);
-            applyDouble(props, "emergency-tps-threshold", config::setEmergencyTpsThreshold);
-            applyDouble(props, "emergency-memory-threshold", config::setEmergencyMemoryThreshold);
-            applyInteger(props, "emergency-delay", config::setEmergencyDelay);
+            applyDouble(props, "emergency-tps-threshold", value -> config.setEmergencyTpsThreshold(clamp(value, 0.0, 20.0)));
+            applyDouble(props, "emergency-memory-threshold", value -> config.setEmergencyMemoryThreshold(clamp(value, 0.0, 100.0)));
+            applyInteger(props, "emergency-delay", value -> config.setEmergencyDelay(Math.max(value, 0)));
 
-            applyInteger(props, "shutdown-delay-ticks", config::setShutdownDelayTicks);
+            applyInteger(props, "shutdown-delay-ticks", value -> config.setShutdownDelayTicks(Math.max(value, 0)));
             applyBoolean(props, "use-op-as-admin", config::setUseOpAsAdminEnabled);
-            applyInteger(props, "default-permission-level", config::setDefaultPermissionLevel);
+            applyInteger(props, "default-permission-level", value -> config.setDefaultPermissionLevel(clamp(value, 0, 4)));
         } catch (IOException exception) {
             logger.warning("Failed to load config: " + exception.getMessage());
         }
@@ -270,6 +270,14 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         } catch (NumberFormatException exception) {
             logger.warning("Ignoring invalid decimal for '" + key + "': " + raw);
         }
+    }
+
+    private static double clamp(double value, double min, double max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    private static int clamp(int value, int min, int max) {
+        return Math.max(min, Math.min(max, value));
     }
 
     private List<String> splitCsv(String value) {

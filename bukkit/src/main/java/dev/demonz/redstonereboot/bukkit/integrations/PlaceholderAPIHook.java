@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Locale;
 
 /**
  * PlaceholderAPI expansion for RedstoneReboot.
@@ -100,13 +101,21 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
             }
 
             case "tps": {
-                if (plugin.getServerLoadMonitor() == null) return "20.0";
-                return String.format("%.1f", plugin.getServerLoadMonitor().getLastTPS());
+                double tps = plugin.getServerLoadMonitor() != null 
+                    ? plugin.getServerLoadMonitor().getLastTPS() 
+                    : plugin.getTPS();
+                return String.format(Locale.ROOT, "%.1f", tps);
             }
 
             case "memory": {
-                if (plugin.getServerLoadMonitor() == null) return "0.0%";
-                return String.format("%.1f%%", plugin.getServerLoadMonitor().getLastMemoryUsage());
+                double memoryUsage;
+                if (plugin.getServerLoadMonitor() != null) {
+                    memoryUsage = plugin.getServerLoadMonitor().getLastMemoryUsage();
+                } else {
+                    Runtime runtime = Runtime.getRuntime();
+                    memoryUsage = (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
+                }
+                return String.format(Locale.ROOT, "%.1f%%", memoryUsage);
             }
 
             case "version":

@@ -20,10 +20,14 @@ public class LocalScriptBackend extends SupervisorBackend {
     private final String scriptName;
     private final boolean isWindows;
 
-    public LocalScriptBackend(Logger logger) {
+    public LocalScriptBackend(Logger logger, String customScriptName) {
         super(logger, "LocalScript");
         this.isWindows = System.getProperty("os.name").toLowerCase().contains("win");
-        this.scriptName = isWindows ? "redstonereboot-start.bat" : "redstonereboot-start.sh";
+        if (customScriptName != null && !customScriptName.trim().isEmpty()) {
+            this.scriptName = customScriptName.trim();
+        } else {
+            this.scriptName = isWindows ? "redstonereboot-start.bat" : "redstonereboot-start.sh";
+        }
     }
 
     @Override
@@ -39,7 +43,12 @@ public class LocalScriptBackend extends SupervisorBackend {
         }
 
         try {
-            Files.writeString(Paths.get(RESTART_MARKER), "restart");
+            Path markerPath = Paths.get(RESTART_MARKER).toAbsolutePath();
+            Files.writeString(markerPath, "restart",
+                java.nio.file.StandardOpenOption.CREATE,
+                java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
+                java.nio.file.StandardOpenOption.WRITE,
+                java.nio.file.StandardOpenOption.SYNC);
         } catch (IOException exception) {
             logger.warning("Failed to arm LocalScript restart marker: " + exception.getMessage());
             return BackendResult.FAILED;
@@ -52,7 +61,7 @@ public class LocalScriptBackend extends SupervisorBackend {
         if (isWired()) {
             return BackendState.FULL;
         }
-        if (Files.exists(Paths.get(scriptName))) {
+        if (Files.exists(Paths.get(scriptName).toAbsolutePath())) {
             return BackendState.GENERATED;
         }
         return BackendState.SHUTDOWN_ONLY;
@@ -62,11 +71,11 @@ public class LocalScriptBackend extends SupervisorBackend {
         // Wiring proof: -D property or Env Var or Marker File
         if (Boolean.getBoolean("redstonereboot.active")) return true;
         if ("1".equals(System.getenv("REDSTONEREBOOT_ACTIVE"))) return true;
-        return Files.exists(Paths.get(".redstonereboot_wired"));
+        return Files.exists(Paths.get(".redstonereboot_wired").toAbsolutePath());
     }
 
     public void generateScript(boolean overwrite) {
-        Path path = Paths.get(scriptName);
+        Path path = Paths.get(scriptName).toAbsolutePath();
         if (Files.exists(path) && !overwrite) {
             return;
         }
@@ -84,26 +93,28 @@ public class LocalScriptBackend extends SupervisorBackend {
     }
 
     private String getLinuxTemplate() {
+        String absoluteMarker = Paths.get(RESTART_MARKER).toAbsolutePath().toString().replace("\\", "/");
         return "#!/bin/bash\n" +
                "# RedstoneReboot Auto-Restart Wrapper\n" +
                "while true; do\n" +
                "    " + detectStartupCommand() + "\n" +
-               "    if [ ! -f \"" + RESTART_MARKER + "\" ]; then\n" +
+               "    if [ ! -f \"" + absoluteMarker + "\" ]; then\n" +
                "        exit 0\n" +
                "    fi\n" +
-               "    rm -f \"" + RESTART_MARKER + "\"\n" +
+               "    rm -f \"" + absoluteMarker + "\"\n" +
                "    echo \"Server stopped. Restarting in 5 seconds... (Press Ctrl+C to cancel)\"\n" +
                "    sleep 5\n" +
                "done\n";
     }
 
     private String getWindowsTemplate() {
+        String absoluteMarker = Paths.get(RESTART_MARKER).toAbsolutePath().toString();
         return "@echo off\n" +
                "title RedstoneReboot Restart Wrapper\n" +
                ":start\n" +
                "    " + detectStartupCommand() + "\n" +
-               "if not exist " + RESTART_MARKER + " goto end\n" +
-               "del /f /q " + RESTART_MARKER + " >nul 2>&1\n" +
+               "if not exist \"" + absoluteMarker + "\" goto end\n" +
+               "del /f /q \"" + absoluteMarker + "\" >nul 2>&1\n" +
                "echo Server stopped. Restarting in 5 seconds... (Press Ctrl+C to cancel)\n" +
                "timeout /t 5\n" +
                "goto start\n" +
@@ -112,35 +123,68 @@ public class LocalScriptBackend extends SupervisorBackend {
     }
 
     private String detectStartupCommand() {
+        String override = System.getProperty("redstonereboot.localscript-command");
+        if (override == null || override.isBlank()) {
+            override = System.getenv("REDSTONEREBOOT_LOCALSCRIPT_COMMAND");
+        }
+        if (override != null && !override.isBlank()) {
+            return override;
+        }
+
         String cmd = System.getProperty("sun.java.command");
+
+        // Extract and preserve custom JVM arguments (like memory allocations)
+        List<String> jvmArgsList = new ArrayList<>();
+        try {
+            java.lang.management.RuntimeMXBean runtimeMxBean = java.lang.management.ManagementFactory.getRuntimeMXBean();
+            List<String> inputArgs = runtimeMxBean.getInputArguments();
+            for (String arg : inputArgs) {
+                if (!arg.contains("redstonereboot.active")) {
+                    jvmArgsList.add(arg);
+                }
+            }
+        } catch (Exception ignored) {}
+
+        String jvmFlags = jvmArgsList.isEmpty() ? "" : String.join(" ", jvmArgsList) + " ";
+
         if (cmd == null || cmd.isBlank()) {
-            return "java -Dredstonereboot.active=true -jar server.jar nogui";
+            return "java " + jvmFlags + "-Dredstonereboot.active=true -jar server.jar nogui";
         }
 
-        String[] parts = cmd.trim().split("\\s+");
-        int jarIndex = -1;
-        for (int i = 0; i < parts.length; i++) {
-            if (parts[i].endsWith(".jar")) {
-                jarIndex = i;
-                break;
-            }
-        }
-
+        // Support spaces in paths by wrapping the JAR path in quotes
+        int jarIndex = cmd.toLowerCase().lastIndexOf(".jar");
         if (jarIndex >= 0) {
-            String jar = parts[jarIndex];
-            List<String> args = new ArrayList<>();
-            for (int i = jarIndex + 1; i < parts.length; i++) {
-                args.add(parts[i]);
-            }
+            String jarPath = cmd.substring(0, jarIndex + 4).trim();
+            String rawArgs = cmd.substring(jarIndex + 4).trim();
 
-            StringBuilder command = new StringBuilder("java -Dredstonereboot.active=true -jar ");
-            command.append(jar);
-            if (!args.isEmpty()) {
-                command.append(' ').append(String.join(" ", args));
+            String jarQuoted = jarPath.startsWith("\"") && jarPath.endsWith("\"") ? jarPath : "\"" + jarPath + "\"";
+
+            StringBuilder command = new StringBuilder("java ");
+            command.append(jvmFlags);
+            command.append("-Dredstonereboot.active=true -jar ");
+            command.append(jarQuoted);
+            if (!rawArgs.isEmpty()) {
+                command.append(' ').append(rawArgs);
             }
             return command.toString();
         }
 
-        return "java -Dredstonereboot.active=true -jar server.jar nogui";
+        // Handle main class runs safely
+        int firstSpace = cmd.indexOf(' ');
+        if (firstSpace >= 0) {
+            String mainClass = cmd.substring(0, firstSpace).trim();
+            String rawArgs = cmd.substring(firstSpace + 1).trim();
+
+            StringBuilder command = new StringBuilder("java ");
+            command.append(jvmFlags);
+            command.append("-Dredstonereboot.active=true ");
+            command.append(mainClass);
+            if (!rawArgs.isEmpty()) {
+                command.append(' ').append(rawArgs);
+            }
+            return command.toString();
+        }
+
+        return "java " + jvmFlags + "-Dredstonereboot.active=true -jar \"" + cmd.trim() + "\" nogui";
     }
 }

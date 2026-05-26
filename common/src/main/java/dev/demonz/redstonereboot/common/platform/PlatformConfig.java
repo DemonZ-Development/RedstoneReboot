@@ -27,7 +27,7 @@ public interface PlatformConfig {
     /** @return the configured timezone as a {@link ZoneId} */
     ZoneId getZoneId();
 
-    /** @return the raw timezone string from configuration (e.g. {@code "Asia/Kolkata"}) */
+    /** @return the raw timezone string from configuration (e.g. {@code "Europe/London"}) */
     String getTimezone();
 
     /** @return seconds of warning time before a scheduled restart begins */
