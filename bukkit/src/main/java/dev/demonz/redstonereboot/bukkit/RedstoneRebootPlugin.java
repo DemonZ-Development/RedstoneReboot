@@ -181,21 +181,44 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
+    private static java.lang.reflect.Method cachedTpsMethod;
+    private static java.lang.reflect.Method cachedGetServerMethod;
+    private static java.lang.reflect.Field cachedRecentTpsField;
+
     @Override
     public double getTPS() {
-        try {
-            java.lang.reflect.Method tpsMethod = Bukkit.class.getMethod("getTPS");
-            double[] tps = (double[]) tpsMethod.invoke(null);
-            return tps.length > 0 ? Math.min(tps[0], 20.0D) : 20.0D;
-        } catch (Exception ignored) {
+        if (cachedTpsMethod == null) {
             try {
-                Object server = Bukkit.getServer().getClass().getMethod("getServer").invoke(Bukkit.getServer());
-                double[] recentTps = (double[]) server.getClass().getField("recentTps").get(server);
-                return recentTps.length > 0 ? Math.min(recentTps[0], 20.0D) : 20.0D;
-            } catch (Exception fallbackIgnored) {
-                return 20.0D;
-            }
+                cachedTpsMethod = Bukkit.class.getMethod("getTPS");
+            } catch (Exception ignored) {}
         }
+        if (cachedTpsMethod != null) {
+            try {
+                double[] tps = (double[]) cachedTpsMethod.invoke(null);
+                if (tps.length > 0) return Math.min(tps[0], 20.0D);
+            } catch (Exception ignored) {}
+        }
+
+        if (cachedGetServerMethod == null) {
+            try {
+                cachedGetServerMethod = Bukkit.getServer().getClass().getMethod("getServer");
+            } catch (Exception ignored) {}
+        }
+        if (cachedGetServerMethod != null && cachedRecentTpsField == null) {
+            try {
+                Object nmsServer = cachedGetServerMethod.invoke(Bukkit.getServer());
+                cachedRecentTpsField = nmsServer.getClass().getField("recentTps");
+            } catch (Exception ignored) {}
+        }
+        if (cachedRecentTpsField != null) {
+            try {
+                Object nmsServer = cachedGetServerMethod.invoke(Bukkit.getServer());
+                double[] recentTps = (double[]) cachedRecentTpsField.get(nmsServer);
+                if (recentTps.length > 0) return Math.min(recentTps[0], 20.0D);
+            } catch (Exception ignored) {}
+        }
+
+        return 20.0D;
     }
 
     @Override

@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
@@ -17,6 +19,12 @@ import java.util.logging.Logger;
 public class LocalScriptBackend extends SupervisorBackend {
 
     private static final String RESTART_MARKER = ".redstonereboot_restart";
+    private static final List<String> SENSITIVE_ARG_PREFIXES = Arrays.asList(
+        "-dpassword", "-dsecret", "-dtoken", "-dapikey", "-dkey", "-dcredential",
+        "-ddb.", "-ddatabase.", "-djdbc.", "-dspring.datasource.",
+        "-djavax.net.ssl.key", "-djdk.tls.client"
+    );
+
     private final String scriptName;
     private final boolean isWindows;
 
@@ -128,63 +136,119 @@ public class LocalScriptBackend extends SupervisorBackend {
             override = System.getenv("REDSTONEREBOOT_LOCALSCRIPT_COMMAND");
         }
         if (override != null && !override.isBlank()) {
-            return override;
+            return isWindows ? windowsEscape(override) : linuxEscape(override);
         }
 
         String cmd = System.getProperty("sun.java.command");
 
-        // Extract and preserve custom JVM arguments (like memory allocations)
-        List<String> jvmArgsList = new ArrayList<>();
+        // Extract and preserve JVM arguments, filtering sensitive ones
+        List<String> safeArgs = new ArrayList<>();
         try {
             java.lang.management.RuntimeMXBean runtimeMxBean = java.lang.management.ManagementFactory.getRuntimeMXBean();
             List<String> inputArgs = runtimeMxBean.getInputArguments();
             for (String arg : inputArgs) {
-                if (!arg.contains("redstonereboot.active")) {
-                    jvmArgsList.add(arg);
+                if (arg.contains("redstonereboot.active")) {
+                    continue;
                 }
+                if (isSensitiveArg(arg)) {
+                    logger.warning("Filtered sensitive JVM argument from restart script: " + arg.split("=")[0] + "=***");
+                    continue;
+                }
+                safeArgs.add(arg);
             }
         } catch (Exception ignored) {}
 
-        String jvmFlags = jvmArgsList.isEmpty() ? "" : String.join(" ", jvmArgsList) + " ";
+        StringBuilder command = new StringBuilder("java");
+        for (String arg : safeArgs) {
+            command.append(' ').append(isWindows ? windowsEscape(arg) : linuxEscape(arg));
+        }
 
         if (cmd == null || cmd.isBlank()) {
-            return "java " + jvmFlags + "-Dredstonereboot.active=true -jar server.jar nogui";
-        }
-
-        // Support spaces in paths by wrapping the JAR path in quotes
-        int jarIndex = cmd.toLowerCase().lastIndexOf(".jar");
-        if (jarIndex >= 0) {
-            String jarPath = cmd.substring(0, jarIndex + 4).trim();
-            String rawArgs = cmd.substring(jarIndex + 4).trim();
-
-            String jarQuoted = jarPath.startsWith("\"") && jarPath.endsWith("\"") ? jarPath : "\"" + jarPath + "\"";
-
-            StringBuilder command = new StringBuilder("java ");
-            command.append(jvmFlags);
-            command.append("-Dredstonereboot.active=true -jar ");
-            command.append(jarQuoted);
-            if (!rawArgs.isEmpty()) {
-                command.append(' ').append(rawArgs);
-            }
+            command.append(isWindows ? " -Dredstonereboot.active=true -jar server.jar nogui" : " -Dredstonereboot.active=true -jar server.jar nogui");
             return command.toString();
         }
 
-        // Handle main class runs safely
-        int firstSpace = cmd.indexOf(' ');
-        if (firstSpace >= 0) {
-            String mainClass = cmd.substring(0, firstSpace).trim();
-            String rawArgs = cmd.substring(firstSpace + 1).trim();
-
-            StringBuilder command = new StringBuilder("java ");
-            command.append(jvmFlags);
-            command.append("-Dredstonereboot.active=true ");
-            command.append(mainClass);
-            if (!rawArgs.isEmpty()) {
-                command.append(' ').append(rawArgs);
+        // Parse sun.java.command respecting embedded quotes
+        List<String> parts = splitCommand(cmd);
+        boolean hasJar = false;
+        for (int i = 0; i < parts.size(); i++) {
+            String part = parts.get(i);
+            String lower = part.toLowerCase(Locale.ROOT);
+            if (lower.endsWith(".jar")) {
+                command.append(" -jar");
+                hasJar = true;
             }
-            return command.toString();
+            command.append(' ').append(isWindows ? windowsEscape(part) : linuxEscape(part));
         }
 
-        return "java " + jvmFlags + "-Dredstonereboot.active=true -jar \"" + cmd.trim() + "\" nogui";
+        if (!hasJar) {
+            // Main-class run — no -jar flag needed
+        }
+
+        return command.toString();
+    }
+
+    private static boolean isSensitiveArg(String arg) {
+        String lower = arg.toLowerCase(Locale.ROOT);
+        for (String prefix : SENSITIVE_ARG_PREFIXES) {
+            if (lower.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static List<String> splitCommand(String cmd) {
+        List<String> parts = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuote = false;
+        for (int i = 0; i < cmd.length(); i++) {
+            char c = cmd.charAt(i);
+            if (c == '"') {
+                inQuote = !inQuote;
+            } else if (c == ' ' && !inQuote) {
+                if (current.length() > 0) {
+                    parts.add(current.toString());
+                    current.setLength(0);
+                }
+            } else {
+                current.append(c);
+            }
+        }
+        if (current.length() > 0) {
+            parts.add(current.toString());
+        }
+        return parts;
+    }
+
+    /**
+     * Shell-escape a string for bash: single-quote wrapping with embedded single-quote escaping.
+     */
+    private static String linuxEscape(String arg) {
+        return "'" + arg.replace("'", "'\\''") + "'";
+    }
+
+    /**
+     * Shell-escape a string for Windows cmd.exe: wrap in double quotes, escape inner quotes and special chars.
+     */
+    private static String windowsEscape(String arg) {
+        if (arg.isEmpty()) {
+            return "\"\"";
+        }
+        StringBuilder sb = new StringBuilder("\"");
+        for (int i = 0; i < arg.length(); i++) {
+            char c = arg.charAt(i);
+            if (c == '"') {
+                sb.append("\"\"");
+            } else if (c == '^') {
+                sb.append("^^");
+            } else if (c == '&' || c == '|' || c == '<' || c == '>' || c == '%') {
+                sb.append('^').append(c);
+            } else {
+                sb.append(c);
+            }
+        }
+        sb.append('"');
+        return sb.toString();
     }
 }

@@ -4,9 +4,11 @@ import dev.demonz.redstonereboot.common.backend.BackendResult;
 import dev.demonz.redstonereboot.common.backend.ControllerBackend;
 
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.logging.Logger;
 
@@ -17,14 +19,14 @@ public class PterodactylBackend extends ControllerBackend {
 
     private final String panelUrl;
     private final String apiKey;
-    private final String serverId;
+    private final String encodedServerId;
     private final HttpClient httpClient;
 
     public PterodactylBackend(Logger logger, String panelUrl, String apiKey, String serverId) {
         super(logger, "Pterodactyl");
         this.panelUrl = panelUrl;
         this.apiKey = apiKey;
-        this.serverId = serverId;
+        this.encodedServerId = URLEncoder.encode(serverId != null ? serverId : "", StandardCharsets.UTF_8);
         this.httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
@@ -32,14 +34,14 @@ public class PterodactylBackend extends ControllerBackend {
 
     @Override
     public BackendResult execute() {
-        if (isBlank(panelUrl) || isBlank(serverId) || isBlank(resolveApiKey())) {
+        if (isBlank(panelUrl) || isBlank(encodedServerId) || isBlank(resolveApiKey())) {
             logger.warning("Pterodactyl backend misconfigured. Missing URL, Key, or ID.");
             return BackendResult.FAILED;
         }
 
         try {
             String baseUrl = panelUrl.endsWith("/") ? panelUrl : panelUrl + "/";
-            URI uri = URI.create(baseUrl + "api/client/servers/" + serverId + "/power");
+            URI uri = URI.create(baseUrl + "api/client/servers/" + encodedServerId + "/power");
 
             String body = "{\"signal\": \"restart\"}";
             HttpRequest request = HttpRequest.newBuilder()
@@ -72,13 +74,13 @@ public class PterodactylBackend extends ControllerBackend {
 
     @Override
     public BackendState getState() {
-        if (isBlank(panelUrl) || isBlank(serverId) || isBlank(resolveApiKey())) {
+        if (isBlank(panelUrl) || isBlank(encodedServerId) || isBlank(resolveApiKey())) {
             return BackendState.MISCONFIGURED;
         }
 
         try {
             String baseUrl = panelUrl.endsWith("/") ? panelUrl : panelUrl + "/";
-            URI uri = URI.create(baseUrl + "api/client/servers/" + serverId + "/resources");
+            URI uri = URI.create(baseUrl + "api/client/servers/" + encodedServerId + "/resources");
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .header("Authorization", "Bearer " + resolveApiKey())

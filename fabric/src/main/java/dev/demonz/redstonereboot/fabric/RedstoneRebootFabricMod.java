@@ -9,10 +9,12 @@ import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+import java.lang.reflect.Constructor;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
@@ -70,9 +72,43 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
         Text titleText = Text.literal(LegacyTextUtil.stripLegacyFormatting(title));
         Text subtitleText = Text.literal(LegacyTextUtil.stripLegacyFormatting(subtitle));
         for (net.minecraft.server.network.ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket(10, 40, 10));
-            player.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.SubtitleS2CPacket(subtitleText));
-            player.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.TitleS2CPacket(titleText));
+            sendTitlePackets(player, titleText, subtitleText);
+        }
+    }
+
+    private void sendTitlePackets(net.minecraft.server.network.ServerPlayerEntity player, Text title, Text subtitle) {
+        try {
+            // Try 1.20.2+ consolidated TitleS2CPacket with Action enum
+            Class<?> titlePacketClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleS2CPacket");
+            Class<?> actionEnum = Class.forName("net.minecraft.network.packet.s2c.play.TitleS2CPacket$Action");
+            Object[] actions = actionEnum.getEnumConstants();
+            if (actions != null && actions.length >= 3) {
+                // Send TIMES, SUBTITLE, TITLE in order
+                Constructor<?> packetCtor = titlePacketClass.getConstructor(actionEnum, Text.class);
+                player.networkHandler.sendPacket((Packet<?>) packetCtor.newInstance(actions[2], Text.literal("")));
+                player.networkHandler.sendPacket((Packet<?>) packetCtor.newInstance(actions[1], subtitle));
+                player.networkHandler.sendPacket((Packet<?>) packetCtor.newInstance(actions[0], title));
+                return;
+            }
+        } catch (Exception ignored) {
+            // Fall through to 1.20.1 approach
+        }
+
+        // 1.20.1 and earlier: separate packet classes
+        try {
+            Class<?> fadeClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket");
+            Constructor<?> fadeCtor = fadeClass.getConstructor(int.class, int.class, int.class);
+            player.networkHandler.sendPacket((Packet<?>) fadeCtor.newInstance(10, 40, 10));
+
+            Class<?> subtitleClass = Class.forName("net.minecraft.network.packet.s2c.play.SubtitleS2CPacket");
+            Constructor<?> subtitleCtor = subtitleClass.getConstructor(Text.class);
+            player.networkHandler.sendPacket((Packet<?>) subtitleCtor.newInstance(subtitle));
+
+            Class<?> titleClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleS2CPacket");
+            Constructor<?> titleCtor = titleClass.getConstructor(Text.class);
+            player.networkHandler.sendPacket((Packet<?>) titleCtor.newInstance(title));
+        } catch (Exception ignored) {
+            getLogger().warning("[title] Failed to send title packet: " + ignored.getMessage());
         }
     }
 
