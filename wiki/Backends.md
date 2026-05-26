@@ -32,6 +32,8 @@ localscript-file=start.sh
 
 Use this when RedstoneReboot should only issue a clean server stop. This is the safest default and the fallback used when no explicit backend is configured.
 
+If you are running under systemd, Docker, or Pterodactyl, SHUTDOWN_ONLY still works — the external supervisor detects the exit and restarts the process. See [FAQ: SHUTDOWN_ONLY but restarts work](FAQ.md#reboot-doctor-shows-shutdown_only-but-restarts-work-fine).
+
 ### SYSTEMD
 
 Use this when the server process is already managed as a Linux service. RedstoneReboot requests the stop or restart flow through the named service.

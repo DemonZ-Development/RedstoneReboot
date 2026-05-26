@@ -67,6 +67,20 @@ See the full list on the [Placeholders](Placeholders.md) wiki page.
 
 This means the backend you configured in `restart-backends.properties` does not match the environment RedstoneReboot detected. For example, selecting `SYSTEMD` while running inside a Docker container. Review the [Backend Guide](Backends.md) and adjust your `active-backend` value.
 
+### `/reboot doctor` shows SHUTDOWN_ONLY but restarts work fine
+
+This is expected if your server is **managed by an external process supervisor** (systemd with `Restart=always`, Docker with `restart: always`, Pterodactyl panel, etc.).
+
+Here's what happens behind the scenes:
+
+1. `ShutdownOnlyBackend.execute()` returns `ACCEPTED` — the shutdown sequence runs normally
+2. The server process stops gracefully
+3. Your hosting environment detects the exit and immediately starts a new process
+
+So the server *appears* to restart even though RedstoneReboot only issued a shutdown. The doctor output correctly reports SHUTDOWN_ONLY because RedstoneReboot does not control the restart lifecycle — it relies on the external supervisor.
+
+To confirm this is working as intended, check the **Detected Env** line in `/reboot doctor`. If it shows SYSTEMD, DOCKER, or PTERODACTYL alongside SHUTDOWN_ONLY, you have a healthy setup. Configure the matching backend in `restart-backends.properties` to make it official and suppress the SHUTDOWN_ONLY notice.
+
 ### What is the lockout?
 
 When a backend returns an uncertain result (e.g., a Pterodactyl API timeout), RedstoneReboot enters a temporary lockout period (`lockout-duration-seconds` in the backend config). During this window, new restart requests are blocked to avoid stacking conflicting attempts.

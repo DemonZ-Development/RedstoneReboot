@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.4.1] — 2026-05-26
+
+### Security
+- LocalScriptBackend: shell-escape all startup command args for both Linux (single-quote wrapping) and Windows (caret escaping) — prevents command injection via `sun.java.command`, JVM args, or `REDSTONEREBOOT_LOCALSCRIPT_COMMAND`
+- LocalScriptBackend: filter sensitive JVM args (`-Dpassword`, `-Dsecret`, `-Dtoken`, `-Dkey`, `-Ddb.`, etc.) from generated restart scripts — prevents credential leakage to disk
+
+### Fixed
+- Folia async scheduler methods (`runRepeatingAsync`/`runLaterAsync`) now use `getAsyncScheduler()` instead of delegating to the global region scheduler — blocking operations no longer run on the server tick thread
+- `isRestartInProgress()` now returns `true` during active backend execution — prevents race where new `scheduleRestart()` or health monitors could fire while a backend call is in-flight
+- Fabric title broadcasting now uses reflection to handle both 1.20.1 (separate packet classes) and 1.20.2+ (consolidated `TitleS2CPacket$Action`) — no more crash on modern Fabric versions
+- Pterodactyl `serverId` is now URL-encoded — special characters in server IDs no longer break API requests
+- Bukkit `getTPS()` reflection handles are now cached after first successful lookup — repeated `getMethod`/`getField` calls eliminated
+- `cleanup()` now logs at INFO level when cancelling in-progress restarts or stopping scheduled checks — admins can see it in console regardless of alert settings
+
 ## [1.4.0] — 2026-05-26
 
 ### Added

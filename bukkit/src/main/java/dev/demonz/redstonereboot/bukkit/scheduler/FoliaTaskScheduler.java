@@ -15,17 +15,35 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
 
     private final JavaPlugin plugin;
     private final Object globalScheduler;
+    private final Object asyncScheduler;
     private final Method runDelayedMethod;
     private final Method runAtFixedRateMethod;
+    private final Method asyncRunNowMethod;
+    private final Method asyncRunDelayedMethod;
+    private final Method asyncRunAtFixedRateMethod;
 
     FoliaTaskScheduler(JavaPlugin plugin) {
         this.plugin = plugin;
         try {
-            globalScheduler = plugin.getServer().getClass().getMethod("getGlobalRegionScheduler").invoke(plugin.getServer());
-            runDelayedMethod = globalScheduler.getClass()
-                .getMethod("runDelayed", org.bukkit.plugin.Plugin.class, Consumer.class, long.class);
-            runAtFixedRateMethod = globalScheduler.getClass()
-                .getMethod("runAtFixedRate", org.bukkit.plugin.Plugin.class, Consumer.class, long.class, long.class);
+            Class<?> pluginClass = org.bukkit.plugin.Plugin.class;
+            Class<?> consumerClass = Consumer.class;
+
+            Object server = plugin.getServer();
+            globalScheduler = server.getClass().getMethod("getGlobalRegionScheduler").invoke(server);
+            Class<?> globalSchedulerClass = globalScheduler.getClass();
+            runDelayedMethod = globalSchedulerClass
+                .getMethod("runDelayed", pluginClass, consumerClass, long.class);
+            runAtFixedRateMethod = globalSchedulerClass
+                .getMethod("runAtFixedRate", pluginClass, consumerClass, long.class, long.class);
+
+            asyncScheduler = server.getClass().getMethod("getAsyncScheduler").invoke(server);
+            Class<?> asyncSchedulerClass = asyncScheduler.getClass();
+            asyncRunNowMethod = asyncSchedulerClass
+                .getMethod("runNow", pluginClass, consumerClass);
+            asyncRunDelayedMethod = asyncSchedulerClass
+                .getMethod("runDelayed", pluginClass, consumerClass, long.class);
+            asyncRunAtFixedRateMethod = asyncSchedulerClass
+                .getMethod("runAtFixedRate", pluginClass, consumerClass, long.class, long.class);
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException("Failed to initialize Folia scheduler bridge.", exception);
         }
@@ -49,7 +67,18 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
 
     @Override
     public ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks) {
-        return runRepeating(task, initialDelayTicks, periodTicks);
+        try {
+            Object scheduledTask = asyncRunAtFixedRateMethod.invoke(
+                asyncScheduler,
+                plugin,
+                (Consumer<Object>) ignored -> safelyRun(task),
+                initialDelayTicks,
+                periodTicks
+            );
+            return reflectionHandle(scheduledTask);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Failed to schedule repeating async Folia task.", exception);
+        }
     }
 
     @Override
@@ -69,7 +98,30 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
 
     @Override
     public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
-        return runLater(task, delayTicks);
+        if (delayTicks <= 0) {
+            // AsyncScheduler.runNow does not accept a Consumer with 0 ticks — use runNow
+            try {
+                Object scheduledTask = asyncRunNowMethod.invoke(
+                    asyncScheduler,
+                    plugin,
+                    (Consumer<Object>) ignored -> safelyRun(task)
+                );
+                return reflectionHandle(scheduledTask);
+            } catch (ReflectiveOperationException exception) {
+                throw new IllegalStateException("Failed to schedule immediate async Folia task.", exception);
+            }
+        }
+        try {
+            Object scheduledTask = asyncRunDelayedMethod.invoke(
+                asyncScheduler,
+                plugin,
+                (Consumer<Object>) ignored -> safelyRun(task),
+                delayTicks
+            );
+            return reflectionHandle(scheduledTask);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Failed to schedule delayed async Folia task.", exception);
+        }
     }
 
     @Override

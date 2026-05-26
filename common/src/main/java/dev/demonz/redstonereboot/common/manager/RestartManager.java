@@ -316,7 +316,7 @@ public class RestartManager {
     }
 
     public synchronized boolean isRestartInProgress() {
-        return currentRestartTask != null;
+        return currentRestartTask != null || restartExecuting.get();
     }
 
     public synchronized int getSecondsUntilRestart() {
@@ -336,10 +336,14 @@ public class RestartManager {
     }
 
     public synchronized void cleanup() {
-        cancelCurrentCountdown(true);
+        if (isRestartInProgress()) {
+            cancelCurrentCountdown(true);
+            logger.info("Cleanup: cancelled in-progress restart.");
+        }
         if (schedulerTask != null) {
             schedulerTask.cancel();
             schedulerTask = null;
+            logger.info("Cleanup: stopped scheduled restart checks.");
         }
     }
 
