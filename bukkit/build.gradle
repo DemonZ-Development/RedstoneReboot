@@ -19,12 +19,15 @@ dependencies {
 
 shadowJar {
     archiveBaseName = 'RedstoneReboot-Bukkit'
+    archiveClassifier = ''
     mergeServiceFiles()
 
     relocate 'org.bstats', 'dev.demonz.redstonereboot.libs.bstats'
     relocate 'net.kyori.adventure', 'dev.demonz.redstonereboot.libs.kyori.adventure'
     relocate 'net.kyori.examination', 'dev.demonz.redstonereboot.libs.kyori.examination'
 }
+
+assemble.dependsOn shadowJar
 
 jar {
     archiveBaseName = 'RedstoneReboot-Bukkit'
