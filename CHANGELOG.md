@@ -6,13 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [1.4.2] — 2026-05-26
+## [1.4.2] — 2026-05-27
 
 ### Added
+- **Automated MockBukkit Test Suite**: Implemented high-level sandbox unit/integration tests covering commands, permissions, 40-tick scheduler countdowns, cancellation, and PlaceholderAPI.
 - Minecraft 26.x compatibility: JDK 25 toolchain (compiles Java 17 bytecode — runs on all JVMs ≥17)
 - `MinecraftTPSUtil`: `double[]` fallback for 26.x where the `tickTimes` field type may change
 
 ### Fixed
+- **Folia 0-Tick Scheduler Exception**: Clamped task delays to `1L` minimum to bypass strict Paper/Folia exceptions.
+- **Modular Classloading Security (Java 9+)**: Swapped concrete package reflection targets for public interfaces (`org.bukkit.Server` and `net.luckperms.api.LuckPerms`), resolving Java modularity warnings.
+- **YAML Config Reload Wipe Protection**: Guarded configuration reload state with a trial YAML load, preventing syntax errors from overriding active settings.
+- **PlaceholderAPI CPU Load Optimization**: Implemented volatile cached metrics updated sequentially on a background thread, halting repeated high-CPU reflection calls.
+- **Fabric Yarn Remapping Crash**: Converted yarn reflection mappings into direct NMS class instantiation.
+- **Metaspace Memory Leaks**: Registered mod shutdown hooks to class fields and systematically cleaned them up during `stopCore()` execution.
 - **bStats metrics not reporting** — `MetricsBase.checkRelocation()` threw `IllegalStateException` because manual `zipTree` shading left classes in `org.bstats` package. Migrated to Gradle Shadow plugin with proper package relocation (`org.bstats` → `dev.demonz.redstonereboot.libs.bstats`)
 - bStats initialization failure now logged at `WARNING` level instead of invisible `FINE`
 - Forge mod metadata: version range locked from `[1.20.4,)` to `[1.20.4,1.20.5]` — prevents false 26.x compatibility claim on Modrinth
