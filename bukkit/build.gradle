@@ -8,8 +8,8 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.11.5'
     compileOnly 'org.jetbrains:annotations:25.0.0'
     implementation 'net.kyori:adventure-platform-bukkit:4.3.0'
-    implementation 'net.kyori:adventure-text-minimessage:4.13.0'
-    implementation 'net.kyori:adventure-text-serializer-legacy:4.13.0'
+    implementation 'net.kyori:adventure-text-minimessage:5.1.1'
+    implementation 'net.kyori:adventure-text-serializer-legacy:5.1.1'
     implementation 'org.bstats:bstats-bukkit:3.0.2'
     testImplementation platform('org.junit:junit-bom:5.11.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
