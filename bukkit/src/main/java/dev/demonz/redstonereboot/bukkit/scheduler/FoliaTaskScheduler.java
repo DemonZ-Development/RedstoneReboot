@@ -42,12 +42,13 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
 
             asyncScheduler = server.getClass().getMethod("getAsyncScheduler").invoke(server);
             Class<?> asyncSchedulerClass = asyncScheduler.getClass();
+            Class<?> timeUnitClass = java.util.concurrent.TimeUnit.class;
             asyncRunNowMethod = asyncSchedulerClass
                 .getMethod("runNow", pluginClass, consumerClass);
             asyncRunDelayedMethod = asyncSchedulerClass
-                .getMethod("runDelayed", pluginClass, consumerClass, long.class);
+                .getMethod("runDelayed", pluginClass, consumerClass, long.class, timeUnitClass);
             asyncRunAtFixedRateMethod = asyncSchedulerClass
-                .getMethod("runAtFixedRate", pluginClass, consumerClass, long.class, long.class);
+                .getMethod("runAtFixedRate", pluginClass, consumerClass, long.class, long.class, timeUnitClass);
 
             // Resolve cancel method from returned task type
             cancelMethod = Class.forName("io.papermc.paper.threadedregions.scheduler.ScheduledTask")
@@ -81,8 +82,9 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 asyncScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                initialDelayTicks,
-                periodTicks
+                initialDelayTicks * 50L,
+                periodTicks * 50L,
+                java.util.concurrent.TimeUnit.MILLISECONDS
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {
@@ -127,7 +129,8 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 asyncScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                delayTicks
+                delayTicks * 50L,
+                java.util.concurrent.TimeUnit.MILLISECONDS
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {

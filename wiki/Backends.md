@@ -17,6 +17,7 @@ RedstoneReboot can either stop the server itself or hand restart ownership to an
 Backends are configured through `restart-backends.properties`.
 
 ```properties
+backends-enabled=false
 active-backend=SHUTDOWN_ONLY
 lockout-duration-seconds=300
 ptero-url=
@@ -25,6 +26,11 @@ ptero-id=
 systemd-service=minecraft
 localscript-file=start.sh
 ```
+
+### Key Properties
+
+- **`backends-enabled`**: Must be `true` for backend processing to occur; otherwise defaults to `SHUTDOWN_ONLY`.
+- **Environment Variables**: Sensitive properties support dynamic resolution using `${env.VAR_NAME:-fallback}` (e.g., `ptero-token=${env.PTERO_API_KEY}`). This works for variables prefixed with `REBOOT_`, `PTERO_`, `MINECRAFT_`, or `JAVA_`.
 
 ## Choosing a Backend
 

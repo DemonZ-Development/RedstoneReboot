@@ -36,15 +36,9 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
             startCore(scheduler, loadSimpleConfig(configPath), configDir);
 
             NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
+            NeoForge.EVENT_BUS.addListener(this::onServerStarted);
             NeoForge.EVENT_BUS.addListener(this::onServerStopping);
 
-            if (core != null) {
-                try {
-                    core.onEnable();
-                } catch (Exception onEnableException) {
-                    getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
-                }
-            }
             startPlatformMonitoring();
             getLogger().info("NeoForge dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
@@ -56,6 +50,16 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
         if (core == null) return;
         new BrigadierCommand(core).register(event.getDispatcher(), source -> new NeoForgeSender(this, (CommandSourceStack) source));
         getLogger().info("RedstoneReboot command registered.");
+    }
+
+    private void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
+        if (core != null) {
+            try {
+                core.onEnable();
+            } catch (Exception onEnableException) {
+                getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
+            }
+        }
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
@@ -167,7 +171,7 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
                 return true;
             }
             int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
-            return level > 0 && source.hasPermission(level);
+            return level <= 0 || source.hasPermission(level);
         }
     }
 
@@ -194,7 +198,7 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
                 char code = text.charAt(++i);
                 net.minecraft.ChatFormatting format = net.minecraft.ChatFormatting.getByCode(code);
                 if (format != null) {
-                    if (format.isColor()) {
+                    if (format.isColor() || format == net.minecraft.ChatFormatting.RESET) {
                         formats.clear();
                     }
                     formats.add(format);

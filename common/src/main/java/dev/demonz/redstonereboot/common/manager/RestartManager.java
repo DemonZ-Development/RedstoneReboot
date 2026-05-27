@@ -148,9 +148,10 @@ public class RestartManager {
      * @return {@code true} if the restart was accepted and scheduled
      */
     public synchronized boolean scheduleRestart(int delay, RestartReason reason, String initiator) {
+        if (restartExecuting.get()) return false;
         // Clamp delay to prevent integer overflow for extreme values (max ~68 years → clamp to ~2 years)
         int normalizedDelay = Math.max(0, Math.min(delay, 63072000));
-        int currentRemaining = getSecondsUntilRestart();
+        long currentRemaining = getSecondsUntilRestart();
 
         if (isRestartInProgress() && currentRemaining >= 0 && currentRemaining <= normalizedDelay) {
             logger.warning("Ignoring restart request from " + initiator
@@ -321,7 +322,7 @@ public class RestartManager {
     }
 
     public synchronized boolean cancelRestart() {
-        if (!isRestartInProgress()) {
+        if (!isRestartInProgress() || restartExecuting.get()) {
             return false;
         }
 

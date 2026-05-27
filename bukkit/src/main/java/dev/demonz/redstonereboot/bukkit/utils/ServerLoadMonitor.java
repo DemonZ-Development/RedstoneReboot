@@ -49,7 +49,7 @@ public class ServerLoadMonitor {
     }
 
     private void checkTPS() {
-        if (!plugin.getConfigManager().isMonitoringEnabled()) {
+        if (!plugin.getConfigManager().isMonitoringEnabled() || lastTPS < 0) {
             consecutiveLowTPS = 0;
             return;
         }
@@ -105,7 +105,7 @@ public class ServerLoadMonitor {
 
         boolean triggered = false;
 
-        if (lastTPS < plugin.getConfigManager().getEmergencyTpsThreshold()) {
+        if (lastTPS >= 0 && lastTPS < plugin.getConfigManager().getEmergencyTpsThreshold()) {
             if (emergencyTpsTriggered.compareAndSet(false, true)) {
                 plugin.sendEmergencyAlert("Critical TPS: " + String.format(Locale.ROOT, "%.1f", lastTPS));
                 triggerRestart(RestartReason.EMERGENCY_TPS, "EmergencyMonitor");

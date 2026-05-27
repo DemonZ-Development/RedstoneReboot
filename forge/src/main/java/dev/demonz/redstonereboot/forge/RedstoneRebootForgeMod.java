@@ -36,15 +36,9 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             startCore(scheduler, loadSimpleConfig(configPath), configDir);
 
             MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
+            MinecraftForge.EVENT_BUS.addListener(this::onServerStarted);
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopping);
 
-            if (core != null) {
-                try {
-                    core.onEnable();
-                } catch (Exception onEnableException) {
-                    getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
-                }
-            }
             startPlatformMonitoring();
             getLogger().info("Forge dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
@@ -56,6 +50,16 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
         if (core == null) return;
         new BrigadierCommand(core).register(event.getDispatcher(), source -> new ForgeSender(this, (CommandSourceStack) source));
         getLogger().info("RedstoneReboot command registered.");
+    }
+
+    private void onServerStarted(net.minecraftforge.event.server.ServerStartedEvent event) {
+        if (core != null) {
+            try {
+                core.onEnable();
+            } catch (Exception onEnableException) {
+                getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
+            }
+        }
     }
 
     private void onServerStopping(ServerStoppingEvent event) {
@@ -167,7 +171,7 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
                 return true;
             }
             int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
-            return level > 0 && source.hasPermission(level);
+            return level <= 0 || source.hasPermission(level);
         }
     }
 
@@ -194,7 +198,7 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
                 char code = text.charAt(++i);
                 net.minecraft.ChatFormatting format = net.minecraft.ChatFormatting.getByCode(code);
                 if (format != null) {
-                    if (format.isColor()) {
+                    if (format.isColor() || format == net.minecraft.ChatFormatting.RESET) {
                         formats.clear();
                     }
                     formats.add(format);
