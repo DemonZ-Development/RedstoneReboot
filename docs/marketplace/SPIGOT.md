@@ -102,6 +102,16 @@ RedstoneReboot separates "when to restart" from "how to restart":
 [*] [B]PTERODACTYL[/B] — Pterodactyl panel API integration.
 [/LIST]
 
+[B]💡 Do I need a custom backend?[/B]
+If your server is already wrapped in a startup loop script (like a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), [B]SHUTDOWN_ONLY works out of the box[/B]! When the restart timer runs out, the plugin gracefully stops the server, and your script starts it back up automatically.
+
+[B]Why use a custom backend then?[/B]
+[LIST=1]
+[*] [B]Intelligent Handoff (Pterodactyl, Multicraft)[/B] — Avoid panel desyncs or false offline indicators. Instead of just shutting down, the plugin talks to your panel's API to request a clean power cycle.
+[*] [B]Self-Healing Bootups[/B] — If you don't run a startup loop script, the [B]LOCALSCRIPT[/B] backend spawns a new process to boot the server back up automatically.
+[*] [B]Crash Lockout Safety[/B] — Simple loops can get stuck in infinite crash loops if a file gets corrupted. Custom backends implement safety lockout timers to prevent endless boot hammering.
+[/LIST]
+
 Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE] — changes apply instantly.
 
 [HR][/HR]

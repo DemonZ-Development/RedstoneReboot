@@ -52,6 +52,11 @@ This page serves the plugin builds for Bukkit, Spigot, Paper, and Folia:
 - **LOCALSCRIPT** — auto-generated wrapper script restart loop
 - **SYSTEMD** / **DOCKER** / **PTERODACTYL** — native environment integration
 - Hot-reload: edit `restart-backends.properties` and `/reboot reload`
+- **Do I need a custom backend?** If your server is already wrapped in a startup loop script (like a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **`SHUTDOWN_ONLY` works out of the box!** When the restart timer runs out, the engine gracefully stops the server, and your script starts it back up automatically.
+- **Why configure a custom backend then?** 
+  1. *Intelligent Handoff (Pterodactyl / Panels)*: Avoid panel desyncs or false offline indicators by requesting a clean power cycle via the panel's API.
+  2. *Self-Healing Bootups*: The `LOCALSCRIPT` backend spawns a new process to boot the server back up automatically if you don't run a loop script.
+  3. *Crash Lockout Safety*: Implements safety lockout timers to prevent endless boot hammering if files get corrupted.
 
 ### 🔔 Rich Alerts & Integrations
 - Chat, titles, action bar, and sounds
