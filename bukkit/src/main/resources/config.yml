@@ -88,5 +88,6 @@ placeholders:
 advanced:
   metrics-enabled: true
   shutdown-delay-ticks: 60
+  backup-on-migration: true
 
 config-version: 3

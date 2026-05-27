@@ -168,4 +168,56 @@ public class RedstoneRebootBukkitTest {
         // Verify that config in memory did not change and remains safe
         assertEquals(ConfigManager.CURRENT_CONFIG_VERSION, cfg.getConfigVersion());
     }
+
+    @Test
+    public void testConfigMigration() throws Exception {
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
+        assertTrue(configFile.exists());
+
+        // Intentionally write an outdated v1 configuration
+        try (FileWriter writer = new FileWriter(configFile)) {
+            writer.write("general:\n" +
+                         "  plugin-prefix: \"§8[§cRedstone§8] §aReboot\"\n" +
+                         "  debug-mode: false\n" +
+                         "  strict-validation: true\n" +
+                         "permissions:\n" +
+                         "  luckperms:\n" +
+                         "    integration-enabled: true\n" +
+                         "    default-permission: \"some.old.permission\"\n" +
+                         "    admin-permission: \"some.admin.permission\"\n" +
+                         "advanced:\n" +
+                         "  async-operations: true\n" +
+                         "  thread-pool-size: 4\n" +
+                         "config-version: 1\n");
+        }
+
+        // Reload the plugin so it triggers loadConfig() which calls migrateConfig()
+        plugin.reloadPluginState();
+
+        ConfigManager cfg = plugin.getConfigManager();
+        // Assert version was migrated to current
+        assertEquals(ConfigManager.CURRENT_CONFIG_VERSION, cfg.getConfigVersion());
+
+        // Assert new default keys were injected
+        FileConfiguration fileConfig = plugin.getConfig();
+        assertTrue(fileConfig.getBoolean("permissions.fallback.use-op-as-admin"));
+        assertEquals(2, fileConfig.getInt("permissions.fallback.default-level"));
+        assertTrue(fileConfig.getBoolean("permissions.fallback.public-permissions-enabled"));
+        assertTrue(fileConfig.getBoolean("placeholders.enabled"));
+        assertTrue(fileConfig.getBoolean("advanced.metrics-enabled"));
+        assertEquals(60, fileConfig.getInt("advanced.shutdown-delay-ticks"));
+
+        // Assert old obsolete keys were completely removed
+        assertFalse(fileConfig.contains("permissions.luckperms.default-permission"));
+        assertFalse(fileConfig.contains("permissions.luckperms.admin-permission"));
+        assertFalse(fileConfig.contains("advanced.async-operations"));
+        assertFalse(fileConfig.contains("advanced.thread-pool-size"));
+
+        // Assert backup file was created
+        File backupFile = new File(plugin.getDataFolder(), "config.yml.v1.backup");
+        assertTrue(backupFile.exists());
+
+        // Clean up backup file
+        backupFile.delete();
+    }
 }

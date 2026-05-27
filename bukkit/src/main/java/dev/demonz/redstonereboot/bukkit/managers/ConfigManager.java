@@ -31,9 +31,70 @@ public class ConfigManager implements PlatformConfig {
     private void loadConfig() {
         plugin.saveDefaultConfig();
         config = plugin.getConfig();
+        migrateConfig(config);
         if (isStrictValidationEnabled()) {
             validateConfiguration();
         }
+    }
+
+    private void migrateConfig(FileConfiguration cfg) {
+        int version = cfg.getInt("config-version", 1);
+        if (version >= CURRENT_CONFIG_VERSION) {
+            return;
+        }
+
+        plugin.getLogger().info("Migrating config.yml from version " + version + " to " + CURRENT_CONFIG_VERSION + "...");
+
+        // Create backup of old config if enabled
+        boolean backupEnabled = cfg.getBoolean("advanced.backup-on-migration", true);
+        if (backupEnabled) {
+            java.io.File configFile = new java.io.File(plugin.getDataFolder(), "config.yml");
+            if (configFile.exists()) {
+                java.io.File backupFile = new java.io.File(plugin.getDataFolder(), "config.yml.v" + version + ".backup");
+                try {
+                    java.nio.file.Files.copy(configFile.toPath(), backupFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    plugin.getLogger().info("Created config backup: " + backupFile.getName());
+                } catch (Exception e) {
+                    plugin.getLogger().warning("Failed to create config backup: " + e.getMessage());
+                }
+            }
+        }
+
+        // v1.3.3 -> v1.4.0 removals and new default key additions
+        if (version < 3) {
+            // Remove old unused keys
+            cfg.set("permissions.luckperms.default-permission", null);
+            cfg.set("permissions.luckperms.admin-permission", null);
+            cfg.set("advanced.async-operations", null);
+            cfg.set("advanced.thread-pool-size", null);
+
+            // Add new missing keys if they don't exist
+            if (!cfg.contains("permissions.fallback.use-op-as-admin")) {
+                cfg.set("permissions.fallback.use-op-as-admin", true);
+            }
+            if (!cfg.contains("permissions.fallback.default-level")) {
+                cfg.set("permissions.fallback.default-level", 2);
+            }
+            if (!cfg.contains("permissions.fallback.public-permissions-enabled")) {
+                cfg.set("permissions.fallback.public-permissions-enabled", true);
+            }
+            if (!cfg.contains("placeholders.enabled")) {
+                cfg.set("placeholders.enabled", true);
+            }
+            if (!cfg.contains("advanced.metrics-enabled")) {
+                cfg.set("advanced.metrics-enabled", true);
+            }
+            if (!cfg.contains("advanced.shutdown-delay-ticks")) {
+                cfg.set("advanced.shutdown-delay-ticks", 60);
+            }
+        }
+
+        // Set to the current version
+        cfg.set("config-version", CURRENT_CONFIG_VERSION);
+
+        // Save changes
+        plugin.saveConfig();
+        plugin.getLogger().info("Successfully migrated config.yml to version " + CURRENT_CONFIG_VERSION + "!");
     }
 
     private void validateConfiguration() {
@@ -115,6 +176,7 @@ public class ConfigManager implements PlatformConfig {
 
         plugin.reloadConfig();
         FileConfiguration newConfig = plugin.getConfig();
+        migrateConfig(newConfig);
         if (isStrictValidationEnabled()) {
             // Validate the new config BEFORE assigning it to this.config.
             // If validation fails, the old config remains active.
