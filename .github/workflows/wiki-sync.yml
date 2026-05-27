@@ -16,9 +16,9 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      # actions/checkout v4.1.1
+      # actions/checkout v4
       - name: Checkout main repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@v4
         with:
           path: main
 
@@ -27,9 +27,9 @@ jobs:
           mkdir -p staging
           cp -r main/wiki/*.md staging/
 
-      # actions/checkout v4.1.1
+      # actions/checkout v4
       - name: Checkout wiki repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@v4
         with:
           repository: ${{ github.repository }}.wiki
           token: ${{ secrets.GITHUB_TOKEN }}
