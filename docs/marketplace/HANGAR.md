@@ -128,8 +128,4 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-<div align="center">
-
-Crafted with ❤️ by <a href="https://demonzdevelopment.online"><strong>DemonZ Development</strong></a>
-
-</div>
+Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)

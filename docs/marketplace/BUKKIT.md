@@ -125,8 +125,4 @@ This page serves the plugin builds for Bukkit, Spigot, Paper, and Folia:
 
 ---
 
-<div align="center">
-
-Crafted with ❤️ by <a href="https://demonzdevelopment.online"><strong>DemonZ Development</strong></a>
-
-</div>
+Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
