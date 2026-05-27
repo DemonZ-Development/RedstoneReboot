@@ -153,12 +153,6 @@ Choose the file that matches your server platform:
 
 ---
 
-<div align="center">
+Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
 
-<img src="https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="128"/>
-<br>
-Crafted with ❤️ by <a href="https://demonzdevelopment.online"><strong>DemonZ Development</strong></a>
-<br>
-<i>Premium Minecraft infrastructure, engineered for scale.</i>
-
-</div>
+*Premium Minecraft infrastructure, engineered for scale.*
