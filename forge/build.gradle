@@ -1,5 +1,5 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '6.0.25'
+    id 'net.minecraftforge.gradle' version '7.0.25'
 }
 
 // Toolchain inherited from root build.gradle (JavaLanguageVersion.of(21))
