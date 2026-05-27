@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -39,9 +40,9 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
     protected volatile RedstoneRebootCore core;
 
     protected AbstractBootstrapServerPlatform(Logger logger, String platformName, String minecraftVersion) {
-        this.logger = logger;
-        this.platformName = platformName;
-        this.minecraftVersion = minecraftVersion;
+        this.logger = Objects.requireNonNull(logger, "logger must not be null");
+        this.platformName = Objects.requireNonNull(platformName, "platformName must not be null");
+        this.minecraftVersion = Objects.requireNonNull(minecraftVersion, "minecraftVersion must not be null");
     }
 
     protected final Logger getLogger() {
@@ -70,6 +71,9 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             Properties props = new Properties();
             try (InputStream in = Files.newInputStream(configPath)) {
                 props.load(in);
+            } catch (IllegalArgumentException exception) {
+                logger.warning("Malformed .properties file at " + configPath + ": " + exception.getMessage() + ". Using defaults.");
+                return config;
             }
 
             List<String> scheduledTimes = splitCsv(props.getProperty("scheduled-times", ""));
@@ -82,13 +86,15 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
                 config.setScheduledDays(scheduledDays);
             }
 
-            List<Integer> warningTimes = splitIntegerCsv(props.getProperty("warning-times", ""));
+            List<Integer> warningTimes = splitIntegerCsv(props.getProperty("warning-times", "300,60,30,10,5"));
             if (!warningTimes.isEmpty()) {
                 config.setWarningTimes(warningTimes.stream()
                     .filter(value -> value > 0)
                     .distinct()
                     .sorted(Comparator.reverseOrder())
                     .toList());
+            } else {
+                config.setWarningTimes(new ArrayList<>(List.of(300, 60, 30, 10, 5)));
             }
 
             config.setTimezone(props.getProperty("timezone", config.getTimezone()).trim());
@@ -111,6 +117,31 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             applyInteger(props, "shutdown-delay-ticks", value -> config.setShutdownDelayTicks(Math.max(value, 0)));
             applyBoolean(props, "use-op-as-admin", config::setUseOpAsAdminEnabled);
             applyInteger(props, "default-permission-level", value -> config.setDefaultPermissionLevel(clamp(value, 0, 4)));
+            applyBoolean(props, "public-permissions-enabled", config::setPublicPermissionsEnabled);
+
+            String prefix = props.getProperty("plugin-prefix");
+            if (prefix != null) {
+                config.setPrefix(prefix);
+            }
+            applyBoolean(props, "chat-alerts-enabled", config::setChatAlertsEnabled);
+            String chatFormat = props.getProperty("chat-alert-format");
+            if (chatFormat != null) {
+                config.setChatAlertFormat(chatFormat);
+            }
+            applyBoolean(props, "title-alerts-enabled", config::setTitleAlertsEnabled);
+            String titleMain = props.getProperty("title-main-text");
+            if (titleMain != null) {
+                config.setTitleMainText(titleMain);
+            }
+            String titleSub = props.getProperty("title-sub-text");
+            if (titleSub != null) {
+                config.setTitleSubText(titleSub);
+            }
+            applyBoolean(props, "actionbar-alerts-enabled", config::setActionBarAlertsEnabled);
+            String actionFormat = props.getProperty("actionbar-format");
+            if (actionFormat != null) {
+                config.setActionBarFormat(actionFormat);
+            }
         } catch (IOException exception) {
             logger.warning("Failed to load config: " + exception.getMessage());
         }
@@ -185,6 +216,90 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             + " | " + LegacyTextUtil.stripLegacyFormatting(subtitle));
     }
 
+    private static String formatDuration(int seconds) {
+        if (seconds < 60) {
+            return seconds + "s";
+        }
+        if (seconds < 3600) {
+            return (seconds / 60) + "m " + (seconds % 60) + "s";
+        }
+        return (seconds / 3600) + "h " + ((seconds % 3600) / 60) + "m";
+    }
+
+    @Override
+    public void sendRestartAlert(int seconds, dev.demonz.redstonereboot.common.manager.RestartReason reason) {
+        if (mutableConfig == null || !mutableConfig.isAlertsEnabled()) {
+            return;
+        }
+
+        String timeString = formatDuration(seconds);
+
+        if (mutableConfig.isChatAlertsEnabled()) {
+            String chatMessage = mutableConfig.getChatAlertFormat()
+                .replace("{time}", timeString)
+                .replace("{reason}", reason.getDisplayName());
+            broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(chatMessage));
+        }
+
+        if (mutableConfig.isTitleAlertsEnabled()) {
+            String mainTitle = mutableConfig.getTitleMainText();
+            String subTitle = mutableConfig.getTitleSubText().replace("{time}", timeString);
+            broadcastTitle(
+                LegacyTextUtil.translateAlternateColorCodes(mainTitle),
+                LegacyTextUtil.translateAlternateColorCodes(subTitle)
+            );
+        }
+    }
+
+    @Override
+    public void sendFinalRestartAlert(dev.demonz.redstonereboot.common.manager.RestartReason reason) {
+        if (mutableConfig == null || !mutableConfig.isAlertsEnabled()) {
+            return;
+        }
+        String prefix = mutableConfig.getPrefix();
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
+            prefix + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName()
+        ));
+    }
+
+    @Override
+    public void sendRestartCancelledAlert() {
+        if (mutableConfig == null || !mutableConfig.isAlertsEnabled()) {
+            return;
+        }
+        String prefix = mutableConfig.getPrefix();
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
+            prefix + " &aScheduled restart has been CANCELLED!"
+        ));
+    }
+
+    @Override
+    public void sendEmergencyAlert(String reason) {
+        if (mutableConfig == null || !mutableConfig.isAlertsEnabled()) {
+            return;
+        }
+        String prefix = mutableConfig.getPrefix();
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
+            prefix + " &4&lEMERGENCY RESTART&r&c - " + reason
+        ));
+        broadcastTitle(
+            LegacyTextUtil.translateAlternateColorCodes("&4&lEmergency Restart"),
+            LegacyTextUtil.translateAlternateColorCodes("&c" + reason)
+        );
+    }
+
+    @Override
+    public void sendPostponedAlert(String adminDetail) {
+        if (mutableConfig == null || !mutableConfig.isAlertsEnabled()) {
+            return;
+        }
+        String prefix = mutableConfig.getPrefix();
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
+            prefix + " &cScheduled restart postponed. &eThe server will remain online."
+        ));
+        logger.warning("RESTART POSTPONED - Admin Detail: " + adminDetail);
+    }
+
     @Override
     public void executeConsole(String command) {
         logger.warning("Console execution requested on " + platformName
@@ -232,6 +347,15 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         props.setProperty("shutdown-delay-ticks", "60");
         props.setProperty("use-op-as-admin", "true");
         props.setProperty("default-permission-level", "2");
+        props.setProperty("public-permissions-enabled", "true");
+        props.setProperty("plugin-prefix", "§8[§cRedstone§8] §aReboot");
+        props.setProperty("chat-alerts-enabled", "true");
+        props.setProperty("chat-alert-format", "§8[§cRedstone§8] §eServer will restart in §c{time}§e!");
+        props.setProperty("title-alerts-enabled", "true");
+        props.setProperty("title-main-text", "§c⚡ Server Restart");
+        props.setProperty("title-sub-text", "§ein §c{time}");
+        props.setProperty("actionbar-alerts-enabled", "true");
+        props.setProperty("actionbar-format", "§8[§cRedstone§8] §eRestart in: §c{time}");
 
         try (OutputStream out = Files.newOutputStream(configPath)) {
             props.store(out, "RedstoneReboot Configuration");
@@ -323,5 +447,14 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         target.setShutdownDelayTicks(source.getShutdownDelayTicks());
         target.setUseOpAsAdminEnabled(source.isUseOpAsAdminEnabled());
         target.setDefaultPermissionLevel(source.getDefaultPermissionLevel());
+        target.setPublicPermissionsEnabled(source.isPublicPermissionsEnabled());
+        target.setPrefix(source.getPrefix());
+        target.setChatAlertsEnabled(source.isChatAlertsEnabled());
+        target.setChatAlertFormat(source.getChatAlertFormat());
+        target.setTitleAlertsEnabled(source.isTitleAlertsEnabled());
+        target.setTitleMainText(source.getTitleMainText());
+        target.setTitleSubText(source.getTitleSubText());
+        target.setActionBarAlertsEnabled(source.isActionBarAlertsEnabled());
+        target.setActionBarFormat(source.getActionBarFormat());
     }
 }

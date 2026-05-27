@@ -1,11 +1,13 @@
 package dev.demonz.redstonereboot.common.scheduler;
 
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,6 +20,7 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
 
     private final ScheduledExecutorService executor;
     private final Executor dispatcher;
+    private final AtomicBoolean shutdown = new AtomicBoolean(false);
 
     public JavaPlatformScheduler() {
         this(Runnable::run);
@@ -30,7 +33,11 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
 
     @Override
     public ScheduledTaskHandle runRepeating(Runnable task, long initialDelayTicks, long periodTicks) {
-        // Assuming 20 ticks per second (50ms per tick)
+        Objects.requireNonNull(task, "task must not be null");
+        if (shutdown.get()) {
+            LOGGER.warning("runRepeating called after shutdown — task discarded.");
+            return () -> {};
+        }
         ScheduledFuture<?> future = executor.scheduleAtFixedRate(
             () -> dispatchSafely(task),
             initialDelayTicks * 50,
@@ -42,6 +49,11 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
 
     @Override
     public ScheduledTaskHandle runRepeatingAsync(Runnable task, long initialDelayTicks, long periodTicks) {
+        Objects.requireNonNull(task, "task must not be null");
+        if (shutdown.get()) {
+            LOGGER.warning("runRepeatingAsync called after shutdown — task discarded.");
+            return () -> {};
+        }
         ScheduledFuture<?> future = executor.scheduleAtFixedRate(
             () -> runSafely(task),
             initialDelayTicks * 50,
@@ -53,6 +65,11 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
 
     @Override
     public ScheduledTaskHandle runLater(Runnable task, long delayTicks) {
+        Objects.requireNonNull(task, "task must not be null");
+        if (shutdown.get()) {
+            LOGGER.warning("runLater called after shutdown — task discarded.");
+            return () -> {};
+        }
         ScheduledFuture<?> future = executor.schedule(
             () -> dispatchSafely(task),
             delayTicks * 50,
@@ -63,6 +80,11 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
 
     @Override
     public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
+        Objects.requireNonNull(task, "task must not be null");
+        if (shutdown.get()) {
+            LOGGER.warning("runLaterAsync called after shutdown — task discarded.");
+            return () -> {};
+        }
         ScheduledFuture<?> future = executor.schedule(
             () -> runSafely(task),
             delayTicks * 50,
@@ -77,10 +99,12 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
     }
 
     public void shutdown() {
+        shutdown.set(true);
         executor.shutdownNow();
     }
 
     private void dispatchSafely(Runnable task) {
+        if (shutdown.get()) return;
         try {
             dispatcher.execute(() -> runSafely(task));
         } catch (Exception exception) {
@@ -89,8 +113,12 @@ public class JavaPlatformScheduler implements PlatformTaskScheduler {
     }
 
     private void runSafely(Runnable task) {
+        if (shutdown.get()) return;
         try {
             task.run();
+        } catch (Error error) {
+            LOGGER.log(Level.SEVERE, "Scheduled task threw an Error.", error);
+            throw error;
         } catch (Exception exception) {
             LOGGER.log(Level.SEVERE, "Scheduled task failed.", exception);
         }

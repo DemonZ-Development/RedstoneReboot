@@ -60,7 +60,7 @@ class PlatformLoadMonitorTest {
 
     private static BackendRegistry backendRegistry() {
         Logger logger = Logger.getLogger("PlatformLoadMonitorTest");
-        return new BackendRegistry(logger, new BackendConfig(Path.of("build", "tmp", "PlatformLoadMonitorTest"), logger));
+        return new BackendRegistry(logger, new BackendConfig(Path.of("build", "tmp", "PlatformLoadMonitorTest"), logger), Path.of("build", "tmp", "PlatformLoadMonitorTest"));
     }
 
     private static final class FakeScheduler implements PlatformTaskScheduler {

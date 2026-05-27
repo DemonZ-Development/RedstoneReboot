@@ -6,6 +6,20 @@ import java.util.logging.Logger;
 
 /**
  * Utility to safely extract TPS data from MinecraftServer across different platforms and mappings.
+ *
+ * <p><b>Java 9+ Module Access Note:</b> On Java 9+ with module encapsulation,
+ * the reflective call {@code Field.setAccessible(true)} on the tick-time array field
+ * of {@code MinecraftServer} may throw {@link InaccessibleObjectException} unless
+ * the JVM is started with the appropriate {@code --add-opens} flag. For example:</p>
+ *
+ * <pre>{@code
+ * --add-opens java.base/java.lang=ALL-UNNAMED
+ * --add-opens net.minecraft.server/net.minecraft.server=ALL-UNNAMED
+ * }</pre>
+ *
+ * <p>If the flag is missing, this utility gracefully falls back to returning 20.0 TPS
+ * and logs a warning. Fabric and Forge loaders typically handle this automatically,
+ * but standalone or custom launch configurations may need the flag added manually.</p>
  */
 public final class MinecraftTPSUtil {
 
@@ -37,13 +51,25 @@ public final class MinecraftTPSUtil {
                     tickTimesField.setAccessible(true);
                 }
 
-                long[] times = (long[]) tickTimesField.get(server);
-                if (times == null || times.length == 0) return 20.0;
+                Object raw = tickTimesField.get(server);
+                if (raw == null) return 20.0;
 
-                long sum = 0;
-                for (long t : times) {
-                    sum += t;
+                long[] times;
+                if (raw instanceof long[]) {
+                    times = (long[]) raw;
+                } else if (raw instanceof double[]) {
+                    double[] dtimes = (double[]) raw;
+                    double dsum = 0;
+                    for (double t : dtimes) dsum += t;
+                    double avgNanos = dsum / dtimes.length;
+                    return Math.min(20.0, 1000000000.0 / avgNanos);
+                } else {
+                    return 20.0;
                 }
+
+                if (times.length == 0) return 20.0;
+                long sum = 0;
+                for (long t : times) sum += t;
 
                 double avgNanos = (double) sum / times.length;
                 return Math.min(20.0, 1000000000.0 / avgNanos);
@@ -59,8 +85,11 @@ public final class MinecraftTPSUtil {
     private static Field findTickTimesField(Class<?> clazz) {
         Class<?> current = clazz;
         while (current != null && current != Object.class) {
-            // Try common mapping names
-            for (String name : new String[]{"tickTimes", "h", "field_1740", "tickLengths"}) {
+            // Try common mapping names: SRG, Yarn/intermediary, and Mojmap variants
+            for (String name : new String[]{
+                "tickTimes", "tickLengths",
+                "field_1740", "field_4735"   // common intermediary names for tick time arrays
+            }) {
                 try {
                     return current.getDeclaredField(name);
                 } catch (NoSuchFieldException ignored) {}

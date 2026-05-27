@@ -31,7 +31,7 @@ When `permissions.fallback.use-op-as-admin` is `true` (the default), server oper
 
 Fabric, Forge, and NeoForge builds do not have a Bukkit permission system. Instead, they use operator permission levels:
 
-- `use-op-as-admin: true` — OP level 4 grants admin access
-- `default-permission-level: 2` — The minimum OP level required for commands
+- `use-op-as-admin=true` — OP level 4 grants admin access
+- `default-permission-level=2` — The minimum OP level required for commands
 
 These values are configurable in `config/redstonereboot.properties`.

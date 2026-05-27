@@ -10,6 +10,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
  */
 public class PermissionManager {
 
+    private final RedstoneRebootPlugin plugin;
     private final ConfigManager configManager;
     private Object luckPermsAPI;
     private boolean luckPermsAvailable;
@@ -22,6 +23,7 @@ public class PermissionManager {
     private java.lang.reflect.Method asBooleanMethod;
 
     public PermissionManager(RedstoneRebootPlugin plugin) {
+        this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         if (Bukkit.getPluginManager().getPlugin("LuckPerms") != null) {
             try {
@@ -32,7 +34,8 @@ public class PermissionManager {
                     luckPermsAvailable = true;
                     prepareReflection();
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                plugin.getLogger().warning("LuckPerms integration failed to initialize: " + e.getMessage() + ". Falling back to Bukkit permissions.");
                 luckPermsAPI = null;
                 luckPermsAvailable = false;
             }
@@ -64,8 +67,10 @@ public class PermissionManager {
                     Object result = checkPermissionMethod.invoke(permissionData, permission);
                     return (Boolean) asBooleanMethod.invoke(result);
                 }
-            } catch (Exception ignored) {
-                // Fall through to Bukkit permissions.
+            } catch (Exception e) {
+                plugin.getLogger().fine("LuckPerms permission check failed: " + e.getMessage() + ". Falling back to Bukkit permissions.");
+                // Fall through to Bukkit permissions if LuckPerms lookup fails.
+                // This handles the race where getUser() returns null during player login.
             }
         }
         return player.hasPermission(permission);

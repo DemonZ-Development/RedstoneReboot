@@ -1,10 +1,10 @@
 package dev.demonz.redstonereboot.bukkit.commands;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
+import dev.demonz.redstonereboot.bukkit.utils.ServerLoadMonitor;
 import dev.demonz.redstonereboot.common.command.CommandProcessor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,8 +20,6 @@ import java.util.Locale;
  * Main command handler for /reboot.
  */
 public class RebootCommand implements CommandExecutor, TabCompleter {
-
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     private final RedstoneRebootPlugin plugin;
     private final CommandProcessor processor;
@@ -67,7 +65,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
             for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "doctor", "reload", "help")) {
-                if (candidate.startsWith(args[0].toLowerCase())) {
+                if (candidate.startsWith(args[0].toLowerCase()) && hasTabPermission(sender, candidate)) {
                     completions.add(candidate);
                 }
             }
@@ -78,8 +76,24 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         return completions;
     }
 
+    private boolean hasTabPermission(CommandSender sender, String subcommand) {
+        return switch (subcommand) {
+            case "now" -> sender.hasPermission("redstonereboot.restart.now");
+            case "schedule" -> sender.hasPermission("redstonereboot.restart.schedule");
+            case "cancel" -> sender.hasPermission("redstonereboot.restart.cancel");
+            case "reload" -> sender.hasPermission("redstonereboot.config.reload");
+            case "doctor" -> sender.hasPermission("redstonereboot.doctor");
+            default -> true;
+        };
+    }
+
     private boolean handleNow(CommandSender sender, String[] args) {
-        if (sender instanceof Player player && !plugin.getPermissionManager().canRestartNow(player)) {
+        if (sender instanceof Player player) {
+            if (!plugin.getPermissionManager().canRestartNow(player)) {
+                msg(sender, "No permission.", NamedTextColor.RED);
+                return true;
+            }
+        } else if (!sender.hasPermission("redstonereboot.restart.now")) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -103,7 +117,12 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleSchedule(CommandSender sender, String[] args) {
-        if (sender instanceof Player player && !plugin.getPermissionManager().canScheduleRestart(player)) {
+        if (sender instanceof Player player) {
+            if (!plugin.getPermissionManager().canScheduleRestart(player)) {
+                msg(sender, "No permission.", NamedTextColor.RED);
+                return true;
+            }
+        } else if (!sender.hasPermission("redstonereboot.restart.schedule")) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -127,7 +146,12 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleCancel(CommandSender sender) {
-        if (sender instanceof Player player && !plugin.getPermissionManager().canCancelRestart(player)) {
+        if (sender instanceof Player player) {
+            if (!plugin.getPermissionManager().canCancelRestart(player)) {
+                msg(sender, "No permission.", NamedTextColor.RED);
+                return true;
+            }
+        } else if (!sender.hasPermission("redstonereboot.restart.cancel")) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -137,7 +161,12 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleInfo(CommandSender sender) {
-        if (sender instanceof Player player && !plugin.getPermissionManager().canViewStatus(player)) {
+        if (sender instanceof Player player) {
+            if (!plugin.getPermissionManager().canViewStatus(player)) {
+                msg(sender, "No permission.", NamedTextColor.RED);
+                return true;
+            }
+        } else if (!sender.hasPermission("redstonereboot.status")) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -154,8 +183,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             healthy = plugin.getServerLoadMonitor().isHealthy();
         } else {
             tps = plugin.getTPS();
-            Runtime runtime = Runtime.getRuntime();
-            memoryUsage = (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
+            memoryUsage = ServerLoadMonitor.getMemoryUsagePercent();
             healthy = tps >= plugin.getConfigManager().getTpsThreshold() 
                    && memoryUsage <= plugin.getConfigManager().getMemoryThreshold();
         }
@@ -167,7 +195,12 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleReload(CommandSender sender) {
-        if (sender instanceof Player player && !plugin.getPermissionManager().canReloadConfig(player)) {
+        if (sender instanceof Player player) {
+            if (!plugin.getPermissionManager().canReloadConfig(player)) {
+                msg(sender, "No permission.", NamedTextColor.RED);
+                return true;
+            }
+        } else if (!sender.hasPermission("redstonereboot.config.reload")) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -183,6 +216,10 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
 
     private boolean handleDoctor(CommandSender sender) {
         if (sender instanceof Player player && !plugin.getPermissionManager().hasPermission(player, "redstonereboot.doctor") && !plugin.getPermissionManager().hasAdminPermission(player)) {
+            msg(sender, "No permission.", NamedTextColor.RED);
+            return true;
+        }
+        if (!(sender instanceof Player) && !sender.hasPermission("redstonereboot.doctor")) {
             msg(sender, "No permission.", NamedTextColor.RED);
             return true;
         }
@@ -203,7 +240,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     }
 
     private void msg(CommandSender sender, String text, NamedTextColor color) {
-        Component prefix = LEGACY_SERIALIZER.deserialize(plugin.getConfigManager().getPrefix());
+        Component prefix = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(plugin.getConfigManager().getPrefix());
         Component message = prefix.append(Component.space()).append(Component.text(text, color));
 
         if (plugin.getAdventure() != null) {
@@ -211,7 +248,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        sender.sendMessage(LEGACY_SERIALIZER.serialize(message));
+        sender.sendMessage(RedstoneRebootPlugin.LEGACY_SERIALIZER.serialize(message));
     }
 
     private class BukkitSender implements CommandProcessor.CommandSender {
@@ -223,13 +260,13 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
 
         @Override
         public void sendMessage(String message) {
-            Component content = LEGACY_SERIALIZER.deserialize(message);
+            Component content = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(message);
             if (plugin.getAdventure() != null) {
                 plugin.getAdventure().sender(sender).sendMessage(content);
                 return;
             }
 
-            sender.sendMessage(LEGACY_SERIALIZER.serialize(content));
+            sender.sendMessage(RedstoneRebootPlugin.LEGACY_SERIALIZER.serialize(content));
         }
 
         @Override
@@ -239,6 +276,10 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
 
         @Override
         public boolean hasPermission(String permission) {
+            if (sender instanceof Player player) {
+                return plugin.getPermissionManager().hasPermission(player, permission)
+                    || plugin.getPermissionManager().hasAdminPermission(player);
+            }
             return sender.hasPermission(permission);
         }
     }

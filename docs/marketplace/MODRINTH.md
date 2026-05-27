@@ -10,7 +10,10 @@
 
 **A Multi-Platform Minecraft Server Restart Engine**
 
-[![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+[![bStats Servers](https://img.shields.io/bstats/servers/30751?label=Servers&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+[![bStats Players](https://img.shields.io/bstats/players/30751?label=Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+
+![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)
 
 </div>
 
@@ -62,11 +65,11 @@ Choose the file that matches your server platform:
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
-| Bukkit-family servers | `1.9` through `1.21.1` | Java 8+ *(legacy)*, Java 17+ *(modern)* |
-| Folia | `1.20+` | Dedicated region-threaded build |
-| Fabric | `1.20.1+` | Requires Fabric API |
-| Forge | `1.20.4+` | Server-side mod |
-| NeoForge | `1.20.4+` | Server-side mod |
+| Bukkit-family servers | `1.9` through `26.x` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
+| Folia | `1.20+` through `26.x` | Dedicated region-threaded build |
+| Fabric | `1.20.1+` through `26.x` | Requires Fabric API |
+| Forge | `1.20.4+` through `26.x` | Dedicated server-side mod build |
+| NeoForge | `1.21.1+` through `26.x` | Dedicated server-side mod build |
 
 ---
 
@@ -113,7 +116,7 @@ Choose the file that matches your server platform:
 | `%redstonereboot_reason%` | `Scheduled Restart` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.4.0` |
+| `%redstonereboot_version%` | `1.4.2` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > MOTD compatible as of v1.3.3+.

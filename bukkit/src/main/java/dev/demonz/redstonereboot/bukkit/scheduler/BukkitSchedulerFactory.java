@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public final class BukkitSchedulerFactory {
 
-    private static Boolean foliaEnvironment;
+    private static volatile Boolean foliaEnvironment;
 
     public static PlatformTaskScheduler create(JavaPlugin plugin) {
         if (isFoliaEnvironment()) {

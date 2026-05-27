@@ -24,6 +24,11 @@ public class PterodactylBackend extends ControllerBackend {
 
     public PterodactylBackend(Logger logger, String panelUrl, String apiKey, String serverId) {
         super(logger, "Pterodactyl");
+        if (panelUrl != null && !panelUrl.isBlank()
+                && !panelUrl.startsWith("http://") && !panelUrl.startsWith("https://")) {
+            throw new IllegalArgumentException(
+                "Pterodactyl panelUrl must start with http:// or https:// — got: " + panelUrl);
+        }
         this.panelUrl = panelUrl;
         this.apiKey = apiKey;
         this.encodedServerId = URLEncoder.encode(serverId != null ? serverId : "", StandardCharsets.UTF_8);
@@ -60,12 +65,12 @@ public class PterodactylBackend extends ControllerBackend {
                 logger.info("Pterodactyl accepted the restart signal.");
                 return BackendResult.ACCEPTED;
             } else {
-                logger.warning("Pterodactyl rejected restart signal. Status: " + status + " Body: " + response.body());
+                logger.warning("Pterodactyl rejected restart signal. Status: " + status + " (body omitted for security)");
                 return BackendResult.FAILED;
             }
         } catch (java.net.http.HttpTimeoutException e) {
-            logger.warning("Pterodactyl API timeout. Treating as FAILED.");
-            return BackendResult.FAILED;
+            logger.warning("Pterodactyl API timeout. Treating as UNKNOWN.");
+            return BackendResult.UNKNOWN;
         } catch (Exception e) {
             logger.warning("Pterodactyl API error: " + e.getMessage());
             return BackendResult.FAILED;
@@ -94,7 +99,7 @@ public class PterodactylBackend extends ControllerBackend {
                 ? BackendState.FULL
                 : BackendState.ASSISTED;
         } catch (Exception exception) {
-            logger.warning("Pterodactyl backend verification failed: " + exception.getMessage());
+            logger.warning("Pterodactyl backend verification failed");
             return BackendState.ASSISTED;
         }
     }
@@ -118,5 +123,12 @@ public class PterodactylBackend extends ControllerBackend {
             return envToken;
         }
         return apiKey;
+    }
+
+    @Override
+    public String toString() {
+        return "PterodactylBackend{serverId=" + encodedServerId
+            + ", panelUrl=" + panelUrl
+            + ", apiKey=***MASKED***}";
     }
 }

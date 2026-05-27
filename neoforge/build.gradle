@@ -28,7 +28,9 @@ dependencies {
 
 jar {
     archiveBaseName = 'RedstoneReboot-NeoForge'
-    from project(':common').sourceSets.main.output
+    from(project(':common').sourceSets.main.output) {
+        into('/')
+    }
 }
 
 processResources {

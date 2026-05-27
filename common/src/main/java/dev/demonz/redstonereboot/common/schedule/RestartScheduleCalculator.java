@@ -27,6 +27,9 @@ public final class RestartScheduleCalculator {
         List<String> configuredTimes,
         List<String> configuredDays
     ) {
+        if (configuredTimes == null || configuredTimes.isEmpty()) {
+            return Optional.empty();
+        }
         Set<DayOfWeek> allowedDays = parseDays(configuredDays);
         List<LocalTime> times = configuredTimes.stream()
             .map(RestartScheduleCalculator::parseTime)

@@ -28,10 +28,13 @@ import java.util.logging.Logger;
  */
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.4.1";
+    public static final String VERSION = "1.4.2";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
+
+    /** Instance getter for VERSION — useful for testability. */
+    public String getVersion() { return VERSION; }
 
     private final ServerPlatform platform;
     private final PlatformTaskScheduler scheduler;
@@ -47,7 +50,7 @@ public class RedstoneRebootCore {
         this.updateChecker = new UpdateChecker("redstonereboot", VERSION, LOGGER);
         
         BackendConfig backendConfig = new BackendConfig(dataFolder, LOGGER);
-        this.backendRegistry = new BackendRegistry(LOGGER, backendConfig);
+        this.backendRegistry = new BackendRegistry(LOGGER, backendConfig, dataFolder);
         this.restartManager = new RestartManager(LOGGER, platform, scheduler, config, backendRegistry);
     }
 
@@ -109,6 +112,12 @@ public class RedstoneRebootCore {
         triggerEmergencyRestart(reason, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS);
     }
 
+    /**
+     * Trigger an emergency restart with a given reason and restart cause.
+     *
+     * @param reason         the human-readable reason for the emergency
+     * @param restartReason  the categorized restart reason (e.g., EMERGENCY_TPS, EMERGENCY_MEMORY)
+     */
     public void triggerEmergencyRestart(String reason, dev.demonz.redstonereboot.common.manager.RestartReason restartReason) {
         LOGGER.severe("==========================================");
         LOGGER.severe("EMERGENCY RESTART TRIGGERED");

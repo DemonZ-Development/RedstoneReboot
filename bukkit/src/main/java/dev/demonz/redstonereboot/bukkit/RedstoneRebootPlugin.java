@@ -29,13 +29,13 @@ import java.util.logging.Level;
  */
 public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
+    public static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
-    private static RedstoneRebootPlugin instance;
+    private static volatile RedstoneRebootPlugin instance;
 
     private BukkitAudiences adventure;
     private volatile PlatformTaskScheduler taskScheduler;
-    private RedstoneRebootCore core;
+    private volatile RedstoneRebootCore core;
     private ConfigManager configManager;
     private AlertManager alertManager;
     private PermissionManager permissionManager;
@@ -93,6 +93,9 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     public void reloadPluginState() {
         try {
             configManager.reloadConfig();
+            if (alertManager != null) {
+                alertManager.resetOnReload();
+            }
             stopMonitoring();
             unhookPlaceholderAPI();
 
@@ -178,6 +181,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
     @Override
     public void executeConsole(String command) {
+        getLogger().info("Executing console command: " + command);
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
     }
 
@@ -218,7 +222,8 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
             } catch (Exception ignored) {}
         }
 
-        return 20.0D;
+        getLogger().warning("Could not determine server TPS via reflection. Returning -1.0 (unknown). Health monitoring may not function correctly.");
+        return -1.0D;
     }
 
     @Override
@@ -293,7 +298,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     }
 
     private void initializeMetrics() {
-        if (!configManager.getRawConfig().getBoolean("advanced.metrics-enabled", true)) {
+        if (!configManager.isMetricsEnabled()) {
             return;
         }
 
@@ -314,7 +319,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
 
             getLogger().info("bStats metrics initialized (ID: 30751).");
         } catch (Exception exception) {
-            getLogger().fine("bStats initialization skipped: " + exception.getMessage());
+            getLogger().warning("bStats initialization skipped: " + exception.getMessage());
         }
     }
 
@@ -326,7 +331,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
         getLogger().info("Scheduler     : " + (taskScheduler.isFolia() ? "FOLIA GLOBAL" : "BUKKIT"));
         getLogger().info("LuckPerms     : " + (permissionManager.isLuckPermsAvailable() ? "HOOKED" : "NOT FOUND"));
         getLogger().info("PlaceholderAPI: " + (placeholderHook != null ? "HOOKED" : "NOT FOUND"));
-        getLogger().info("bStats        : " + (configManager.getRawConfig().getBoolean("advanced.metrics-enabled", true) ? "ENABLED (ID: 30751)" : "DISABLED"));
+        getLogger().info("bStats        : " + (configManager.isMetricsEnabled() ? "ENABLED (ID: 30751)" : "DISABLED"));
         getLogger().info("Timezone      : " + configManager.getTimezone());
         getLogger().info("==========================================");
     }

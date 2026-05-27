@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,6 +50,8 @@ public class RestartManager {
     private final BackendRegistry backendRegistry;
     private final AtomicBoolean controllerRestartPending = new AtomicBoolean(false);
     private final AtomicBoolean restartExecuting = new AtomicBoolean(false);
+    private final AtomicBoolean shutdownGuard = new AtomicBoolean(false);
+    private final AtomicLong restartGeneration = new AtomicLong(0);
     private volatile long lockoutEndTime = 0;
 
     public RestartManager(Logger logger, ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, BackendRegistry backendRegistry) {
@@ -79,7 +82,7 @@ public class RestartManager {
         logger.info("RestartManager initialized - Timezone: " + config.getTimezone());
     }
 
-    public void scheduleRestarts() {
+    public synchronized void scheduleRestarts() {
         if (schedulerTask != null) {
             schedulerTask.cancel();
             schedulerTask = null;
@@ -109,17 +112,18 @@ public class RestartManager {
     }
 
     private void checkScheduledRestarts() {
-        if (nextScheduledRestart == null || isRestartInProgress()) {
+        ZonedDateTime scheduled = nextScheduledRestart;
+        if (scheduled == null || isRestartInProgress()) {
             return;
         }
 
         ZonedDateTime now = currentTime();
         int warningTime = Math.max(config.getScheduledWarningTime(), 0);
-        if (!now.isBefore(nextScheduledRestart.minusSeconds(warningTime))) {
-            int remainingSeconds = (int) Math.max(0L, Duration.between(now, nextScheduledRestart).getSeconds());
+        if (!now.isBefore(scheduled.minusSeconds(warningTime))) {
+            int remainingSeconds = (int) Math.max(0L, Duration.between(now, scheduled).getSeconds());
             int countdownSeconds = Math.min(warningTime, remainingSeconds);
 
-            ZonedDateTime triggeredTime = nextScheduledRestart;
+            ZonedDateTime triggeredTime = scheduled;
             scheduleRestart(countdownSeconds, RestartReason.SCHEDULED, "Scheduled System");
             // Recalculate from just after the triggered time so that if the admin
             // cancels, the 60s polling task won't immediately re-schedule the same occurrence.
@@ -144,11 +148,12 @@ public class RestartManager {
      * @return {@code true} if the restart was accepted and scheduled
      */
     public synchronized boolean scheduleRestart(int delay, RestartReason reason, String initiator) {
-        int normalizedDelay = Math.max(delay, 0);
+        // Clamp delay to prevent integer overflow for extreme values (max ~68 years → clamp to ~2 years)
+        int normalizedDelay = Math.max(0, Math.min(delay, 63072000));
         int currentRemaining = getSecondsUntilRestart();
 
         if (isRestartInProgress() && currentRemaining >= 0 && currentRemaining <= normalizedDelay) {
-            logger.info("Ignoring restart request from " + initiator
+            logger.warning("Ignoring restart request from " + initiator
                 + " because a sooner restart is already running (" + currentRemaining + "s remaining).");
             return false;
         }
@@ -230,6 +235,7 @@ public class RestartManager {
             return;
         }
 
+        final long currentGeneration = restartGeneration.incrementAndGet();
         RestartReason reason = currentRestartReason;
         RestartBackend backend = backendRegistry.getActiveBackend();
 
@@ -239,11 +245,32 @@ public class RestartManager {
         // Reset the guard in the async callback after the backend execution finishes,
         // NOT in a finally block here — otherwise a second executeRestart() can race
         // in before the async call completes.
+        // The generation check ensures stale results from a previous restart attempt
+        // are discarded if a new restart was triggered in the meantime.
         scheduler.runLaterAsync(() -> {
             try {
+                if (shutdownGuard.get()) {
+                    logger.warning("Async restart callback skipped — engine is shutting down.");
+                    return;
+                }
                 backend.prepare();
                 BackendResult result = backend.execute();
-                scheduler.runLater(() -> handleExecutionResult(result, reason, backend), 0);
+                try {
+                    scheduler.runLater(() -> {
+                        if (restartGeneration.get() != currentGeneration) {
+                            logger.fine("Discarding stale restart result (generation mismatch).");
+                            return;
+                        }
+                        handleExecutionResult(result, reason, backend);
+                    }, 0);
+                } catch (Exception innerException) {
+                    if (restartGeneration.get() != currentGeneration) {
+                        logger.fine("Discarding stale restart result (generation mismatch, inline path).");
+                        return;
+                    }
+                    logger.warning("Failed to dispatch result to main thread, handling inline: " + innerException.getMessage());
+                    handleExecutionResult(result, reason, backend);
+                }
             } catch (Exception exception) {
                 scheduler.runLater(() -> {
                     logger.log(Level.SEVERE, "Restart execution error", exception);
@@ -273,7 +300,7 @@ public class RestartManager {
                 if (config.isAlertsEnabled()) {
                     platform.sendFinalRestartAlert(reason);
                 }
-                platform.shutdownServer();
+                platform.shutdownServer(reason.getDisplayName());
             }
         } else if (result == BackendResult.FAILED) {
             String detail = "Backend " + backend.getName() + " explicitly failed the restart request.";
@@ -319,6 +346,9 @@ public class RestartManager {
         return currentRestartTask != null || restartExecuting.get();
     }
 
+    /**
+     * @return seconds until restart, or -1 if no countdown is active
+     */
     public synchronized int getSecondsUntilRestart() {
         return secondsUntilRestart.get();
     }
@@ -336,6 +366,7 @@ public class RestartManager {
     }
 
     public synchronized void cleanup() {
+        shutdownGuard.set(true);
         if (isRestartInProgress()) {
             cancelCurrentCountdown(true);
             logger.info("Cleanup: cancelled in-progress restart.");

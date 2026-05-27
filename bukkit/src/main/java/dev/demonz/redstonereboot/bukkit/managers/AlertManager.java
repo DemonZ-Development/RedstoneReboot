@@ -2,9 +2,9 @@ package dev.demonz.redstonereboot.bukkit.managers;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
 import dev.demonz.redstonereboot.common.manager.RestartReason;
+import dev.demonz.redstonereboot.common.text.LegacyTextUtil;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -17,7 +17,6 @@ import java.util.List;
  * Manages all player-facing alerts using Kyori Adventure for cross-version support.
  */
 public class AlertManager {
-    private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacySection();
 
     private final RedstoneRebootPlugin plugin;
     private final ConfigManager configManager;
@@ -28,6 +27,13 @@ public class AlertManager {
         this.plugin = plugin;
         this.configManager = plugin.getConfigManager();
         this.permissionManager = plugin.getPermissionManager();
+    }
+
+    /**
+     * Reset state that should be cleared on config reload.
+     */
+    public void resetOnReload() {
+        soundWarningLogged = false;
     }
 
     public void sendRestartAlert(int seconds, RestartReason reason) {
@@ -42,8 +48,8 @@ public class AlertManager {
         }
 
         if (configManager.isChatAlertsEnabled()) {
-            Component message = LEGACY_SERIALIZER.deserialize(
-                translateAlternateColorCodes(
+            Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
+                LegacyTextUtil.translateAlternateColorCodes(
                     configManager.getChatAlertFormat()
                         .replace("{time}", timeString)
                         .replace("{reason}", reason.getDisplayName())
@@ -54,16 +60,16 @@ public class AlertManager {
 
         if (configManager.isTitleAlertsEnabled()) {
             Title title = Title.title(
-                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(configManager.getTitleMainText())),
-                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(configManager.getTitleSubText().replace("{time}", timeString))),
+                RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(LegacyTextUtil.translateAlternateColorCodes(configManager.getTitleMainText())),
+                RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(LegacyTextUtil.translateAlternateColorCodes(configManager.getTitleSubText().replace("{time}", timeString))),
                 Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(2000), Duration.ofMillis(500))
             );
             showTitle(recipients, title);
         }
 
         if (configManager.isActionBarAlertsEnabled()) {
-            Component actionBar = LEGACY_SERIALIZER.deserialize(
-                translateAlternateColorCodes(
+            Component actionBar = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
+                LegacyTextUtil.translateAlternateColorCodes(
                     configManager.getActionBarFormat()
                         .replace("{time}", timeString)
                         .replace("{reason}", reason.getDisplayName())
@@ -85,8 +91,8 @@ public class AlertManager {
             return;
         }
 
-        Component message = LEGACY_SERIALIZER.deserialize(
-            translateAlternateColorCodes(configManager.getPrefix() + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName())
+        Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
+            LegacyTextUtil.translateAlternateColorCodes(configManager.getPrefix() + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName())
         );
         sendChat(recipients, message);
         if (configManager.isActionBarAlertsEnabled()) {
@@ -105,8 +111,8 @@ public class AlertManager {
             return;
         }
 
-        Component message = LEGACY_SERIALIZER.deserialize(
-            translateAlternateColorCodes(configManager.getPrefix() + " &aScheduled restart has been CANCELLED!")
+        Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
+            LegacyTextUtil.translateAlternateColorCodes(configManager.getPrefix() + " &aScheduled restart has been CANCELLED!")
         );
         sendChat(recipients, message);
         if (configManager.isActionBarAlertsEnabled()) {
@@ -124,8 +130,8 @@ public class AlertManager {
             return;
         }
 
-        Component message = LEGACY_SERIALIZER.deserialize(
-            translateAlternateColorCodes(configManager.getPrefix() + " &4&lEMERGENCY RESTART&r&c - " + reason)
+        Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
+            LegacyTextUtil.translateAlternateColorCodes(configManager.getPrefix() + " &4&lEMERGENCY RESTART&r&c - " + reason)
         );
         sendChat(recipients, message);
         if (configManager.isActionBarAlertsEnabled()) {
@@ -152,20 +158,20 @@ public class AlertManager {
         }
 
         if (configManager.isChatAlertsEnabled()) {
-            sendChat(recipients, LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(message)));
+            sendChat(recipients, RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(LegacyTextUtil.translateAlternateColorCodes(message)));
         }
 
         if (configManager.isTitleAlertsEnabled()) {
             Title configuredTitle = Title.title(
-                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(title)),
-                LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(subtitle)),
+                RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(LegacyTextUtil.translateAlternateColorCodes(title)),
+                RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(LegacyTextUtil.translateAlternateColorCodes(subtitle)),
                 Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(1500), Duration.ofMillis(500))
             );
             showTitle(recipients, configuredTitle);
         }
 
         if (configManager.isActionBarAlertsEnabled()) {
-            sendActionBar(recipients, LEGACY_SERIALIZER.deserialize(translateAlternateColorCodes(subtitle)));
+            sendActionBar(recipients, RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(LegacyTextUtil.translateAlternateColorCodes(subtitle)));
         }
 
         playConfiguredSound(recipients);
@@ -227,18 +233,6 @@ public class AlertManager {
                 soundWarningLogged = true;
             }
         }
-    }
-
-    private String translateAlternateColorCodes(String text) {
-        if (text == null) return "";
-        char[] b = text.toCharArray();
-        for (int i = 0; i < b.length - 1; i++) {
-            if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
-                b[i] = '§';
-                b[i + 1] = Character.toLowerCase(b[i + 1]);
-            }
-        }
-        return new String(b);
     }
 
     private String formatTime(int seconds) {

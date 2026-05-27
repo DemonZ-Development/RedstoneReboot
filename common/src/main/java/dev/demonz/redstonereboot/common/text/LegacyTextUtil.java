@@ -33,4 +33,25 @@ public final class LegacyTextUtil {
 
         return stripped.toString();
     }
+
+    /**
+     * Translate Bukkit alternate color codes ({@code &amp;}) into section-sign
+     * color codes ({@code §}).  Identical in behaviour to
+     * {@code ChatColor.translateAlternateColorCodes('&amp;', text)} but
+     * without depending on the Bukkit API.
+     *
+     * @param text the input text, may be {@code null}
+     * @return the color-translated text, or an empty string if input is {@code null}
+     */
+    public static String translateAlternateColorCodes(String text) {
+        if (text == null) return "";
+        char[] b = text.toCharArray();
+        for (int i = 0; i < b.length - 1; i++) {
+            if (b[i] == '&' && "0123456789AaBbCcDdEeFfKkLlMmNnOoRrXx".indexOf(b[i + 1]) > -1) {
+                b[i] = '\u00A7';
+                b[i + 1] = Character.toLowerCase(b[i + 1]);
+            }
+        }
+        return new String(b);
+    }
 }

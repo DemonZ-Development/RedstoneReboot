@@ -62,7 +62,7 @@ final class BukkitTaskScheduler implements PlatformTaskScheduler {
     private void safelyRun(Runnable task) {
         try {
             task.run();
-        } catch (Exception exception) {
+        } catch (Throwable exception) {
             plugin.getLogger().log(Level.SEVERE, "Scheduled task failed.", exception);
         }
     }

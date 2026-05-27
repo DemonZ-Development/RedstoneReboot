@@ -1,9 +1,12 @@
-# RedstoneReboot v1.4.1 Configuration
+# RedstoneReboot v1.4.2 Configuration
 # Advanced multi-platform server restart engine.
 # GitHub: https://github.com/sdemonzdevelopment-spec/RedstoneReboot
 # Wiki: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki
 #
 # === Migration Guide ===
+# v1.4.1 -> v1.4.2:
+#   - No config changes required.
+#
 # v1.4.0 -> v1.4.1:
 #   - No config changes required.
 #
@@ -77,6 +80,7 @@ permissions:
   fallback:
     use-op-as-admin: true
     default-level: 2 # Default permission level for mod-platform commands.
+    public-permissions-enabled: true # Grant status/use/notify to all players
 
 placeholders:
   enabled: true
@@ -85,4 +89,4 @@ advanced:
   metrics-enabled: true
   shutdown-delay-ticks: 60
 
-config-version: 2
+config-version: 3

@@ -29,6 +29,19 @@ public class CommandProcessor {
         this.core = core;
     }
 
+    /**
+     * Checks whether the given permission string is one of the public-facing
+     * permissions that should always be granted regardless of op level.
+     *
+     * @param permission the permission string to check
+     * @return {@code true} if the permission is a public permission
+     */
+    public static boolean isPublicPermission(String permission) {
+        return "redstonereboot.status".equals(permission)
+            || "redstonereboot.use".equals(permission)
+            || "redstonereboot.notify".equals(permission);
+    }
+
     public void processStatus(CommandSender sender) {
         RestartManager rm = core.getRestartManager();
         sender.sendMessage("\u00A76=== RedstoneReboot Status ===");
@@ -139,42 +152,46 @@ public class CommandProcessor {
     public void processDoctor(CommandSender sender) {
         sender.sendMessage("\u00A76=== RedstoneReboot Diagnostics ===");
 
-        RestartBackend backend = core.getBackendRegistry().getActiveBackend();
-        RestartBackend.BackendState state = backend.getState();
+        core.getScheduler().runLaterAsync(() -> {
+            RestartBackend backend = core.getBackendRegistry().getActiveBackend();
+            RestartBackend.BackendState state = backend.getState();
+            List<String> detected = EnvironmentDetector.detectPotentialBackends();
+            boolean isLockoutActive = core.getRestartManager().isLockoutActive();
 
-        sender.sendMessage("\u00A77Active Backend: \u00A7b" + backend.getName());
+            core.getScheduler().runLater(() -> {
+                sender.sendMessage("\u00A77Active Backend: \u00A7b" + backend.getName());
 
-        String stateColor = "\u00A7a";
-        if (state == RestartBackend.BackendState.MISCONFIGURED) {
-            stateColor = "\u00A7c";
-        } else if (state == RestartBackend.BackendState.GENERATED || state == RestartBackend.BackendState.ASSISTED) {
-            stateColor = "\u00A7e";
-        }
+                String stateColor = "\u00A7a";
+                if (state == RestartBackend.BackendState.MISCONFIGURED) {
+                    stateColor = "\u00A7c";
+                } else if (state == RestartBackend.BackendState.GENERATED || state == RestartBackend.BackendState.ASSISTED) {
+                    stateColor = "\u00A7e";
+                }
 
-        sender.sendMessage("\u00A77Backend State: " + stateColor + "\u00A7l" + state.name());
+                sender.sendMessage("\u00A77Backend State: " + stateColor + "\u00A7l" + state.name());
 
-        if (state == RestartBackend.BackendState.GENERATED) {
-            sender.sendMessage("\u00A7e[!] Script generated, but no 'Wired' proof found.");
-            sender.sendMessage("\u00A7e    Add \u00A7f-Dredstonereboot.active=true \u00A7eto startup.");
-        } else if (state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
-            sender.sendMessage("\u00A77[i] Server will stop gracefully. Restart relies on your hosting environment (Pterodactyl, systemd, Docker, etc.). To manage the restart yourself, configure a backend in restart-backends.properties.");
-        }
+                if (state == RestartBackend.BackendState.GENERATED) {
+                    sender.sendMessage("\u00A7e[!] Script generated, but no 'Wired' proof found.");
+                    sender.sendMessage("\u00A7e    Add \u00A7f-Dredstonereboot.active=true \u00A7eto startup.");
+                } else if (state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
+                    sender.sendMessage("\u00A77[i] Server will stop gracefully. Restart relies on your hosting environment (Pterodactyl, systemd, Docker, etc.). To manage the restart yourself, configure a backend in restart-backends.properties.");
+                }
 
-        List<String> detected = EnvironmentDetector.detectPotentialBackends();
-        if (!detected.isEmpty()) {
-            sender.sendMessage("\u00A77Detected Env: \u00A7f" + String.join(", ", detected));
-            if (!detected.contains(backend.getName().toUpperCase())
-                && !backend.getName().equals("LocalScript")) {
-                sender.sendMessage("\u00A7c[!] Potential Mismatch: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Set active-backend in restart-backends.properties.");
-            }
-        } else {
-            sender.sendMessage("\u00A77Detected Env: \u00A7fGeneric VPS/Local");
-        }
+                if (!detected.isEmpty()) {
+                    sender.sendMessage("\u00A77Detected Env: \u00A7f" + String.join(", ", detected));
+                    if (!detected.contains(backend.getName().toUpperCase())
+                        && !backend.getName().equals("LocalScript")) {
+                        sender.sendMessage("\u00A7c[!] Potential Mismatch: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Set active-backend in restart-backends.properties.");
+                    }
+                } else {
+                    sender.sendMessage("\u00A77Detected Env: \u00A7fGeneric VPS/Local");
+                }
 
-        RestartManager rm = core.getRestartManager();
-        if (rm.isLockoutActive()) {
-            sender.sendMessage("\u00A7c[!] Lockout Active: New restarts suppressed.");
-        }
+                if (isLockoutActive) {
+                    sender.sendMessage("\u00A7c[!] Lockout Active: New restarts suppressed.");
+                }
+            }, 0);
+        }, 0);
     }
 
     /**

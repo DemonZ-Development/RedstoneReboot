@@ -15,4 +15,16 @@ public abstract class SupervisorBackend extends BaseBackend {
     public final boolean isControllerOwned() {
         return false;
     }
+
+    /**
+     * Check whether this supervisor backend is properly "wired" into the server's
+     * startup process. Wiring is proven by either the {@code redstonereboot.active}
+     * system property or the {@code REDSTONEREBOOT_ACTIVE} environment variable.
+     *
+     * @return {@code true} if the backend is wired into the startup command
+     */
+    protected boolean isWired() {
+        return Boolean.getBoolean("redstonereboot.active")
+            || "1".equals(System.getenv("REDSTONEREBOOT_ACTIVE"));
+    }
 }

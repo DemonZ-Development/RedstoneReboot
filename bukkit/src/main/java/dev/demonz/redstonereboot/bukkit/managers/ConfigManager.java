@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
  */
 public class ConfigManager implements PlatformConfig {
 
-    public static final int CURRENT_CONFIG_VERSION = 2;
+    public static final int CURRENT_CONFIG_VERSION = 3;
 
     private final Plugin plugin;
-    private FileConfiguration config;
+    private volatile FileConfiguration config;
 
     public ConfigManager(Plugin plugin) {
         this.plugin = plugin;
@@ -37,18 +37,23 @@ public class ConfigManager implements PlatformConfig {
     }
 
     private void validateConfiguration() {
-        int version = getConfigVersion();
+        validateConfiguration(this.config);
+    }
+
+    private void validateConfiguration(FileConfiguration cfg) {
+        int version = cfg.getInt("config-version", CURRENT_CONFIG_VERSION);
         if (version < CURRENT_CONFIG_VERSION) {
             plugin.getLogger().warning("Your config.yml is outdated! (v" + version + " < v" + CURRENT_CONFIG_VERSION + ")");
         }
 
+        String timezone = cfg.getString("scheduled-restarts.timezone", "UTC");
         try {
-            ZoneId.of(getTimezone());
+            ZoneId.of(timezone);
         } catch (Exception exception) {
-            throw new RuntimeException("Invalid timezone '" + getTimezone() + "'. Use a valid ZoneId like 'Europe/London' or 'UTC'.");
+            throw new RuntimeException("Invalid timezone '" + timezone + "'. Use a valid ZoneId like 'Europe/London' or 'UTC'.");
         }
 
-        for (String time : getScheduledTimes()) {
+        for (String time : cfg.getStringList("scheduled-restarts.times")) {
             if (!time.matches("^([0-1]?\\d|2[0-3]):[0-5]\\d$")) {
                 throw new RuntimeException("Invalid time format '" + time + "'. Use HH:MM (24-hour).");
             }
@@ -58,35 +63,41 @@ public class ConfigManager implements PlatformConfig {
         Set<String> weekdayKeys = java.util.Arrays.stream(DayOfWeek.values())
             .map(Enum::name)
             .collect(Collectors.toSet());
-        for (String day : getScheduledDays()) {
+        List<String> configuredDays = cfg.getStringList("scheduled-restarts.days");
+        List<String> days = configuredDays.isEmpty() ? List.of("ALL") : configuredDays;
+        for (String day : days) {
             String normalized = day.toUpperCase(Locale.ROOT);
             if (!validDays.contains(normalized) && !weekdayKeys.contains(normalized)) {
                 throw new RuntimeException("Invalid day value '" + day + "'.");
             }
         }
 
-        if (getTpsThreshold() < 0.0D || getTpsThreshold() > 20.0D) {
+        double tpsThreshold = cfg.getDouble("monitoring.tps-threshold", 18.0D);
+        if (tpsThreshold < 0.0D || tpsThreshold > 20.0D) {
             throw new RuntimeException("TPS threshold must be between 0 and 20.");
         }
-        if (getMemoryThreshold() < 0.0D || getMemoryThreshold() > 100.0D) {
+        double memThreshold = cfg.getDouble("monitoring.memory-threshold", 85.0D);
+        if (memThreshold < 0.0D || memThreshold > 100.0D) {
             throw new RuntimeException("Memory threshold must be between 0 and 100.");
         }
-        if (getEmergencyTpsThreshold() < 0.0D || getEmergencyTpsThreshold() > 20.0D) {
+        double emergTps = cfg.getDouble("emergency.tps-threshold", 12.0D);
+        if (emergTps < 0.0D || emergTps > 20.0D) {
             throw new RuntimeException("Emergency TPS threshold must be between 0 and 20.");
         }
-        if (getEmergencyMemoryThreshold() < 0.0D || getEmergencyMemoryThreshold() > 100.0D) {
+        double emergMem = cfg.getDouble("emergency.memory-threshold", 95.0D);
+        if (emergMem < 0.0D || emergMem > 100.0D) {
             throw new RuntimeException("Emergency memory threshold must be between 0 and 100.");
         }
-        if (getCheckInterval() <= 0) {
+        if (cfg.getInt("monitoring.check-interval", 30) <= 0) {
             throw new RuntimeException("Monitoring check-interval must be greater than 0.");
         }
-        if (getConsecutiveChecks() <= 0) {
+        if (cfg.getInt("monitoring.consecutive-checks", 3) <= 0) {
             throw new RuntimeException("Monitoring consecutive-checks must be greater than 0.");
         }
-        if (getEmergencyDelay() < 0) {
+        if (cfg.getInt("emergency.delay", 30) < 0) {
             throw new RuntimeException("Emergency delay must not be negative.");
         }
-        int permLevel = getDefaultPermissionLevel();
+        int permLevel = cfg.getInt("permissions.fallback.default-level", 2);
         if (permLevel < 0 || permLevel > 4) {
             throw new RuntimeException("default-permission-level must be 0-4 (got " + permLevel + ").");
         }
@@ -94,21 +105,18 @@ public class ConfigManager implements PlatformConfig {
 
     public void reloadConfig() {
         plugin.reloadConfig();
-        org.bukkit.configuration.file.FileConfiguration newConfig = plugin.getConfig();
+        FileConfiguration newConfig = plugin.getConfig();
         if (isStrictValidationEnabled()) {
-            // Validate against the new config before swapping the reference.
-            // If validation throws, the old config remains active.
-            org.bukkit.configuration.file.FileConfiguration oldConfig = this.config;
-            this.config = newConfig;
+            // Validate the new config BEFORE assigning it to this.config.
+            // If validation fails, the old config remains active.
             try {
-                validateConfiguration();
+                validateConfiguration(newConfig);
             } catch (RuntimeException e) {
-                this.config = oldConfig;
+                plugin.getLogger().warning("Config validation failed — keeping previous config. Error: " + e.getMessage());
                 throw e;
             }
-        } else {
-            config = newConfig;
         }
+        this.config = newConfig;
     }
 
     public int getConfigVersion() {
@@ -262,6 +270,16 @@ public class ConfigManager implements PlatformConfig {
         return config.getInt("permissions.fallback.default-level", 2);
     }
 
+    @Override
+    public boolean isPublicPermissionsEnabled() {
+        return config.getBoolean("permissions.fallback.public-permissions-enabled", true);
+    }
+
+    public boolean isMetricsEnabled() {
+        return config.getBoolean("advanced.metrics-enabled", true);
+    }
+
+    /** @return the internal config (read-only — do not modify) */
     public FileConfiguration getRawConfig() {
         return config;
     }

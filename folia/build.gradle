@@ -1,15 +1,25 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.0'
+}
+
 dependencies {
+    implementation project(':common')
     implementation project(':bukkit')
     compileOnly 'io.papermc.paper:paper-api:1.20.4-R0.1-SNAPSHOT'
 }
 
+shadowJar {
+    archiveBaseName = 'RedstoneReboot-Folia'
+    mergeServiceFiles()
+
+    relocate 'org.bstats', 'dev.demonz.redstonereboot.libs.bstats'
+    relocate 'net.kyori.adventure', 'dev.demonz.redstonereboot.libs.kyori.adventure'
+    relocate 'net.kyori.examination', 'dev.demonz.redstonereboot.libs.kyori.examination'
+}
+
 jar {
     archiveBaseName = 'RedstoneReboot-Folia'
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+    archiveClassifier = 'thin'
 }
 
 processResources {

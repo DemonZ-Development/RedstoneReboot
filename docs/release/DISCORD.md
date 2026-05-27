@@ -13,10 +13,11 @@ This release adds bStats metrics integration, fixes PlaceholderAPI MOTD compatib
 - 📊 TPS and memory-based restart automation
 - 🚑 Emergency restart handling & memory leak prevention
 - **Supported Platforms:**
-- **Bukkit/Paper:** 1.9.x - 1.21.x+
-- **Folia:** 1.20.1+
-- **Fabric:** 1.20.1+
-- **Forge/NeoForge:** 1.20.4+
+- **Bukkit/Paper:** 1.9.x - 26.x
+- **Folia:** 1.20.1+ - 26.x
+- **Fabric:** 1.20.1+ - 26.x
+- **Forge:** 1.20.4+ - 26.x
+- **NeoForge:** 1.21.1+ - 26.x (Java 21+)
 
 **Docs and links:**
 - **GitHub:** <https://github.com/sdemonzdevelopment-spec/RedstoneReboot>
