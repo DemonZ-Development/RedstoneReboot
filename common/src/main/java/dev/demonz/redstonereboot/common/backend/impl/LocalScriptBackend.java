@@ -21,7 +21,7 @@ public class LocalScriptBackend extends SupervisorBackend {
     private static final String RESTART_MARKER = ".redstonereboot_restart";
     private static final java.util.regex.Pattern SENSITIVE_ARG_PATTERN =
         java.util.regex.Pattern.compile(
-            "-D.*?(password|secret|token|apikey|key|credential|db\\.|database\\.|jdbc\\.|spring\\.datasource\\.|javax\\.net\\.ssl\\.key|jdk\\.tls\\.client)",
+            "(-D|--?)(.*?)?(password|secret|token|apikey|key|credential|db\\.|database\\.|jdbc\\.|spring\\.datasource\\.|javax\\.net\\.ssl\\.key|jdk\\.tls\\.client)",
             java.util.regex.Pattern.CASE_INSENSITIVE
         );
 
@@ -112,6 +112,7 @@ public class LocalScriptBackend extends SupervisorBackend {
         String absoluteMarker = dataFolder.resolve(RESTART_MARKER).toAbsolutePath().toString().replace("\\", "/");
         return "#!/bin/bash\n" +
                "# RedstoneReboot Auto-Restart Wrapper\n" +
+               "export REDSTONEREBOOT_ACTIVE=1\n" +
                "while true; do\n" +
                "    " + detectStartupCommand() + "\n" +
                "    if [ ! -f \"" + absoluteMarker + "\" ]; then\n" +
@@ -127,6 +128,7 @@ public class LocalScriptBackend extends SupervisorBackend {
         String absoluteMarker = dataFolder.resolve(RESTART_MARKER).toAbsolutePath().toString();
         return "@echo off\n" +
                "title RedstoneReboot Restart Wrapper\n" +
+               "set REDSTONEREBOOT_ACTIVE=1\n" +
                ":start\n" +
                "    " + detectStartupCommand() + "\n" +
                "if not exist \"" + absoluteMarker + "\" goto end\n" +
@@ -206,7 +208,9 @@ public class LocalScriptBackend extends SupervisorBackend {
 
         // Parse sun.java.command respecting embedded quotes
         List<String> parts = splitCommand(cmd);
-        boolean hasJar = parts.stream().map(p -> p.toLowerCase(Locale.ROOT)).anyMatch(p -> p.endsWith(".jar"));
+        boolean hasJar = parts.stream()
+            .map(p -> p.replaceAll("^\"|\"$", "").toLowerCase(Locale.ROOT))
+            .anyMatch(p -> p.endsWith(".jar"));
         
         if (!hasJar) {
             // Main-class run — add classpath from java.class.path BEFORE the main class
@@ -223,15 +227,16 @@ public class LocalScriptBackend extends SupervisorBackend {
 
         for (int i = 0; i < parts.size(); i++) {
             String part = parts.get(i);
-            String lower = part.toLowerCase(Locale.ROOT);
+            String cleanPart = part.replaceAll("^\"|\"$", "");
+            String cleanLower = cleanPart.toLowerCase(Locale.ROOT);
             if (isSensitiveArg(part)) {
                 logger.info("Filtered sensitive program argument from wrapper script.");
                 continue;
             }
-            if (lower.endsWith(".jar")) {
+            if (cleanLower.endsWith(".jar")) {
                 command.append(" -jar");
             }
-            command.append(' ').append(isWindows ? windowsEscape(part) : linuxEscape(part));
+            command.append(' ').append(isWindows ? windowsEscape(cleanPart) : linuxEscape(cleanPart));
         }
 
         return command.toString();

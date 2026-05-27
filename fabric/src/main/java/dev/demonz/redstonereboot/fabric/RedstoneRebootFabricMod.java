@@ -89,21 +89,23 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
         }
     }
 
+    @Override
+    public void broadcastActionBar(String message) {
+        if (server != null && server.getPlayerManager() != null) {
+            Text text = parseLegacyText(message);
+            for (net.minecraft.server.network.ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                player.sendMessage(text, true);
+            }
+        }
+    }
+
     private void sendTitlePackets(net.minecraft.server.network.ServerPlayerEntity player, Text title, Text subtitle) {
         try {
-            Class<?> fadeClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket");
-            Constructor<?> fadeCtor = fadeClass.getConstructor(int.class, int.class, int.class);
-            player.networkHandler.sendPacket((Packet<?>) fadeCtor.newInstance(TITLE_FADE_IN, TITLE_STAY, TITLE_FADE_OUT));
-
-            Class<?> subtitleClass = Class.forName("net.minecraft.network.packet.s2c.play.SubtitleS2CPacket");
-            Constructor<?> subtitleCtor = subtitleClass.getConstructor(Text.class);
-            player.networkHandler.sendPacket((Packet<?>) subtitleCtor.newInstance(subtitle));
-
-            Class<?> titleClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleS2CPacket");
-            Constructor<?> titleCtor = titleClass.getConstructor(Text.class);
-            player.networkHandler.sendPacket((Packet<?>) titleCtor.newInstance(title));
-        } catch (Exception ignored) {
-            getLogger().warning("[title] Failed to send title packet: " + ignored.getMessage());
+            player.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket(TITLE_FADE_IN, TITLE_STAY, TITLE_FADE_OUT));
+            player.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.SubtitleS2CPacket(subtitle));
+            player.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.TitleS2CPacket(title));
+        } catch (Exception exception) {
+            getLogger().warning("[title] Failed to send title packet: " + exception.getMessage());
         }
     }
 
@@ -176,9 +178,17 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
             if (CommandProcessor.isPublicPermission(permission) && coreRef != null && coreRef.getConfig().isPublicPermissionsEnabled()) {
                 return true;
             }
+            
+            boolean isAdmin = permission.startsWith("redstonereboot.restart.") || permission.contains(".reload") || permission.contains(".doctor");
+            
             if (coreRef != null && coreRef.getConfig().isUseOpAsAdminEnabled() && source.hasPermissionLevel(4)) {
                 return true;
             }
+            
+            if (isAdmin) {
+                return source.hasPermissionLevel(4);
+            }
+            
             int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
             return level <= 0 || source.hasPermissionLevel(level);
         }
@@ -196,28 +206,71 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
         net.minecraft.text.MutableText result = Text.empty();
         StringBuilder currentText = new StringBuilder();
         java.util.List<net.minecraft.util.Formatting> formats = new java.util.ArrayList<>();
+        net.minecraft.text.TextColor activeColor = null;
         
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (c == '\u00A7' && i + 1 < text.length()) {
-                if (currentText.length() > 0) {
-                    result.append(Text.literal(currentText.toString()).formatted(formats.toArray(new net.minecraft.util.Formatting[0])));
-                    currentText.setLength(0);
+            if (c == '\u00A7' && i + 13 < text.length() && text.charAt(i + 1) == 'x') {
+                boolean isHex = true;
+                StringBuilder hex = new StringBuilder("#");
+                for (int j = 0; j < 6; j++) {
+                    if (text.charAt(i + 2 + j * 2) != '\u00A7') {
+                        isHex = false;
+                        break;
+                    }
+                    hex.append(text.charAt(i + 3 + j * 2));
                 }
-                char code = text.charAt(++i);
+                if (isHex) {
+                    if (currentText.length() > 0) {
+                        net.minecraft.text.MutableText partText = Text.literal(currentText.toString()).formatted(formats.toArray(new net.minecraft.util.Formatting[0]));
+                        if (activeColor != null) {
+                            partText.setStyle(partText.getStyle().withColor(activeColor));
+                        }
+                        result.append(partText);
+                        currentText.setLength(0);
+                    }
+                    try {
+                        activeColor = net.minecraft.text.TextColor.fromRgb(Integer.parseInt(hex.substring(1), 16));
+                    } catch (NumberFormatException ignored) {
+                        activeColor = null;
+                    }
+                    formats.clear();
+                    i += 13;
+                    continue;
+                }
+            }
+
+            if (c == '\u00A7' && i + 1 < text.length()) {
+                char code = text.charAt(i + 1);
                 net.minecraft.util.Formatting format = net.minecraft.util.Formatting.byCode(code);
                 if (format != null) {
+                    if (currentText.length() > 0) {
+                        net.minecraft.text.MutableText partText = Text.literal(currentText.toString()).formatted(formats.toArray(new net.minecraft.util.Formatting[0]));
+                        if (activeColor != null) {
+                            partText.setStyle(partText.getStyle().withColor(activeColor));
+                        }
+                        result.append(partText);
+                        currentText.setLength(0);
+                    }
                     if (format.isColor() || format == net.minecraft.util.Formatting.RESET) {
                         formats.clear();
+                        activeColor = null;
                     }
                     formats.add(format);
+                    i++;
+                } else {
+                    currentText.append(c);
                 }
             } else {
                 currentText.append(c);
             }
         }
         if (currentText.length() > 0) {
-            result.append(Text.literal(currentText.toString()).formatted(formats.toArray(new net.minecraft.util.Formatting[0])));
+            net.minecraft.text.MutableText partText = Text.literal(currentText.toString()).formatted(formats.toArray(new net.minecraft.util.Formatting[0]));
+            if (activeColor != null) {
+                partText.setStyle(partText.getStyle().withColor(activeColor));
+            }
+            result.append(partText);
         }
         return result;
     }

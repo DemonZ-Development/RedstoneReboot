@@ -93,6 +93,17 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
     }
 
     @Override
+    public void broadcastActionBar(String message) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null && server.getPlayerList() != null) {
+            Component component = parseLegacyComponent(message);
+            for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
+                player.sendSystemMessage(component, true);
+            }
+        }
+    }
+
+    @Override
     public void executeConsole(String command) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null) {
@@ -167,9 +178,17 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             if (CommandProcessor.isPublicPermission(permission) && coreRef != null && coreRef.getConfig().isPublicPermissionsEnabled()) {
                 return true;
             }
+            
+            boolean isAdmin = permission.startsWith("redstonereboot.restart.") || permission.contains(".reload") || permission.contains(".doctor");
+            
             if (coreRef != null && coreRef.getConfig().isUseOpAsAdminEnabled() && source.hasPermission(4)) {
                 return true;
             }
+            
+            if (isAdmin) {
+                return source.hasPermission(4);
+            }
+            
             int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
             return level <= 0 || source.hasPermission(level);
         }
@@ -187,28 +206,67 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
         net.minecraft.network.chat.MutableComponent result = Component.empty();
         StringBuilder currentText = new StringBuilder();
         java.util.List<net.minecraft.ChatFormatting> formats = new java.util.ArrayList<>();
+        net.minecraft.network.chat.TextColor activeColor = null;
         
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
-            if (c == '\u00A7' && i + 1 < text.length()) {
-                if (currentText.length() > 0) {
-                    result.append(Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0])));
-                    currentText.setLength(0);
+            if (c == '\u00A7' && i + 13 < text.length() && text.charAt(i + 1) == 'x') {
+                boolean isHex = true;
+                StringBuilder hex = new StringBuilder("#");
+                for (int j = 0; j < 6; j++) {
+                    if (text.charAt(i + 2 + j * 2) != '\u00A7') {
+                        isHex = false;
+                        break;
+                    }
+                    hex.append(text.charAt(i + 3 + j * 2));
                 }
-                char code = text.charAt(++i);
+                if (isHex) {
+                    if (currentText.length() > 0) {
+                        net.minecraft.network.chat.MutableComponent part = Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0]));
+                        if (activeColor != null) {
+                            part.setStyle(part.getStyle().withColor(activeColor));
+                        }
+                        result.append(part);
+                        currentText.setLength(0);
+                    }
+                    activeColor = net.minecraft.network.chat.TextColor.parseColor(hex.toString()).result().orElse(null);
+                    formats.clear();
+                    i += 13;
+                    continue;
+                }
+            }
+
+            if (c == '\u00A7' && i + 1 < text.length()) {
+                char code = text.charAt(i + 1);
                 net.minecraft.ChatFormatting format = net.minecraft.ChatFormatting.getByCode(code);
                 if (format != null) {
+                    if (currentText.length() > 0) {
+                        net.minecraft.network.chat.MutableComponent part = Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0]));
+                        if (activeColor != null) {
+                            part.setStyle(part.getStyle().withColor(activeColor));
+                        }
+                        result.append(part);
+                        currentText.setLength(0);
+                    }
                     if (format.isColor() || format == net.minecraft.ChatFormatting.RESET) {
                         formats.clear();
+                        activeColor = null;
                     }
                     formats.add(format);
+                    i++;
+                } else {
+                    currentText.append(c);
                 }
             } else {
                 currentText.append(c);
             }
         }
         if (currentText.length() > 0) {
-            result.append(Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0])));
+            net.minecraft.network.chat.MutableComponent part = Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0]));
+            if (activeColor != null) {
+                part.setStyle(part.getStyle().withColor(activeColor));
+            }
+            result.append(part);
         }
         return result;
     }

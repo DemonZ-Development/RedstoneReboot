@@ -111,7 +111,7 @@ public class RestartManager {
         ).orElse(null);
     }
 
-    private void checkScheduledRestarts() {
+    private synchronized void checkScheduledRestarts() {
         ZonedDateTime scheduled = nextScheduledRestart;
         if (scheduled == null || isRestartInProgress()) {
             return;
@@ -248,39 +248,47 @@ public class RestartManager {
         // in before the async call completes.
         // The generation check ensures stale results from a previous restart attempt
         // are discarded if a new restart was triggered in the meantime.
-        scheduler.runLaterAsync(() -> {
-            try {
-                if (shutdownGuard.get()) {
-                    logger.warning("Async restart callback skipped — engine is shutting down.");
-                    return;
-                }
-                backend.prepare();
-                BackendResult result = backend.execute();
+        try {
+            scheduler.runLaterAsync(() -> {
                 try {
-                    scheduler.runLater(() -> {
-                        if (restartGeneration.get() != currentGeneration) {
-                            logger.fine("Discarding stale restart result (generation mismatch).");
-                            return;
-                        }
-                        handleExecutionResult(result, reason, backend);
-                    }, 0);
-                } catch (Exception innerException) {
-                    if (restartGeneration.get() != currentGeneration) {
-                        logger.fine("Discarding stale restart result (generation mismatch, inline path).");
+                    if (shutdownGuard.get()) {
+                        logger.warning("Async restart callback skipped — engine is shutting down.");
                         return;
                     }
-                    logger.warning("Failed to dispatch result to main thread, handling inline: " + innerException.getMessage());
-                    handleExecutionResult(result, reason, backend);
+                    backend.prepare();
+                    BackendResult result = backend.execute();
+                    try {
+                        scheduler.runLater(() -> {
+                            if (restartGeneration.get() != currentGeneration) {
+                                logger.fine("Discarding stale restart result (generation mismatch).");
+                                return;
+                            }
+                            handleExecutionResult(result, reason, backend);
+                        }, 0);
+                    } catch (Exception innerException) {
+                        if (restartGeneration.get() != currentGeneration) {
+                            logger.fine("Discarding stale restart result (generation mismatch, inline path).");
+                            return;
+                        }
+                        logger.warning("Failed to dispatch result to main thread, cannot run inline due to thread safety limits: " + innerException.getMessage());
+                    }
+                } catch (Exception exception) {
+                    try {
+                        scheduler.runLater(() -> {
+                            logger.log(Level.SEVERE, "Restart execution error", exception);
+                            platform.sendPostponedAlert("Internal error during backend execution: " + exception.getMessage());
+                        }, 0);
+                    } catch (Exception innerException) {
+                        logger.log(Level.SEVERE, "Failed to schedule restart execution error callback", innerException);
+                    }
+                } finally {
+                    restartExecuting.set(false);
                 }
-            } catch (Exception exception) {
-                scheduler.runLater(() -> {
-                    logger.log(Level.SEVERE, "Restart execution error", exception);
-                    platform.sendPostponedAlert("Internal error during backend execution: " + exception.getMessage());
-                }, 0);
-            } finally {
-                restartExecuting.set(false);
-            }
-        }, 0);
+            }, 0);
+        } catch (Exception exception) {
+            logger.log(Level.SEVERE, "Failed to submit async restart execution task", exception);
+            restartExecuting.set(false);
+        }
     }
 
     private void handleExecutionResult(BackendResult result, RestartReason reason, RestartBackend backend) {

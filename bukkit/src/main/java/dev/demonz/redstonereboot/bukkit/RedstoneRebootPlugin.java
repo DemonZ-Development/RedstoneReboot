@@ -41,6 +41,10 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     private PermissionManager permissionManager;
     private ServerLoadMonitor serverLoadMonitor;
     private PlaceholderAPIHook placeholderHook;
+    private volatile double cachedTps = 20.0D;
+    private volatile double cachedMemoryUsage = 0.0D;
+    private volatile boolean warnedTpsReflection = false;
+    private dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle cacheTask;
 
     @Override
     public void onEnable() {
@@ -61,6 +65,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
             getServer().getPluginManager().registerEvents(new ServerEventListener(this), this);
 
             core.onEnable();
+            startCacheTask();
             restartMonitoring();
             hookPlaceholderAPI();
             initializeMetrics();
@@ -74,6 +79,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     @Override
     public void onDisable() {
         try {
+            stopCacheTask();
             stopMonitoring();
             unhookPlaceholderAPI();
             if (core != null) {
@@ -96,12 +102,14 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
             if (alertManager != null) {
                 alertManager.resetOnReload();
             }
+            stopCacheTask();
             stopMonitoring();
             unhookPlaceholderAPI();
 
             core.onDisable();
             core.onEnable();
 
+            startCacheTask();
             restartMonitoring();
             hookPlaceholderAPI();
         } catch (Exception exception) {
@@ -189,8 +197,7 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
     private static java.lang.reflect.Method cachedGetServerMethod;
     private static java.lang.reflect.Field cachedRecentTpsField;
 
-    @Override
-    public double getTPS() {
+    private double fetchTPS() {
         if (cachedTpsMethod == null) {
             try {
                 cachedTpsMethod = Bukkit.class.getMethod("getTPS");
@@ -222,8 +229,37 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
             } catch (Exception ignored) {}
         }
 
-        getLogger().warning("Could not determine server TPS via reflection. Returning -1.0 (unknown). Health monitoring may not function correctly.");
+        if (!warnedTpsReflection) {
+            getLogger().warning("Could not determine server TPS via reflection. Returning -1.0 (unknown). Health monitoring may not function correctly.");
+            warnedTpsReflection = true;
+        }
         return -1.0D;
+    }
+
+    @Override
+    public double getTPS() {
+        return cachedTps;
+    }
+
+    public double getCachedMemoryUsage() {
+        return cachedMemoryUsage;
+    }
+
+    private void startCacheTask() {
+        if (cacheTask != null) {
+            cacheTask.cancel();
+        }
+        cacheTask = taskScheduler.runRepeating(() -> {
+            cachedTps = fetchTPS();
+            cachedMemoryUsage = ServerLoadMonitor.getMemoryUsagePercent();
+        }, 0L, 20L);
+    }
+
+    private void stopCacheTask() {
+        if (cacheTask != null) {
+            cacheTask.cancel();
+            cacheTask = null;
+        }
     }
 
     @Override

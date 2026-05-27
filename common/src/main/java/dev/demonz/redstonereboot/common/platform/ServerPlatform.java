@@ -31,6 +31,15 @@ public interface ServerPlatform {
     void broadcastTitle(String title, String subtitle);
 
     /**
+     * Broadcast an action bar message to all online players.
+     *
+     * @param message the action bar message
+     */
+    default void broadcastActionBar(String message) {
+        // Default no-op
+    }
+
+    /**
      * Send a unified alert (chat, title, action bar, etc.) based on platform configuration.
      *
      * @param message  the chat message

@@ -9,7 +9,11 @@ public final class BukkitSchedulerFactory {
 
     public static PlatformTaskScheduler create(JavaPlugin plugin) {
         if (isFoliaEnvironment()) {
-            return new FoliaTaskScheduler(plugin);
+            try {
+                return new FoliaTaskScheduler(plugin);
+            } catch (Exception exception) {
+                plugin.getLogger().warning("Folia environment detected but scheduler bridge failed to initialize. Falling back to Bukkit: " + exception.getMessage());
+            }
         }
         return new BukkitTaskScheduler(plugin);
     }
