@@ -16,6 +16,7 @@ Mod loaders (Fabric, Forge, NeoForge) expose equivalent values through `config/r
 
 ```yaml
 general:
+  config-version: 3
   plugin-prefix: "&8[&cRedstone&8] &aReboot"
   debug-mode: false
   strict-validation: true
@@ -105,6 +106,7 @@ permissions:
   fallback:
     use-op-as-admin: true
     default-level: 2
+    public-permissions-enabled: true
 ```
 
 - `default-level` is primarily relevant for non-Bukkit command environments
@@ -215,6 +217,7 @@ restart-backends.properties
 Example:
 
 ```properties
+backends-enabled=false
 active-backend=SHUTDOWN_ONLY
 lockout-duration-seconds=300
 
@@ -236,6 +239,8 @@ localscript-file=start.sh
 
 ### Notes
 
+- **`backends-enabled`**: Must be `true` for backend processing to occur; otherwise defaults to `SHUTDOWN_ONLY`.
+- **Environment Variables**: Sensitive properties support dynamic resolution using `${env.VAR_NAME:-fallback}` (e.g., `ptero-token=${env.PTERO_API_KEY}`). This works for variables prefixed with `REBOOT_`, `PTERO_`, `MINECRAFT_`, or `JAVA_`.
 - `lockout-duration-seconds` is used when backend state becomes uncertain and RedstoneReboot temporarily suppresses new restart requests.
 - `systemd-service` is used by the `SYSTEMD` backend.
 - `localscript-file` is used by the `LOCALSCRIPT` backend.

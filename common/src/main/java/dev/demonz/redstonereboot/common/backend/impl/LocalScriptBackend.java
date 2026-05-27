@@ -224,6 +224,10 @@ public class LocalScriptBackend extends SupervisorBackend {
         for (int i = 0; i < parts.size(); i++) {
             String part = parts.get(i);
             String lower = part.toLowerCase(Locale.ROOT);
+            if (isSensitiveArg(part)) {
+                logger.info("Filtered sensitive program argument from wrapper script.");
+                continue;
+            }
             if (lower.endsWith(".jar")) {
                 command.append(" -jar");
             }
@@ -268,14 +272,15 @@ public class LocalScriptBackend extends SupervisorBackend {
         return SENSITIVE_ARG_PATTERN.matcher(arg).find();
     }
 
-    private static List<String> splitCommand(String cmd) {
-        List<String> parts = new ArrayList<>();
+    private List<String> splitCommand(String cmd) {
+        List<String> parts = new java.util.ArrayList<>();
         StringBuilder current = new StringBuilder();
         boolean inQuote = false;
         for (int i = 0; i < cmd.length(); i++) {
             char c = cmd.charAt(i);
             if (c == '"') {
                 inQuote = !inQuote;
+                current.append(c); // Preserve the quote
             } else if (c == ' ' && !inQuote) {
                 if (current.length() > 0) {
                     parts.add(current.toString());
@@ -302,21 +307,18 @@ public class LocalScriptBackend extends SupervisorBackend {
      * Shell-escape a string for Windows cmd.exe: wrap in double quotes, escape inner quotes and special chars.
      */
     private static String windowsEscape(String arg) {
-        if (arg.isEmpty()) {
-            return "\"\"";
-        }
+        if (arg.isEmpty()) return "\"\"";
+        // If it's already properly wrapped in double quotes, we don't need to add carets
+        // for characters inside the quotes in cmd.exe.
+        boolean wrapped = arg.length() >= 2 && arg.startsWith("\"") && arg.endsWith("\"");
+        
         StringBuilder sb = new StringBuilder("\"");
         for (int i = 0; i < arg.length(); i++) {
             char c = arg.charAt(i);
-            if (c == '"') {
-                sb.append("\"\"");
-            } else if (c == '^') {
-                sb.append("^^");
-            } else if (c == '&' || c == '|' || c == '<' || c == '>' || c == '%') {
-                sb.append('^').append(c);
-            } else {
-                sb.append(c);
-            }
+            if (c == '"') sb.append("\"\"");
+            else if (!wrapped && (c == '^')) sb.append("^^");
+            else if (!wrapped && (c == '&' || c == '|' || c == '<' || c == '>' || c == '%')) sb.append('^').append(c);
+            else sb.append(c);
         }
         sb.append('"');
         return sb.toString();

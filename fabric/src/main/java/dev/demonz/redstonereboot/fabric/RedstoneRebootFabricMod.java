@@ -42,10 +42,16 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
             Path configPath = FabricLoader.getInstance().getConfigDir().resolve("redstonereboot.properties");
             startCore(scheduler, loadSimpleConfig(configPath), FabricLoader.getInstance().getConfigDir());
 
-            ServerLifecycleEvents.SERVER_STARTED.register(startedServer -> this.server = startedServer);
+            ServerLifecycleEvents.SERVER_STARTED.register(startedServer -> {
+                this.server = startedServer;
+                if (core != null) core.onEnable();
+            });
             ServerLifecycleEvents.SERVER_STOPPING.register(stoppingServer -> {
                 this.server = stoppingServer;
                 stopCore();
+            });
+            ServerLifecycleEvents.SERVER_STOPPED.register(stoppedServer -> {
+                this.server = null;
             });
 
             CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
@@ -54,7 +60,6 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
                 getLogger().info("RedstoneReboot command registered.");
             });
 
-            if (core != null) core.onEnable();
             startPlatformMonitoring();
             getLogger().info("Fabric dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
@@ -85,54 +90,6 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
     }
 
     private void sendTitlePackets(net.minecraft.server.network.ServerPlayerEntity player, Text title, Text subtitle) {
-        try {
-            // Try 1.20.2+ consolidated TitleS2CPacket with Action enum
-            Class<?> titlePacketClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleS2CPacket");
-            Class<?> actionEnum = Class.forName("net.minecraft.network.packet.s2c.play.TitleS2CPacket$Action");
-            Object[] actions = actionEnum.getEnumConstants();
-            if (actions != null && actions.length >= 3) {
-                // Resolve enum constants by name instead of ordinal position
-                Object titleAction = null, subtitleAction = null, timesAction = null;
-                for (Object action : actions) {
-                    String name = ((Enum<?>) action).name();
-                    switch (name) {
-                        case "TITLE": titleAction = action; break;
-                        case "SUBTITLE": subtitleAction = action; break;
-                        case "TIMES": timesAction = action; break;
-                    }
-                }
-
-                if (timesAction != null) {
-                    // Try to find TIMES constructor that accepts fade-in/stay/fade-out integers
-                    try {
-                        Constructor<?> timesCtor = titlePacketClass.getConstructor(actionEnum, int.class, int.class, int.class);
-                        player.networkHandler.sendPacket((Packet<?>) timesCtor.newInstance(timesAction, TITLE_FADE_IN, TITLE_STAY, TITLE_FADE_OUT));
-                    } catch (NoSuchMethodException e) {
-                        // No int-param constructor for TIMES; send with Text constructor (default timing)
-                        getLogger().warning("[title] TIMES constructor with int params not found. Title will use default timing.");
-                        player.networkHandler.sendPacket((Packet<?>) titlePacketClass.getConstructor(actionEnum, Text.class).newInstance(timesAction, Text.literal("")));
-                    }
-                } else {
-                    getLogger().warning("[title] TIMES action not found in enum. Title will use default timing.");
-                }
-
-                if (subtitleAction != null) {
-                    Constructor<?> packetCtor = titlePacketClass.getConstructor(actionEnum, Text.class);
-                    player.networkHandler.sendPacket((Packet<?>) packetCtor.newInstance(subtitleAction, subtitle));
-                }
-
-                if (titleAction != null) {
-                    Constructor<?> packetCtor = titlePacketClass.getConstructor(actionEnum, Text.class);
-                    player.networkHandler.sendPacket((Packet<?>) packetCtor.newInstance(titleAction, title));
-                }
-
-                return;
-            }
-        } catch (Exception ignored) {
-            // Fall through to 1.20.1 approach
-        }
-
-        // 1.20.1 and earlier: separate packet classes
         try {
             Class<?> fadeClass = Class.forName("net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket");
             Constructor<?> fadeCtor = fadeClass.getConstructor(int.class, int.class, int.class);
@@ -223,7 +180,7 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
                 return true;
             }
             int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
-            return level > 0 && source.hasPermissionLevel(level);
+            return level <= 0 || source.hasPermissionLevel(level);
         }
     }
 
@@ -250,7 +207,7 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
                 char code = text.charAt(++i);
                 net.minecraft.util.Formatting format = net.minecraft.util.Formatting.byCode(code);
                 if (format != null) {
-                    if (format.isColor()) {
+                    if (format.isColor() || format == net.minecraft.util.Formatting.RESET) {
                         formats.clear();
                     }
                     formats.add(format);

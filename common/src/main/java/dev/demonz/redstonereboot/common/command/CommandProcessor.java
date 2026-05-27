@@ -49,8 +49,13 @@ public class CommandProcessor {
         sender.sendMessage("\u00A77Platform: \u00A7f" + core.getPlatform().getPlatformName());
 
         if (rm.isRestartInProgress()) {
-            sender.sendMessage("\u00A7cStatus: \u00A7lRestart in progress \u00A7r\u00A77(\u00A7e"
-                + rm.getSecondsUntilRestart() + "s remaining\u00A77)");
+            long seconds = (long) rm.getSecondsUntilRestart();
+            if (seconds < 0) {
+                sender.sendMessage("\u00A7cStatus: \u00A7lRestart executing...");
+            } else {
+                sender.sendMessage("\u00A7cStatus: \u00A7lRestart in progress \u00A7r\u00A77(\u00A7e"
+                    + seconds + "s remaining\u00A77)");
+            }
             sender.sendMessage("\u00A77Reason: \u00A7f" + rm.getCurrentRestartReason().getDisplayName());
         } else {
             sender.sendMessage("\u00A7aStatus: \u00A7fNormal operation");
@@ -130,8 +135,13 @@ public class CommandProcessor {
 
         RestartManager rm = core.getRestartManager();
         if (rm.isRestartInProgress()) {
-            sender.sendMessage("\u00A7cStatus: \u00A7lRestart in progress \u00A7r\u00A77(\u00A7e"
-                + rm.getSecondsUntilRestart() + "s\u00A77)");
+            long seconds = (long) rm.getSecondsUntilRestart();
+            if (seconds < 0) {
+                sender.sendMessage("\u00A7cStatus: \u00A7lRestart executing...");
+            } else {
+                sender.sendMessage("\u00A7cStatus: \u00A7lRestart in progress \u00A7r\u00A77(\u00A7e"
+                    + seconds + "s\u00A77)");
+            }
         } else {
             sender.sendMessage("\u00A7aStatus: \u00A7fNormal operation");
         }
