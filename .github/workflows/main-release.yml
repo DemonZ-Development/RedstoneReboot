@@ -32,9 +32,9 @@ jobs:
             echo "checkout_ref=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           fi
 
-      # actions/checkout v4.1.1
+      # actions/checkout v4
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+        uses: actions/checkout@v4
         with:
           ref: ${{ steps.meta.outputs.checkout_ref }}
           fetch-depth: 0
@@ -52,9 +52,9 @@ jobs:
         shell: bash
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      # actions/setup-java v4.2.1
+      # actions/setup-java v4
       - name: Set up JDK 21
-        uses: actions/setup-java@9704b39bf258b59bc04750da4b3668a3f6c1a1e5
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: temurin
@@ -62,9 +62,9 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      # gradle/actions/setup-gradle v3.1.0
+      # gradle/actions/setup-gradle v3
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f965bca2e
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Extract version
         id: version
@@ -93,7 +93,7 @@ jobs:
 
       # actions/upload-artifact v4
       - name: Upload main release bundle
-        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bbfa9b3
+        uses: actions/upload-artifact@v4
         with:
           name: RedstoneReboot-Main-Release
           path: release-artifacts/*
@@ -111,7 +111,7 @@ jobs:
 
       # softprops/action-gh-release v2
       - name: Publish main release channel
-        uses: softprops/action-gh-release@d99959edaa4873057e2e133b0a7c5803675a78e7
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: main
           target_commitish: ${{ steps.commit.outputs.sha }}
