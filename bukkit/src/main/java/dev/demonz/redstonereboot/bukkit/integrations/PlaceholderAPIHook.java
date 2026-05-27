@@ -1,6 +1,7 @@
 package dev.demonz.redstonereboot.bukkit.integrations;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
+import dev.demonz.redstonereboot.bukkit.utils.ServerLoadMonitor;
 import dev.demonz.redstonereboot.common.manager.RestartManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
@@ -112,8 +113,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
                 if (plugin.getServerLoadMonitor() != null) {
                     memoryUsage = plugin.getServerLoadMonitor().getLastMemoryUsage();
                 } else {
-                    Runtime runtime = Runtime.getRuntime();
-                    memoryUsage = (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
+                    memoryUsage = ServerLoadMonitor.getMemoryUsagePercent();
                 }
                 return String.format(Locale.ROOT, "%.1f%%", memoryUsage);
             }
@@ -136,6 +136,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         try {
             return plugin.getRestartManager();
         } catch (Exception e) {
+            plugin.getLogger().fine("Could not get RestartManager: " + e.getMessage());
             return null;
         }
     }

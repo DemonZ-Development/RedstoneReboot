@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.4.2] — 2026-05-26
+
+### Added
+- Minecraft 26.x compatibility: JDK 25 toolchain (compiles Java 17 bytecode — runs on all JVMs ≥17)
+- `MinecraftTPSUtil`: `double[]` fallback for 26.x where the `tickTimes` field type may change
+
+### Fixed
+- **bStats metrics not reporting** — `MetricsBase.checkRelocation()` threw `IllegalStateException` because manual `zipTree` shading left classes in `org.bstats` package. Migrated to Gradle Shadow plugin with proper package relocation (`org.bstats` → `dev.demonz.redstonereboot.libs.bstats`)
+- bStats initialization failure now logged at `WARNING` level instead of invisible `FINE`
+- Forge mod metadata: version range locked from `[1.20.4,)` to `[1.20.4,1.20.5]` — prevents false 26.x compatibility claim on Modrinth
+- NeoForge mod metadata: version range locked from `[1.21.1,)` to `[1.21.1,1.21.2]` — same fix
+
+### Changed
+- Build: JDK 25 toolchain, `sourceCompatibility`/`targetCompatibility` kept at `VERSION_17` (backward compatible — runs on Java 17+ servers)
+- Folia build also migrated to Gradle Shadow plugin with same relocations
+- Bukkit config version bumped to 3
+
 ## [1.4.1] — 2026-05-26
 
 ### Security

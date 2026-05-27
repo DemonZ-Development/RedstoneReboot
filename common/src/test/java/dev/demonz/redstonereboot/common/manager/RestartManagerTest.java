@@ -68,7 +68,7 @@ class RestartManagerTest {
 
     private static BackendRegistry backendRegistry() {
         Logger logger = Logger.getLogger("RestartManagerTest");
-        return new BackendRegistry(logger, new BackendConfig(Path.of("build", "tmp", "RestartManagerTest"), logger));
+        return new BackendRegistry(logger, new BackendConfig(Path.of("build", "tmp", "RestartManagerTest"), logger), Path.of("build", "tmp", "RestartManagerTest"));
     }
 
     private static final class FakeScheduler implements PlatformTaskScheduler {

@@ -32,30 +32,29 @@ jobs:
             echo "checkout_ref=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           fi
 
+      # actions/checkout v4.1.1
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
         with:
           ref: ${{ steps.meta.outputs.checkout_ref }}
           fetch-depth: 0
+
+      - name: Validate release ref
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ "${{ github.ref }}" != refs/heads/main ]]; then
+            echo "::error::Release can only be triggered from main branch"
+            exit 1
+          fi
 
       - name: Resolve commit SHA
         id: commit
         shell: bash
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Read project version
-        id: version
-        shell: bash
-        run: |
-          version="$(sed -n "s/.*version = '\([^']*\)'.*/\1/p" build.gradle | head -n 1)"
-          if [ -z "$version" ]; then
-            echo "Unable to determine project version from build.gradle" >&2
-            exit 1
-          fi
-          echo "value=$version" >> "$GITHUB_OUTPUT"
-
+      # actions/setup-java v4.2.1
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@9704b39bf258b59bc04750da4b3668a3f6c1a1e5
         with:
           java-version: '21'
           distribution: temurin
@@ -63,8 +62,15 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
+      # gradle/actions/setup-gradle v3.1.0
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f965bca2e
+
+      - name: Extract version
+        id: version
+        run: |
+          version=$(./gradlew properties -q | grep "^version:" | awk '{print $2}')
+          echo "version=$version" >> $GITHUB_OUTPUT
 
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
@@ -78,10 +84,16 @@ jobs:
           cp fabric/build/libs/RedstoneReboot-Fabric-*.jar release-artifacts/
           cp forge/build/libs/RedstoneReboot-Forge-*.jar release-artifacts/
           cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar release-artifacts/
-          cp common/build/libs/common-*.jar release-artifacts/
 
+      - name: Generate checksums
+        run: |
+          cd release-artifacts
+          sha256sum *.jar > checksums-sha256.txt
+          sha1sum *.jar > checksums-sha1.txt
+
+      # actions/upload-artifact v4
       - name: Upload main release bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@5d5d22a31266ced268874388b861e4b58bbfa9b3
         with:
           name: RedstoneReboot-Main-Release
           path: release-artifacts/*
@@ -97,18 +109,19 @@ jobs:
           git tag -f main
           git push origin refs/tags/main --force
 
+      # softprops/action-gh-release v2
       - name: Publish main release channel
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@d99959edaa4873057e2e133b0a7c5803675a78e7
         with:
           tag_name: main
           target_commitish: ${{ steps.commit.outputs.sha }}
-          name: RedstoneReboot Main (${{ steps.version.outputs.value }})
+          name: RedstoneReboot Main (${{ steps.version.outputs.version }})
           body: |
             ## RedstoneReboot Main
 
             Rolling prerelease channel built from `main`.
 
-            - Version: `${{ steps.version.outputs.value }}`
+            - Version: `${{ steps.version.outputs.version }}`
             - Commit: `${{ steps.commit.outputs.sha }}`
 
             ### Files
@@ -119,7 +132,6 @@ jobs:
             | Fabric | `RedstoneReboot-Fabric-*.jar` |
             | Forge | `RedstoneReboot-Forge-*.jar` |
             | NeoForge | `RedstoneReboot-NeoForge-*.jar` |
-            | Common | `common-*.jar` |
 
             ### Links
             - [Documentation](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)

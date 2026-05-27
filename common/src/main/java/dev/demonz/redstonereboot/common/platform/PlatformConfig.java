@@ -76,4 +76,31 @@ public interface PlatformConfig {
     default int getDefaultPermissionLevel() {
         return 2;
     }
+
+    /** @return {@code true} if public permissions (status, use, notify) are enabled and bypass op-level checks */
+    boolean isPublicPermissionsEnabled();
+
+    /** @return the prefix used in messages */
+    default String getPrefix() { return "§8[§cRedstone§8] §aReboot"; }
+
+    /** @return {@code true} if chat alerts are enabled */
+    default boolean isChatAlertsEnabled() { return true; }
+
+    /** @return the format string for chat alerts */
+    default String getChatAlertFormat() { return "§8[§cRedstone§8] §eServer will restart in §c{time}§e!"; }
+
+    /** @return {@code true} if title alerts are enabled */
+    default boolean isTitleAlertsEnabled() { return true; }
+
+    /** @return the main title text */
+    default String getTitleMainText() { return "§c⚡ Server Restart"; }
+
+    /** @return the subtitle text format */
+    default String getTitleSubText() { return "§ein §c{time}"; }
+
+    /** @return {@code true} if action bar alerts are enabled */
+    default boolean isActionBarAlertsEnabled() { return true; }
+
+    /** @return the format string for action bar alerts */
+    default String getActionBarFormat() { return "§8[§cRedstone§8] §eRestart in: §c{time}"; }
 }

@@ -1,5 +1,6 @@
 dependencies {
+    // Brigadier 1.0.18 is the minimum. Forge ships 1.2.9 at runtime — compatible.
     compileOnly 'com.mojang:brigadier:1.0.18'
-    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation platform('org.junit:junit-bom:5.11.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

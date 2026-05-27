@@ -4,6 +4,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * A mutable implementation of {@link PlatformConfig} that allows mod platforms
@@ -11,41 +12,45 @@ import java.util.List;
  */
 public class SimplePlatformConfig implements PlatformConfig {
 
-    private boolean scheduledRestartsEnabled = false;
-    private List<String> scheduledTimes = new ArrayList<>();
-    private List<String> scheduledDays = new ArrayList<>(Collections.singletonList("ALL"));
-    private String timezone = "UTC";
-    private int scheduledWarningTime = 300;
-    private List<Integer> warningTimes = new ArrayList<>(List.of(300, 60, 30, 10, 5));
-    private boolean alertsEnabled = true;
+    private static final Logger LOGGER = Logger.getLogger(SimplePlatformConfig.class.getName());
 
-    private boolean monitoringEnabled = false;
-    private double tpsThreshold = 18.0;
-    private double memoryThreshold = 85.0;
-    private int checkInterval = 30;
-    private int consecutiveChecks = 3;
+    private volatile boolean scheduledRestartsEnabled = false;
+    private volatile List<String> scheduledTimes = new ArrayList<>();
+    private volatile List<String> scheduledDays = new ArrayList<>(Collections.singletonList("ALL"));
+    private volatile String timezone = "UTC";
+    private volatile int scheduledWarningTime = 300;
+    private volatile List<Integer> warningTimes = new ArrayList<>(List.of(300, 60, 30, 10, 5));
+    private volatile boolean alertsEnabled = true;
 
-    private boolean emergencyRestartEnabled = false;
-    private double emergencyTpsThreshold = 12.0;
-    private double emergencyMemoryThreshold = 95.0;
-    private int emergencyDelay = 30;
-    private int shutdownDelayTicks = 60;
-    private boolean useOpAsAdminEnabled = true;
-    private int defaultPermissionLevel = 2;
+    private volatile boolean monitoringEnabled = false;
+    private volatile double tpsThreshold = 18.0;
+    private volatile double memoryThreshold = 85.0;
+    private volatile int checkInterval = 30;
+    private volatile int consecutiveChecks = 3;
+
+    private volatile boolean emergencyRestartEnabled = false;
+    private volatile double emergencyTpsThreshold = 12.0;
+    private volatile double emergencyMemoryThreshold = 95.0;
+    private volatile int emergencyDelay = 30;
+    private volatile int shutdownDelayTicks = 60;
+    private volatile boolean useOpAsAdminEnabled = true;
+    private volatile int defaultPermissionLevel = 2;
+    private volatile boolean publicPermissionsEnabled = true;
 
     @Override public boolean isScheduledRestartsEnabled() { return scheduledRestartsEnabled; }
-    @Override public List<String> getScheduledTimes() { return scheduledTimes; }
-    @Override public List<String> getScheduledDays() { return scheduledDays; }
+    @Override public List<String> getScheduledTimes() { return Collections.unmodifiableList(scheduledTimes); }
+    @Override public List<String> getScheduledDays() { return Collections.unmodifiableList(scheduledDays); }
     @Override public ZoneId getZoneId() {
         try {
             return ZoneId.of(timezone);
         } catch (Exception e) {
+            LOGGER.warning("Invalid timezone '" + timezone + "' configured, falling back to UTC");
             return ZoneId.of("UTC");
         }
     }
     @Override public String getTimezone() { return timezone; }
     @Override public int getScheduledWarningTime() { return scheduledWarningTime; }
-    @Override public List<Integer> getWarningTimes() { return warningTimes; }
+    @Override public List<Integer> getWarningTimes() { return Collections.unmodifiableList(warningTimes); }
     @Override public boolean isAlertsEnabled() { return alertsEnabled; }
     @Override public boolean isMonitoringEnabled() { return monitoringEnabled; }
     @Override public double getTpsThreshold() { return tpsThreshold; }
@@ -59,6 +64,7 @@ public class SimplePlatformConfig implements PlatformConfig {
     @Override public int getShutdownDelayTicks() { return shutdownDelayTicks; }
     @Override public boolean isUseOpAsAdminEnabled() { return useOpAsAdminEnabled; }
     @Override public int getDefaultPermissionLevel() { return defaultPermissionLevel; }
+    @Override public boolean isPublicPermissionsEnabled() { return publicPermissionsEnabled; }
 
     // Setters for external injection
     public void setScheduledRestartsEnabled(boolean enabled) { this.scheduledRestartsEnabled = enabled; }
@@ -80,4 +86,32 @@ public class SimplePlatformConfig implements PlatformConfig {
     public void setShutdownDelayTicks(int ticks) { this.shutdownDelayTicks = ticks; }
     public void setUseOpAsAdminEnabled(boolean enabled) { this.useOpAsAdminEnabled = enabled; }
     public void setDefaultPermissionLevel(int level) { this.defaultPermissionLevel = level; }
+    public void setPublicPermissionsEnabled(boolean enabled) { this.publicPermissionsEnabled = enabled; }
+
+    private volatile String prefix = "§8[§cRedstone§8] §aReboot";
+    private volatile boolean chatAlertsEnabled = true;
+    private volatile String chatAlertFormat = "§8[§cRedstone§8] §eServer will restart in §c{time}§e!";
+    private volatile boolean titleAlertsEnabled = true;
+    private volatile String titleMainText = "§c⚡ Server Restart";
+    private volatile String titleSubText = "§ein §c{time}";
+    private volatile boolean actionBarAlertsEnabled = true;
+    private volatile String actionBarFormat = "§8[§cRedstone§8] §eRestart in: §c{time}";
+
+    @Override public String getPrefix() { return prefix; }
+    @Override public boolean isChatAlertsEnabled() { return chatAlertsEnabled; }
+    @Override public String getChatAlertFormat() { return chatAlertFormat; }
+    @Override public boolean isTitleAlertsEnabled() { return titleAlertsEnabled; }
+    @Override public String getTitleMainText() { return titleMainText; }
+    @Override public String getTitleSubText() { return titleSubText; }
+    @Override public boolean isActionBarAlertsEnabled() { return actionBarAlertsEnabled; }
+    @Override public String getActionBarFormat() { return actionBarFormat; }
+
+    public void setPrefix(String prefix) { this.prefix = prefix; }
+    public void setChatAlertsEnabled(boolean enabled) { this.chatAlertsEnabled = enabled; }
+    public void setChatAlertFormat(String format) { this.chatAlertFormat = format; }
+    public void setTitleAlertsEnabled(boolean enabled) { this.titleAlertsEnabled = enabled; }
+    public void setTitleMainText(String text) { this.titleMainText = text; }
+    public void setTitleSubText(String text) { this.titleSubText = text; }
+    public void setActionBarAlertsEnabled(boolean enabled) { this.actionBarAlertsEnabled = enabled; }
+    public void setActionBarFormat(String format) { this.actionBarFormat = format; }
 }

@@ -23,26 +23,37 @@ import java.util.logging.Logger;
 @Mod("redstonereboot")
 public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatform {
 
-    private final JavaPlatformScheduler scheduler;
+    private JavaPlatformScheduler scheduler;
 
     public RedstoneRebootForgeMod() {
         super(Logger.getLogger("RedstoneReboot/Forge"), "Forge", resolveMinecraftVersion());
         registerShutdownHook("RedstoneReboot-Forge-Shutdown");
 
-        scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
-        Path configDir = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get();
-        Path configPath = configDir.resolve("redstonereboot.properties");
-        startCore(scheduler, loadSimpleConfig(configPath), configDir);
+        try {
+            scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
+            Path configDir = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get();
+            Path configPath = configDir.resolve("redstonereboot.properties");
+            startCore(scheduler, loadSimpleConfig(configPath), configDir);
 
-        MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
-        MinecraftForge.EVENT_BUS.addListener(this::onServerStopping);
+            MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
+            MinecraftForge.EVENT_BUS.addListener(this::onServerStopping);
 
-        core.onEnable();
-        startPlatformMonitoring();
-        getLogger().info("Forge dedicated-server bootstrap initialized.");
+            if (core != null) {
+                try {
+                    core.onEnable();
+                } catch (Exception onEnableException) {
+                    getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
+                }
+            }
+            startPlatformMonitoring();
+            getLogger().info("Forge dedicated-server bootstrap initialized.");
+        } catch (Exception exception) {
+            getLogger().severe("Failed to initialize RedstoneReboot: " + exception.getMessage());
+        }
     }
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
+        if (core == null) return;
         new BrigadierCommand(core).register(event.getDispatcher(), source -> new ForgeSender(this, (CommandSourceStack) source));
         getLogger().info("RedstoneReboot command registered.");
     }
@@ -53,12 +64,11 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
 
     @Override
     public void broadcastMessage(String message) {
-        String plainMessage = LegacyTextUtil.stripLegacyFormatting(message);
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server != null && server.getPlayerList() != null) {
-            server.getPlayerList().broadcastSystemMessage(Component.literal(plainMessage), false);
+            server.getPlayerList().broadcastSystemMessage(parseLegacyComponent(message), false);
         }
-        getLogger().info("[broadcast] " + plainMessage);
+        getLogger().info("[broadcast] " + LegacyTextUtil.stripLegacyFormatting(message));
     }
 
     @Override
@@ -69,10 +79,10 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
                 + " | " + LegacyTextUtil.stripLegacyFormatting(subtitle));
             return;
         }
-        Component titleComponent = Component.literal(LegacyTextUtil.stripLegacyFormatting(title));
-        Component subtitleComponent = Component.literal(LegacyTextUtil.stripLegacyFormatting(subtitle));
+        Component titleComponent = parseLegacyComponent(title);
+        Component subtitleComponent = parseLegacyComponent(subtitle);
         for (net.minecraft.server.level.ServerPlayer player : server.getPlayerList().getPlayers()) {
-            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 40, 10));
+            player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket(10, 60, 10));
             player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(subtitleComponent));
             player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket(titleComponent));
         }
@@ -120,21 +130,24 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             return;
         }
 
+        getLogger().warning("Server reference is null. Running task on caller thread - this may cause thread safety issues.");
         task.run();
     }
 
     private static class ForgeSender implements CommandProcessor.CommandSender {
         private final RedstoneRebootForgeMod mod;
         private final CommandSourceStack source;
+        private final dev.demonz.redstonereboot.common.RedstoneRebootCore coreRef;
 
         private ForgeSender(RedstoneRebootForgeMod mod, CommandSourceStack source) {
             this.mod = mod;
             this.source = source;
+            this.coreRef = mod.core;
         }
 
         @Override
         public void sendMessage(String message) {
-            source.sendSystemMessage(Component.literal(LegacyTextUtil.stripLegacyFormatting(message)));
+            source.sendSystemMessage(mod.parseLegacyComponent(message));
         }
 
         @Override
@@ -147,13 +160,14 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             if (permission == null) {
                 return false;
             }
-            if (permission.equals("redstonereboot.status") || permission.equals("redstonereboot.use") || permission.equals("redstonereboot.notify")) {
+            if (CommandProcessor.isPublicPermission(permission) && coreRef != null && coreRef.getConfig().isPublicPermissionsEnabled()) {
                 return true;
             }
-            if (mod.core.getConfig().isUseOpAsAdminEnabled() && source.hasPermission(4)) {
+            if (coreRef != null && coreRef.getConfig().isUseOpAsAdminEnabled() && source.hasPermission(4)) {
                 return true;
             }
-            return source.hasPermission(mod.core.getConfig().getDefaultPermissionLevel());
+            int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
+            return level > 0 && source.hasPermission(level);
         }
     }
 
@@ -162,5 +176,36 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             .getModContainerById("minecraft")
             .map(container -> container.getModInfo().getVersion().toString())
             .orElse("Unknown");
+    }
+
+    private Component parseLegacyComponent(String text) {
+        if (text == null || text.isEmpty()) return Component.empty();
+        net.minecraft.network.chat.MutableComponent result = Component.empty();
+        StringBuilder currentText = new StringBuilder();
+        java.util.List<net.minecraft.ChatFormatting> formats = new java.util.ArrayList<>();
+        
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '\u00A7' && i + 1 < text.length()) {
+                if (currentText.length() > 0) {
+                    result.append(Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0])));
+                    currentText.setLength(0);
+                }
+                char code = text.charAt(++i);
+                net.minecraft.ChatFormatting format = net.minecraft.ChatFormatting.getByCode(code);
+                if (format != null) {
+                    if (format.isColor()) {
+                        formats.clear();
+                    }
+                    formats.add(format);
+                }
+            } else {
+                currentText.append(c);
+            }
+        }
+        if (currentText.length() > 0) {
+            result.append(Component.literal(currentText.toString()).withStyle(formats.toArray(new net.minecraft.ChatFormatting[0])));
+        }
+        return result;
     }
 }

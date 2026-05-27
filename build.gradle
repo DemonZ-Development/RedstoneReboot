@@ -2,11 +2,15 @@ plugins {
     id 'java'
 }
 
+// Enable dependency verification
+// Run: ./gradlew --write-verification-metadata sha256 help
+// to populate gradle/verification-metadata.xml
+
 allprojects {
     apply plugin: 'java'
     
     group = 'dev.demonz.redstonereboot'
-    version = '1.4.1'
+    version = '1.4.2'
 
     repositories {
         mavenCentral()
@@ -17,19 +21,16 @@ allprojects {
         maven { url = "https://maven.minecraftforge.net/" }
         maven { url = "https://maven.neoforged.net/releases/" }
     }
+    // Repositories exposed to all modules for convenience.
+    // Unused repos are resolved lazily by Gradle and do not affect build speed.
 
     java {
-        toolchain.languageVersion = JavaLanguageVersion.of(21)
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        toolchain.languageVersion = JavaLanguageVersion.of(21)  // Build JDK; source/target below
+        def j21 = JavaVersion.VERSION_21
+        sourceCompatibility = project.name == 'neoforge' ? j21 : JavaVersion.VERSION_17
+        targetCompatibility = project.name == 'neoforge' ? j21 : JavaVersion.VERSION_17
     }
 
-    if (project.name == 'neoforge') {
-        java {
-            sourceCompatibility = JavaVersion.VERSION_21
-            targetCompatibility = JavaVersion.VERSION_21
-        }
-    }
 
     tasks.withType(JavaCompile).configureEach {
         options.encoding = 'UTF-8'

@@ -8,11 +8,16 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utility class to check for updates via the Modrinth API.
  */
 public class UpdateChecker {
+
+    private static final Pattern VERSION_PATTERN =
+        Pattern.compile("\"version_number\"\\s*:\\s*\"([^\"]+)\"");
 
     private final String projectId;
     private final String currentVersion;
@@ -55,15 +60,12 @@ public class UpdateChecker {
 
                 try (Scanner scanner = new Scanner(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                     String response = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
-                    String versionPrefix = "\"version_number\":\"";
-                    int index = response.indexOf(versionPrefix);
-                    if (index == -1) {
+                    Matcher matcher = VERSION_PATTERN.matcher(response);
+                    if (!matcher.find()) {
+                        logger.warning("Update check: unexpected JSON format — version field not found.");
                         return;
                     }
-
-                    int startIndex = index + versionPrefix.length();
-                    int endIndex = response.indexOf("\"", startIndex);
-                    latestVersion = response.substring(startIndex, endIndex);
+                    latestVersion = matcher.group(1);
                     updateAvailable = !currentVersion.equalsIgnoreCase(latestVersion);
 
                     if (updateAvailable) {

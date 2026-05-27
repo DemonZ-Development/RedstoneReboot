@@ -1,23 +1,30 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.0'
+}
+
 dependencies {
     implementation project(':common')
     compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.5'
-    compileOnly 'org.jetbrains:annotations:24.0.0'
+    compileOnly 'org.jetbrains:annotations:25.0.0'
     implementation 'net.kyori:adventure-platform-bukkit:4.3.0'
     implementation 'net.kyori:adventure-text-minimessage:4.13.0'
     implementation 'net.kyori:adventure-text-serializer-legacy:4.13.0'
     implementation 'org.bstats:bstats-bukkit:3.0.2'
 }
 
+shadowJar {
+    archiveBaseName = 'RedstoneReboot-Bukkit'
+    mergeServiceFiles()
+
+    relocate 'org.bstats', 'dev.demonz.redstonereboot.libs.bstats'
+    relocate 'net.kyori.adventure', 'dev.demonz.redstonereboot.libs.kyori.adventure'
+    relocate 'net.kyori.examination', 'dev.demonz.redstonereboot.libs.kyori.examination'
+}
+
 jar {
     archiveBaseName = 'RedstoneReboot-Bukkit'
-
-    from {
-        configurations.runtimeClasspath.filter { 
-            it.name.contains('adventure') || it.name.contains('kyori') || it.name.contains('common') || it.name.contains('examination') || it.name.contains('bstats') || it.name.contains('json-simple')
-        }.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveClassifier = 'thin'
 }
 
 processResources {

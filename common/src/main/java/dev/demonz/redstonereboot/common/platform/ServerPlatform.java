@@ -142,6 +142,15 @@ public interface ServerPlatform {
         executeConsole("stop");
     }
 
+    /**
+     * Shutdown the server with a reason (default implementation ignores the reason).
+     *
+     * @param reason the reason for the shutdown (may be logged or displayed)
+     */
+    default void shutdownServer(String reason) {
+        shutdownServer();
+    }
+
     private static String formatDuration(int seconds) {
         if (seconds < 60) {
             return seconds + "s";

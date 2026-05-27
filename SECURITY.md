@@ -4,6 +4,7 @@
 
 | Version | Supported          |
 |---------|--------------------|
+| 1.4.x   | ✅ Active support   |
 | 1.3.x   | ✅ Active support   |
 | < 1.3   | ❌ No longer supported |
 
@@ -11,7 +12,9 @@
 
 If you discover a security vulnerability in RedstoneReboot, **please do not open a public issue.**
 
-Instead, report it privately through one of the following channels:
+To report a security vulnerability, please use GitHub's Private Vulnerability Reporting feature at https://github.com/sdemonzdevelopment-spec/RedstoneReboot/security/advisories/new
+
+Alternatively, you may report it privately through one of the following channels:
 
 - **Email**: Contact the maintainer directly via the GitHub profile linked to [DemonZ Development](https://github.com/sdemonzdevelopment-spec).
 - **Discord**: Send a direct message to a team member in the [DemonZ Development Discord](https://discord.gg/GYsTt96ypf).

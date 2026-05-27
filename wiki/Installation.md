@@ -6,11 +6,11 @@ Use the build that matches your server platform. Do not mix Bukkit, Folia, Fabri
 
 | Platform | Artifact | Minecraft | Runtime Java |
 |----------|----------|-----------|--------------|
-| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | `1.9` to `1.21.x+` | Java `8+` on legacy, Java `17/21` on modern |
-| Folia | `RedstoneReboot-Folia-<version>.jar` | `1.20.1+` | Java `17/21` |
-| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1+` | Java `17/21` |
-| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4+` | Java `17/21` |
-| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.20.4+` | Java `17/21` |
+| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | `1.9` to `26.x` | Java `8+` (legacy), `17+` (modern), `25` (26.x+) |
+| Folia | `RedstoneReboot-Folia-<version>.jar` | `1.20.1` to `26.x` | Java `17+`, `25` (26.x+) |
+| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1` to `26.x` | Java `17+`, `25` (26.x+) |
+| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4` to `26.x` | Java `17+`, `25` (26.x+) |
+| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.21.1` to `26.x` | Java `21+`, `25` (26.x+) |
 
 ## Bukkit, Spigot, Paper, and Similar Servers
 

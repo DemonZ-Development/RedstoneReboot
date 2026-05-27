@@ -41,9 +41,7 @@ public class ServerLoadMonitor {
 
     private void checkHealth() {
         lastTPS = plugin.getTPS();
-
-        Runtime runtime = Runtime.getRuntime();
-        lastMemoryUsage = (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
+        lastMemoryUsage = getMemoryUsagePercent();
 
         checkTPS();
         checkMemory();
@@ -151,5 +149,16 @@ public class ServerLoadMonitor {
     public boolean isHealthy() {
         return lastTPS >= plugin.getConfigManager().getTpsThreshold()
             && lastMemoryUsage <= plugin.getConfigManager().getMemoryThreshold();
+    }
+
+    /**
+     * Calculate the current JVM memory usage as a percentage.
+     * This is a shared utility to avoid duplicating the calculation across the codebase.
+     *
+     * @return memory usage percentage (0.0 – 100.0)
+     */
+    public static double getMemoryUsagePercent() {
+        Runtime runtime = Runtime.getRuntime();
+        return (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
     }
 }

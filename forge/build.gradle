@@ -1,8 +1,8 @@
 plugins {
-    id 'net.minecraftforge.gradle' version '6.0.+'
+    id 'net.minecraftforge.gradle' version '6.0.25'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Toolchain inherited from root build.gradle (JavaLanguageVersion.of(21))
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.4-49.0.49'
@@ -23,7 +23,9 @@ minecraft {
 
 jar {
     archiveBaseName = 'RedstoneReboot-Forge'
-    from project(':common').sourceSets.main.output
+    from(project(':common').sourceSets.main.output) {
+        into('/')
+    }
 }
 
 processResources {

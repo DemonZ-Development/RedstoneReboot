@@ -129,6 +129,81 @@ advanced:
 - `metrics-enabled`: enables anonymous usage statistics via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) (Bukkit builds only). Set to `false` to opt out.
 - `shutdown-delay-ticks`: ticks to wait after saving worlds before executing the shutdown sequence.
 
+## Mod Loader Config (redstonereboot.properties)
+
+Mod platforms (Fabric, Forge, NeoForge) use a standard Java `.properties` file located at `config/redstonereboot.properties` instead of `config.yml`. It supports equivalent options mapped as flat key-value pairs:
+
+```properties
+# Scheduled Restarts
+scheduled-restarts-enabled=false
+scheduled-times=06:00,18:00
+scheduled-days=ALL
+timezone=UTC
+warning-time=300
+warning-times=300,60,30,10,5,4,3,2,1
+
+# Alerts & Customization
+alerts-enabled=true
+plugin-prefix=§8[§cRedstone§8] §aReboot
+chat-alerts-enabled=true
+chat-alert-format=§8[§cRedstone§8] §eServer will restart in §c{time}§e!
+title-alerts-enabled=true
+title-main-text=§c⚡ Server Restart
+title-sub-text=§ein §c{time}
+actionbar-alerts-enabled=true
+actionbar-format=§8[§cRedstone§8] §eRestart in: §c{time}
+
+# Health Monitoring
+monitoring-enabled=false
+tps-threshold=18.0
+memory-threshold=85.0
+check-interval=30
+consecutive-checks=3
+
+# Emergency System
+emergency-enabled=false
+emergency-tps-threshold=12.0
+emergency-memory-threshold=95.0
+emergency-delay=30
+
+# Advanced Settings
+shutdown-delay-ticks=60
+
+# Command Permissions
+use-op-as-admin=true
+default-permission-level=2
+public-permissions-enabled=true
+```
+
+### Property Description
+
+- **`scheduled-restarts-enabled`**: Global switch to enable scheduled restarts.
+- **`scheduled-times`**: A comma-separated list of 24-hour times (e.g. `06:00,12:00,18:00`).
+- **`scheduled-days`**: Comma-separated list of weekdays or `ALL`.
+- **`timezone`**: Any valid Java `ZoneId` string (e.g. `Europe/London`, `America/New_York`, or `UTC`).
+- **`warning-time`**: Countdown in seconds for the primary restart scheduler warning.
+- **`warning-times`**: Comma-separated countdown thresholds (in seconds) to broadcast warnings to players.
+- **`alerts-enabled`**: Master toggle for all player-facing broadcast alerts.
+- **`plugin-prefix`**: Prefix string applied to broadcast announcements. Color codes can use either `&` or `§`.
+- **`chat-alerts-enabled`**: If true, countdown warnings are sent in player chat.
+- **`chat-alert-format`**: Chat format template. Supports `{time}` (formatted duration) and `{reason}`.
+- **`title-alerts-enabled`**: If true, title and subtitle alerts are displayed on player screens.
+- **`title-main-text`**: The main title display text.
+- **`title-sub-text`**: The subtitle display text. Supports `{time}`.
+- **`actionbar-alerts-enabled`**: If true, displays the warning in the player's action bar.
+- **`actionbar-format`**: Action bar message format. Supports `{time}`.
+- **`monitoring-enabled`**: Toggle background server performance checking.
+- **`tps-threshold` / `memory-threshold`**: Performance metrics limits triggering automated restarts.
+- **`check-interval`**: Time in seconds between load monitor checks.
+- **`consecutive-checks`**: Number of continuous out-of-bounds checks before initiating a health restart.
+- **`emergency-enabled`**: Toggle emergency restart system.
+- **`emergency-tps-threshold` / `emergency-memory-threshold`**: Severe limit triggers that bypass standard consecutive checks.
+- **`emergency-delay`**: Time in seconds to delay emergency restarts.
+- **`shutdown-delay-ticks`**: Delay in ticks after world saves before termination.
+- **`use-op-as-admin`**: If true, operator level 4 gives full administrator access.
+- **`default-permission-level`**: Minimum OP level required to use command structures.
+- **`public-permissions-enabled`**: Enables standard non-op players to use diagnostics/status commands like `/reboot status`.
+
 ## Backend Config
 
 Backend handoff uses a separate file named:

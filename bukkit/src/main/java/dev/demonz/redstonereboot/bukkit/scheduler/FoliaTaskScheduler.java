@@ -13,6 +13,9 @@ import java.util.logging.Level;
  */
 public final class FoliaTaskScheduler implements PlatformTaskScheduler {
 
+    /** No-op handle returned when scheduling fails due to reflection errors. */
+    private static final ScheduledTaskHandle NO_OP_HANDLE = () -> {};
+
     private final JavaPlugin plugin;
     private final Object globalScheduler;
     private final Object asyncScheduler;
@@ -21,6 +24,7 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
     private final Method asyncRunNowMethod;
     private final Method asyncRunDelayedMethod;
     private final Method asyncRunAtFixedRateMethod;
+    private final Method cancelMethod;
 
     FoliaTaskScheduler(JavaPlugin plugin) {
         this.plugin = plugin;
@@ -44,6 +48,10 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 .getMethod("runDelayed", pluginClass, consumerClass, long.class);
             asyncRunAtFixedRateMethod = asyncSchedulerClass
                 .getMethod("runAtFixedRate", pluginClass, consumerClass, long.class, long.class);
+
+            // Resolve cancel method from returned task type
+            cancelMethod = Class.forName("io.papermc.paper.threadedregions.scheduler.ScheduledTask")
+                .getMethod("cancel");
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException("Failed to initialize Folia scheduler bridge.", exception);
         }
@@ -56,12 +64,13 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 globalScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                Math.max(1L, initialDelayTicks),
+                initialDelayTicks,
                 periodTicks
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Failed to schedule repeating Folia task.", exception);
+            plugin.getLogger().log(Level.SEVERE, "Failed to schedule repeating Folia task.", exception);
+            return NO_OP_HANDLE;
         }
     }
 
@@ -77,7 +86,8 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Failed to schedule repeating async Folia task.", exception);
+            plugin.getLogger().log(Level.SEVERE, "Failed to schedule repeating async Folia task.", exception);
+            return NO_OP_HANDLE;
         }
     }
 
@@ -92,14 +102,14 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Failed to schedule delayed Folia task.", exception);
+            plugin.getLogger().log(Level.SEVERE, "Failed to schedule delayed Folia task.", exception);
+            return NO_OP_HANDLE;
         }
     }
 
     @Override
     public ScheduledTaskHandle runLaterAsync(Runnable task, long delayTicks) {
         if (delayTicks <= 0) {
-            // AsyncScheduler.runNow does not accept a Consumer with 0 ticks — use runNow
             try {
                 Object scheduledTask = asyncRunNowMethod.invoke(
                     asyncScheduler,
@@ -108,7 +118,8 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 );
                 return reflectionHandle(scheduledTask);
             } catch (ReflectiveOperationException exception) {
-                throw new IllegalStateException("Failed to schedule immediate async Folia task.", exception);
+                plugin.getLogger().log(Level.SEVERE, "Failed to schedule immediate async Folia task.", exception);
+                return NO_OP_HANDLE;
             }
         }
         try {
@@ -120,7 +131,8 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Failed to schedule delayed async Folia task.", exception);
+            plugin.getLogger().log(Level.SEVERE, "Failed to schedule delayed async Folia task.", exception);
+            return NO_OP_HANDLE;
         }
     }
 
@@ -133,25 +145,21 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
         if (scheduledTask == null) {
             return () -> {};
         }
-        try {
-            java.lang.reflect.Method cancelMethod = scheduledTask.getClass().getMethod("cancel");
-            cancelMethod.setAccessible(true);
-            return () -> {
-                try {
-                    cancelMethod.invoke(scheduledTask);
-                } catch (ReflectiveOperationException exception) {
-                    plugin.getLogger().log(Level.WARNING, "Failed to cancel Folia scheduled task.", exception);
-                }
-            };
-        } catch (NoSuchMethodException exception) {
-            plugin.getLogger().log(Level.WARNING, "Could not find cancel method on Folia task.", exception);
-            return () -> {};
-        }
+        return () -> {
+            try {
+                cancelMethod.invoke(scheduledTask);
+            } catch (ReflectiveOperationException exception) {
+                plugin.getLogger().log(Level.WARNING, "Failed to cancel Folia scheduled task.", exception);
+            }
+        };
     }
 
     private void safelyRun(Runnable task) {
         try {
             task.run();
+        } catch (Error error) {
+            plugin.getLogger().log(Level.SEVERE, "Scheduled task threw an Error.", error);
+            throw error;
         } catch (Exception exception) {
             plugin.getLogger().log(Level.SEVERE, "Scheduled task failed.", exception);
         }

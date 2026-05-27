@@ -44,12 +44,12 @@ public class SystemdBackend extends SupervisorBackend {
         return BackendState.ASSISTED;
     }
 
-    private boolean isWired() {
-        return Boolean.getBoolean("redstonereboot.active") || 
-               "1".equals(System.getenv("REDSTONEREBOOT_ACTIVE"));
-    }
-
     private boolean isSystemdEnvironment() {
-        return Files.exists(Paths.get("/run/systemd/system"));
+        try {
+            return Files.exists(Paths.get("/run/systemd/system"));
+        } catch (SecurityException exception) {
+            logger.warning("SecurityManager blocked systemd environment check: " + exception.getMessage());
+            return false;
+        }
     }
 }

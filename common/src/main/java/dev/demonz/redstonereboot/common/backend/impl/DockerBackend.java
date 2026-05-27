@@ -41,12 +41,12 @@ public class DockerBackend extends SupervisorBackend {
         return BackendState.ASSISTED;
     }
 
-    private boolean isWired() {
-        return Boolean.getBoolean("redstonereboot.active") || 
-               "1".equals(System.getenv("REDSTONEREBOOT_ACTIVE"));
-    }
-
     private boolean isDockerEnvironment() {
-        return Files.exists(Paths.get("/.dockerenv"));
+        try {
+            return Files.exists(Paths.get("/.dockerenv"));
+        } catch (SecurityException exception) {
+            logger.warning("SecurityManager blocked Docker environment check: " + exception.getMessage());
+            return false;
+        }
     }
 }

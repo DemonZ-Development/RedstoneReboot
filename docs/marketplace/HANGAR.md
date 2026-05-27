@@ -65,11 +65,11 @@ This Hangar page serves the plugin builds for Paper and its forks:
 ---
 
 ### 🌍 Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 1.21.x+
-- **Folia**: 1.20.1+
-- **Fabric**: 1.20.1+
-- **Forge**: 1.20.4+
-- **NeoForge**: 1.20.4+
+- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.x
+- **Folia**: 1.20.1+ to 26.x
+- **Fabric**: 1.20.1+ to 26.x
+- **Forge**: 1.20.4+ to 26.x
+- **NeoForge**: 1.21.1+ to 26.x (Java 21+)
 
 ---
 

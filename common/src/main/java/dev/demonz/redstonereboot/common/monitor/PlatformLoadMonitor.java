@@ -55,17 +55,17 @@ public final class PlatformLoadMonitor {
      * Start the health monitoring loop. Cancels any existing monitor first.
      * The check interval is read from the platform configuration.
      */
-    public void startMonitoring() {
+    public synchronized void startMonitoring() {
         stopMonitoring();
         long intervalTicks = Math.max(config.getCheckInterval(), 1) * 20L;
-        monitorTask = scheduler.runRepeatingAsync(this::checkHealth, intervalTicks, intervalTicks);
+        monitorTask = scheduler.runRepeating(this::checkHealth, intervalTicks, intervalTicks);
         logger.info("Load monitoring active (interval: " + config.getCheckInterval() + "s)");
     }
 
     /**
      * Stop the health monitoring loop and release the scheduled task.
      */
-    public void stopMonitoring() {
+    public synchronized void stopMonitoring() {
         if (monitorTask != null) {
             monitorTask.cancel();
             monitorTask = null;
