@@ -33,14 +33,14 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
             Class<?> consumerClass = Consumer.class;
 
             Object server = plugin.getServer();
-            globalScheduler = server.getClass().getMethod("getGlobalRegionScheduler").invoke(server);
+            globalScheduler = org.bukkit.Server.class.getMethod("getGlobalRegionScheduler").invoke(server);
             Class<?> globalSchedulerClass = globalScheduler.getClass();
             runDelayedMethod = globalSchedulerClass
                 .getMethod("runDelayed", pluginClass, consumerClass, long.class);
             runAtFixedRateMethod = globalSchedulerClass
                 .getMethod("runAtFixedRate", pluginClass, consumerClass, long.class, long.class);
 
-            asyncScheduler = server.getClass().getMethod("getAsyncScheduler").invoke(server);
+            asyncScheduler = org.bukkit.Server.class.getMethod("getAsyncScheduler").invoke(server);
             Class<?> asyncSchedulerClass = asyncScheduler.getClass();
             Class<?> timeUnitClass = java.util.concurrent.TimeUnit.class;
             asyncRunNowMethod = asyncSchedulerClass
@@ -65,8 +65,8 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 globalScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                initialDelayTicks,
-                periodTicks
+                Math.max(1L, initialDelayTicks),
+                Math.max(1L, periodTicks)
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {
@@ -82,8 +82,8 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 asyncScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                initialDelayTicks * 50L,
-                periodTicks * 50L,
+                Math.max(1L, initialDelayTicks) * 50L,
+                Math.max(1L, periodTicks) * 50L,
                 java.util.concurrent.TimeUnit.MILLISECONDS
             );
             return reflectionHandle(scheduledTask);
@@ -100,7 +100,7 @@ public final class FoliaTaskScheduler implements PlatformTaskScheduler {
                 globalScheduler,
                 plugin,
                 (Consumer<Object>) ignored -> safelyRun(task),
-                delayTicks
+                Math.max(1L, delayTicks)
             );
             return reflectionHandle(scheduledTask);
         } catch (ReflectiveOperationException exception) {

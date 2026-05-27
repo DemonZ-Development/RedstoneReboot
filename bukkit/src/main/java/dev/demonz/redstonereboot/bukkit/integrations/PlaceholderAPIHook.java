@@ -102,19 +102,12 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
             }
 
             case "tps": {
-                double tps = plugin.getServerLoadMonitor() != null 
-                    ? plugin.getServerLoadMonitor().getLastTPS() 
-                    : plugin.getTPS();
+                double tps = plugin.getTPS();
                 return String.format(Locale.ROOT, "%.1f", tps);
             }
 
             case "memory": {
-                double memoryUsage;
-                if (plugin.getServerLoadMonitor() != null) {
-                    memoryUsage = plugin.getServerLoadMonitor().getLastMemoryUsage();
-                } else {
-                    memoryUsage = ServerLoadMonitor.getMemoryUsagePercent();
-                }
+                double memoryUsage = plugin.getCachedMemoryUsage();
                 return String.format(Locale.ROOT, "%.1f%%", memoryUsage);
             }
 

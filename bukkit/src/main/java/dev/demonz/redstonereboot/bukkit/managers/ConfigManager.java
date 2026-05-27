@@ -104,6 +104,15 @@ public class ConfigManager implements PlatformConfig {
     }
 
     public void reloadConfig() {
+        java.io.File configFile = new java.io.File(plugin.getDataFolder(), "config.yml");
+        org.bukkit.configuration.file.YamlConfiguration tempConfig = new org.bukkit.configuration.file.YamlConfiguration();
+        try {
+            tempConfig.load(configFile);
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to parse config.yml: " + e.getMessage() + " — keeping previous config!");
+            throw new RuntimeException("Invalid YAML configuration: " + e.getMessage(), e);
+        }
+
         plugin.reloadConfig();
         FileConfiguration newConfig = plugin.getConfig();
         if (isStrictValidationEnabled()) {

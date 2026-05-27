@@ -31,6 +31,7 @@ localscript-file=start.sh
 
 - **`backends-enabled`**: Must be `true` for backend processing to occur; otherwise defaults to `SHUTDOWN_ONLY`.
 - **Environment Variables**: Sensitive properties support dynamic resolution using `${env.VAR_NAME:-fallback}` (e.g., `ptero-token=${env.PTERO_API_KEY}`). This works for variables prefixed with `REBOOT_`, `PTERO_`, `MINECRAFT_`, or `JAVA_`.
+- **Supervisor Wiring Requirements**: Supervisor backends (`LOCALSCRIPT`, `SYSTEMD`, and `DOCKER`) require wiring proof so they know they are running under their respective wrappers or supervisors. You **must** pass the system property `-Dredstonereboot.active=true` or set the environment variable `REDSTONEREBOOT_ACTIVE=1` in your container, systemd service unit, or startup script to satisfy this check, otherwise restarts will fail and postpone. (The auto-generated LocalScript wrapper templates export this environment variable automatically).
 
 ## Choosing a Backend
 

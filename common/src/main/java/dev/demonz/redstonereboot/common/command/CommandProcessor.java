@@ -183,6 +183,12 @@ public class CommandProcessor {
                 if (state == RestartBackend.BackendState.GENERATED) {
                     sender.sendMessage("\u00A7e[!] Script generated, but no 'Wired' proof found.");
                     sender.sendMessage("\u00A7e    Add \u00A7f-Dredstonereboot.active=true \u00A7eto startup.");
+                } else if (state == RestartBackend.BackendState.ASSISTED) {
+                    if ("Pterodactyl".equalsIgnoreCase(backend.getName())) {
+                        sender.sendMessage("\u00A7e[!] Pterodactyl API verification failed. Please verify your ptero-url, ptero-token, and ptero-id settings.");
+                    } else {
+                        sender.sendMessage("\u00A7e[!] Backend is not wired! Please add -Dredstonereboot.active=true to your server startup command or set environment variable REDSTONEREBOOT_ACTIVE=1.");
+                    }
                 } else if (state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
                     sender.sendMessage("\u00A77[i] Server will stop gracefully. Restart relies on your hosting environment (Pterodactyl, systemd, Docker, etc.). To manage the restart yourself, configure a backend in restart-backends.properties.");
                 }
@@ -190,8 +196,9 @@ public class CommandProcessor {
                 if (!detected.isEmpty()) {
                     sender.sendMessage("\u00A77Detected Env: \u00A7f" + String.join(", ", detected));
                     if (!detected.contains(backend.getName().toUpperCase())
-                        && !backend.getName().equals("LocalScript")) {
-                        sender.sendMessage("\u00A7c[!] Potential Mismatch: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Set active-backend in restart-backends.properties.");
+                        && !backend.getName().equals("LocalScript")
+                        && !backend.getName().equals("ShutdownOnly")) {
+                        sender.sendMessage("\u00A7e[i] Mismatch Advice: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Ensure your external supervisor or active-backend handles reboots.");
                     }
                 } else {
                     sender.sendMessage("\u00A77Detected Env: \u00A7fGeneric VPS/Local");

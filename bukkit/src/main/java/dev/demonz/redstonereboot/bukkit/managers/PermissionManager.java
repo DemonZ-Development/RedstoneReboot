@@ -43,7 +43,8 @@ public class PermissionManager {
     }
 
     private void prepareReflection() throws Exception {
-        getUserManagerMethod = luckPermsAPI.getClass().getMethod("getUserManager");
+        Class<?> luckPermsClass = Class.forName("net.luckperms.api.LuckPerms");
+        getUserManagerMethod = luckPermsClass.getMethod("getUserManager");
         Class<?> userManagerClass = getUserManagerMethod.getReturnType();
         getUserMethod = userManagerClass.getMethod("getUser", java.util.UUID.class);
         Class<?> userClass = getUserMethod.getReturnType();

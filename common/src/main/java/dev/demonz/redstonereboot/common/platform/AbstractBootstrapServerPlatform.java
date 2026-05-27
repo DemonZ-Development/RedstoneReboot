@@ -185,9 +185,20 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         }
     }
 
+    private Thread shutdownHookThread;
+
     protected final void stopCore() {
         if (started.compareAndSet(true, false)) {
             stopPlatformMonitoring();
+
+            if (shutdownHookThread != null) {
+                try {
+                    Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
+                } catch (IllegalStateException ignored) {
+                    // JVM is already shutting down
+                }
+                shutdownHookThread = null;
+            }
 
             if (core != null) {
                 core.onDisable();
@@ -202,7 +213,8 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
     }
 
     protected final void registerShutdownHook(String threadName) {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::stopCore, threadName));
+        shutdownHookThread = new Thread(this::stopCore, threadName);
+        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
     }
 
     @Override
@@ -248,6 +260,13 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
                 LegacyTextUtil.translateAlternateColorCodes(mainTitle),
                 LegacyTextUtil.translateAlternateColorCodes(subTitle)
             );
+        }
+
+        if (mutableConfig.isActionBarAlertsEnabled()) {
+            String actionFormat = mutableConfig.getActionBarFormat()
+                .replace("{time}", timeString)
+                .replace("{reason}", reason.getDisplayName());
+            broadcastActionBar(LegacyTextUtil.translateAlternateColorCodes(actionFormat));
         }
     }
 
