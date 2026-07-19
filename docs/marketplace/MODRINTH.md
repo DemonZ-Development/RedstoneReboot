@@ -4,11 +4,11 @@
 
 <div align="center">
 
-![RedstoneReboot Banner](https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/banner.png)
+![RedstoneReboot Banner](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
 
-# ⚡ RedstoneReboot
+# RedstoneReboot
 
-**A Multi-Platform Minecraft Server Restart Engine**
+**A restart engine for Minecraft servers across every major platform**
 
 [![bStats Servers](https://img.shields.io/bstats/servers/30751?label=Servers&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 [![bStats Players](https://img.shields.io/bstats/players/30751?label=Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
@@ -19,49 +19,49 @@
 
 ---
 
-## 🔥 Why RedstoneReboot?
+## Why RedstoneReboot?
 
-RedstoneReboot is a **production-grade server lifecycle engine** that provides precise control over when, why, and how your server restarts. Backed by real-time health monitoring, intelligent scheduling, and a pluggable backend handoff system.
+RedstoneReboot handles when, why, and how your server restarts. It combines live health monitoring, flexible scheduling, and a backend system that hands the actual restart off to whatever process manager you already use.
 
-From a single survival server to a fleet behind Pterodactyl — it delivers reliability, intelligence, and elegance.
+It works for a single survival server or for a whole fleet running behind Pterodactyl.
 
 ### Key Capabilities
 
-- 🕐 **Intelligent Scheduling** — Multiple daily restart windows with global timezone support and day-of-week filters
-- 📊 **Health Monitoring** — Real-time TPS and memory tracking with consecutive-check false-positive protection
-- 🚑 **Emergency Fail-safes** — Automatic restart triggers on critical TPS or memory breach
-- 🔔 **Rich Alerts** — Chat, title, action bar, and configurable sound notifications
-- 🔌 **Backend Handoff** — Delegate to Pterodactyl, Systemd, Docker, or local wrapper scripts
-- 🔄 **Hot-Reload** — Change backend config and `/reboot reload` — no full server restart needed
-- 🧩 **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit builds)
-- 📈 **bStats Metrics** — Anonymous usage telemetry ([view live stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
+- **Intelligent Scheduling** — Multiple restart windows per day, with timezone support and day-of-week filtering
+- **Health Monitoring** — Live TPS and memory tracking, with consecutive-check logic that avoids false restarts from brief spikes
+- **Emergency Fail-safes** — Automatically restarts when TPS or memory crosses a critical threshold
+- **Rich Alerts** — Chat, title, action bar, and configurable sound notifications
+- **Backend Handoff** — Delegates the restart to Pterodactyl, Systemd, Docker, or a local wrapper script
+- **Hot-Reload** — Change the backend config and run `/reboot reload` — no full server restart needed
+- **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit builds)
+- **bStats Metrics** — Anonymous usage telemetry ([view live stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
 
 ---
 
-## ⚡ The Backend System & Startup Loops
+## The Backend System & Startup Loops
 
-RedstoneReboot divides "when to restart" from "how to restart" by supporting multiple backends:
-* **SHUTDOWN_ONLY** — Graceful shutdown (letting your external wrapper restart the process)
-* **LOCALSCRIPT** — Auto-generated shell script handles process restarts
+RedstoneReboot keeps "when to restart" separate from "how to restart" by supporting several backends:
+* **SHUTDOWN_ONLY** — Graceful shutdown (your external wrapper restarts the process)
+* **LOCALSCRIPT** — An auto-generated shell script handles process restarts
 * **SYSTEMD** — Service integration on Linux
 * **DOCKER** — Container-native restart policies
 * **PTERODACTYL** — Direct panel API integration
 
-### 💡 Do I need to set up a custom backend?
-**If your server is already wrapped in a startup loop script** (like a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **`SHUTDOWN_ONLY` works out of the box!** When the restart timer runs out, the engine gracefully stops the server, and your script starts it back up automatically.
+### Do I need to set up a custom backend?
+**If your server is already wrapped in a startup loop script** (a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **SHUTDOWN_ONLY works out of the box.** When the restart timer runs out, the engine stops the server cleanly and your script starts it again.
 
 ### Why configure a custom backend then?
-1. **Intelligent Handoff (Pterodactyl / Panels)**: Avoid panel desyncs or false offline indicators. Instead of just shutting down, the plugin talks to your panel's API to request a clean power cycle.
-2. **Self-Healing Bootups**: If you don't run a startup loop script, the `LOCALSCRIPT` backend spawns a new process to boot the server back up automatically.
-3. **Crash Lockout Safety**: Simple loops can get stuck in infinite crash loops if a file gets corrupted. Custom backends implement safety lockout timers to prevent endless boot hammering.
+1. **Clean handoff (Pterodactyl / panels):** Avoid panel desyncs or false offline indicators. Instead of just shutting down, the plugin talks to your panel's API to request a clean power cycle.
+2. **Self-healing bootups:** If you don't run a startup loop script, the LOCALSCRIPT backend spawns a new process to bring the server back up.
+3. **Crash lockout safety:** Simple loops can get stuck in endless crash loops if a file gets corrupted. Custom backends add safety lockout timers to stop boot hammering.
 
 ---
 
-## 📦 File Selection
+## File Selection
 
 Choose the file that matches your server platform:
 
-### 🌍 Platform Compatibility
+### Platform Compatibility
 - **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 1.21.x+
 - **Folia**: 1.20.1+
 - **Fabric**: 1.20.1+
@@ -70,7 +70,7 @@ Choose the file that matches your server platform:
 
 ---
 
-| 🖥️ Platform | Distribution Type | 📄 File |
+| Platform | Distribution Type | File |
 |-----------|------------------|------|
 | **Bukkit / Spigot / Paper / Purpur** | Plugin | `RedstoneReboot-Bukkit-<version>.jar` |
 | **Folia** | Plugin | `RedstoneReboot-Folia-<version>.jar` |
@@ -80,7 +80,7 @@ Choose the file that matches your server platform:
 
 ---
 
-## 📋 Supported Versions
+## Supported Versions
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
@@ -92,7 +92,7 @@ Choose the file that matches your server platform:
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 ### Plugin Install (Bukkit/Folia)
 1. Download the correct plugin file.
@@ -110,7 +110,7 @@ Choose the file that matches your server platform:
 
 ---
 
-## 🎮 Commands
+## Commands
 
 | Command | Description |
 |---------|-------------|
@@ -125,7 +125,7 @@ Choose the file that matches your server platform:
 
 ---
 
-## 🔗 PlaceholderAPI (Bukkit Builds)
+## PlaceholderAPI (Bukkit Builds)
 
 | Placeholder | Example Output |
 |-------------|----------------|
@@ -135,24 +135,24 @@ Choose the file that matches your server platform:
 | `%redstonereboot_reason%` | `Scheduled Restart` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.4.2` |
+| `%redstonereboot_version%` | `1.5.0` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > MOTD compatible as of v1.3.3+.
 
 ---
 
-## 🔗 Quick Links
+## Quick Links
 
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
-- 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
-- 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
-- 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
-- 🐛 [**Bug Reports & Issues**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
-- 💬 [**Discord Support**](https://discord.gg/GYsTt96ypf)
+- [**Complete Wiki**](https://github.com/DemonZ-Development/RedstoneReboot/wiki)
+- [**GitHub Repository**](https://github.com/DemonZ-Development/RedstoneReboot)
+- [**Developer API Docs**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
+- [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+- [**Bug Reports & Issues**](https://github.com/DemonZ-Development/RedstoneReboot/issues)
+- [**Discord Support**](https://discord.gg/GYsTt96ypf)
 
 ---
 
-Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
+Made by [**DemonZ Development**](https://demonzdevelopment.online)
 
-*Premium Minecraft infrastructure, engineered for scale.*
+*Minecraft server tooling built by DemonZ Development.*

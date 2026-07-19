@@ -39,7 +39,6 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
             NeoForge.EVENT_BUS.addListener(this::onServerStarted);
             NeoForge.EVENT_BUS.addListener(this::onServerStopping);
 
-            startPlatformMonitoring();
             getLogger().info("NeoForge dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
             getLogger().severe("Failed to initialize RedstoneReboot: " + exception.getMessage());
@@ -56,6 +55,7 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
         if (core != null) {
             try {
                 core.onEnable();
+                startPlatformMonitoring();
             } catch (Exception onEnableException) {
                 getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
             }

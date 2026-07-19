@@ -1,14 +1,14 @@
 <div align="center">
 
-![RedstoneReboot Banner](https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/banner.png)
+![RedstoneReboot Banner](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
 
-# ⚡ RedstoneReboot
+# RedstoneReboot
 
-**A Multi-Platform Minecraft Server Restart Engine**
+**A restart engine for Minecraft servers across multiple platforms**
 
-[![CI](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions/workflows/ci.yml/badge.svg)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/sdemonzdevelopment-spec/RedstoneReboot?color=green&label=latest)](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest)
-[![License](https://img.shields.io/github/license/sdemonzdevelopment-spec/RedstoneReboot)](LICENSE)
+[![CI](https://github.com/DemonZ-Development/RedstoneReboot/actions/workflows/ci.yml/badge.svg)](https://github.com/DemonZ-Development/RedstoneReboot/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/DemonZ-Development/RedstoneReboot?color=green&label=latest)](https://github.com/DemonZ-Development/RedstoneReboot/releases/latest)
+[![License](https://img.shields.io/github/license/DemonZ-Development/RedstoneReboot)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?logo=openjdk)](https://adoptium.net/)
 [![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
@@ -18,32 +18,32 @@
 
 ---
 
-## 🔥 Overview
+## Overview
 
-RedstoneReboot is a **production-grade server lifecycle engine** that gives server administrators complete control over restart scheduling, health-based automation, and multi-platform backend handoff.
+RedstoneReboot gives server administrators control over restart scheduling, health-based automation, and multi-platform backend handoff.
 
-Whether you're running a single Paper server, a Folia network, or a fleet of modded Fabric/Forge servers behind Pterodactyl — RedstoneReboot provides the reliability, intelligence, and configurability you need.
+It runs on a single Paper server, a Folia network, or a set of modded Fabric/Forge servers behind Pterodactyl.
 
 ### Key Capabilities
 
 | Feature | Description |
 |---------|-------------|
-| 🕐 **Intelligent Scheduling** | Multiple daily restart windows with timezone awareness and day-of-week filters |
-| 📊 **Health Monitoring** | Real-time TPS and memory tracking with consecutive-check protection against false positives |
-| 🚑 **Emergency Fail-safes** | Automatic emergency restarts when critical TPS or memory thresholds are breached |
-| 🔔 **Rich Alerts** | Chat messages, titles, action bar, and configurable sounds with countdown warnings |
-| 🔌 **Backend Handoff** | Delegate restart execution to Pterodactyl, Systemd, Docker, or local scripts |
-| 🔄 **Hot-Reload** | Change backend config and `/reboot reload` — no full server restart needed |
-| 📈 **bStats Metrics** | Anonymous usage telemetry via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) |
-| 🧩 **PlaceholderAPI** | 8 placeholders for scoreboards, tab lists, and MOTD plugins |
+| **Intelligent Scheduling** | Multiple daily restart windows with timezone awareness and day-of-week filters |
+| **Health Monitoring** | Real-time TPS and memory tracking with consecutive-check protection against false positives |
+| **Emergency Fail-safes** | Automatic emergency restarts when critical TPS or memory thresholds are breached |
+| **Rich Alerts** | Chat messages, titles, action bar, and configurable sounds with countdown warnings |
+| **Backend Handoff** | Delegate restart execution to Pterodactyl, Systemd, Docker, or local scripts |
+| **Hot-Reload** | Change backend config and `/reboot reload` — no full server restart needed |
+| **bStats Metrics** | Anonymous usage telemetry via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) |
+| **PlaceholderAPI** | 8 placeholders for scoreboards, tab lists, and MOTD plugins |
 
 ---
 
-## 📦 Quick Start
+## Quick Start
 
 ### Plugin Install (Bukkit / Paper / Folia)
 
-1. Download the correct JAR from [Releases](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/releases/latest).
+1. Download the correct JAR from [Releases](https://github.com/DemonZ-Development/RedstoneReboot/releases/latest).
 2. Place it in your `plugins/` folder.
 3. Start the server — config files are generated automatically.
 4. Edit `plugins/RedstoneReboot/config.yml` and `plugins/RedstoneReboot/restart-backends.properties`.
@@ -59,7 +59,7 @@ Whether you're running a single Paper server, a Folia network, or a fleet of mod
 
 ---
 
-## 🖥️ Supported Platforms
+## Supported Platforms
 
 | Platform | Type | Minecraft Versions | Java |
 |----------|------|--------------------|------|
@@ -71,7 +71,7 @@ Whether you're running a single Paper server, a Folia network, or a fleet of mod
 
 ---
 
-## 🎮 Commands
+## Commands
 
 | Command | Permission | Description |
 |---------|------------|-------------|
@@ -86,7 +86,7 @@ Whether you're running a single Paper server, a Folia network, or a fleet of mod
 
 ---
 
-## 🔗 PlaceholderAPI Integration
+## PlaceholderAPI Integration
 
 RedstoneReboot integrates with [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/) on Bukkit-family servers.
 
@@ -98,14 +98,14 @@ RedstoneReboot integrates with [PlaceholderAPI](https://www.spigotmc.org/resourc
 | `%redstonereboot_reason%` | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.4.2` |
+| `%redstonereboot_version%` | `1.5.0` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > **MOTD Compatible** — v1.3.3+ includes null-safety fixes for server-list MOTD plugins.
 
 ---
 
-## ⚙️ Backend System
+## Backend System
 
 RedstoneReboot separates the **"when to restart"** from the **"how to restart"** through its backend handoff system. Configure `restart-backends.properties` to choose:
 
@@ -121,20 +121,20 @@ RedstoneReboot separates the **"when to restart"** from the **"how to restart"**
 
 ---
 
-## 📖 Documentation
+## Documentation
 
-- 📚 [**Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki) — Installation, configuration, backends, and troubleshooting
-- 🛠️ [**Developer API**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md) — Bukkit API for plugin developers
-- 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) — Server usage statistics
-- 💬 [**Discord**](https://discord.gg/GYsTt96ypf) — Support and community
-- 📸 [**Instagram**](https://instagram.com/demonzdevelopment) — Updates and announcements
+- [**Wiki**](https://github.com/DemonZ-Development/RedstoneReboot/wiki) — Installation, configuration, backends, and troubleshooting
+- [**Developer API**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md) — Bukkit API for plugin developers
+- [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) — Server usage statistics
+- [**Discord**](https://discord.gg/GYsTt96ypf) — Support and community
+- [**Instagram**](https://instagram.com/demonzdevelopment) — Updates and announcements
 
 ---
 
-## 🏗️ Building from Source
+## Building from Source
 
 ```bash
-git clone https://github.com/sdemonzdevelopment-spec/RedstoneReboot.git
+git clone https://github.com/DemonZ-Development/RedstoneReboot.git
 cd RedstoneReboot
 ./gradlew build
 ```
@@ -145,13 +145,13 @@ Output JARs are located in `<module>/build/libs/`.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and PR guidelines.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the terms in the [LICENSE](LICENSE) file.
 
@@ -159,6 +159,6 @@ This project is licensed under the terms in the [LICENSE](LICENSE) file.
 
 <div align="center">
 
-Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
+Made by [**DemonZ Development**](https://demonzdevelopment.online)
 
 </div>

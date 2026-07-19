@@ -17,7 +17,7 @@ RedstoneReboot `<version>` is finalized on the code/build side.
 
 ## Distribution
 
-- **GitHub:** https://github.com/sdemonzdevelopment-spec/RedstoneReboot
+- **GitHub:** https://github.com/DemonZ-Development/RedstoneReboot
 - **bStats:** https://bstats.org/plugin/bukkit/RedstoneReboot/30751
 - **Discord:** https://discord.gg/GYsTt96ypf
 - **Instagram:** https://instagram.com/demonzdevelopment

@@ -4,11 +4,11 @@
 
 <div align="center">
 
-![RedstoneReboot](https://raw.githubusercontent.com/sdemonzdevelopment-spec/RedstoneReboot/main/assets/banner.png)
+![RedstoneReboot](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
 
-# ⚡ RedstoneReboot
+# RedstoneReboot
 
-**The Most Advanced Multi-Platform Minecraft Server Restart Engine**
+**A restart engine for Bukkit-family Minecraft servers**
 
 [![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
@@ -16,19 +16,19 @@
 
 ---
 
-## 🔥 Why RedstoneReboot?
+## Why RedstoneReboot?
 
-RedstoneReboot is a **production-grade restart management plugin** for modern Bukkit-based servers, with dedicated support for both standard Paper-style schedulers and **Folia's region-threaded model**.
+RedstoneReboot is a restart management plugin for modern Bukkit-based servers, with dedicated support for both standard Paper-style schedulers and **Folia's region-threaded model**.
 
-It gives server administrators precise control over restart scheduling, health-based automation, and backend handoff — from a single survival server to a multi-node network behind Pterodactyl.
+It gives server administrators control over restart scheduling, health-based automation, and backend handoff — from a single survival server to a multi-node network behind Pterodactyl.
 
 ---
 
-## 📦 Hangar Scope
+## Hangar Scope
 
 This Hangar page serves the plugin builds for Paper and its forks:
 
-| 🖥️ Platform | Distribution Type | 📄 File |
+| Platform | Distribution Type | File |
 |-----------|------------------|------|
 | **Paper / Purpur / Pufferfish / Spigot** | Plugin | `RedstoneReboot-Bukkit-<version>.jar` |
 | **Folia** | Plugin | `RedstoneReboot-Folia-<version>.jar` |
@@ -38,30 +38,30 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-## ✨ Key Capabilities
+## Key Capabilities
 
-### 🕐 Intelligent Scheduling
+### Intelligent Scheduling
 - Multiple restart windows per day with timezone-aware timing
 - Day-of-week filtering (e.g., weekdays only)
 - Configurable warning countdowns with granular alert thresholds
 
-### 📊 Health Monitoring & Emergency Fail-safes
+### Health Monitoring & Emergency Fail-safes
 - TPS and memory threshold monitoring with consecutive-check protection
 - Dedicated emergency thresholds for critical situations
 - Graceful stop handling with world-save delay
 
-### 🔌 Backend Handoff System
+### Backend Handoff System
 - **SHUTDOWN_ONLY** — graceful shutdown for external restarters
 - **LOCALSCRIPT** — auto-generated wrapper script restart loop
 - **SYSTEMD** / **DOCKER** / **PTERODACTYL** — native environment integration
 - Hot-reload: edit `restart-backends.properties` and `/reboot reload`
-- **Do I need a custom backend?** If your server is already wrapped in a startup loop script (like a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **`SHUTDOWN_ONLY` works out of the box!** When the restart timer runs out, the engine gracefully stops the server, and your script starts it back up automatically.
-- **Why configure a custom backend then?** 
-  1. *Intelligent Handoff (Pterodactyl / Panels)*: Avoid panel desyncs or false offline indicators by requesting a clean power cycle via the panel's API.
-  2. *Self-Healing Bootups*: The `LOCALSCRIPT` backend spawns a new process to boot the server back up automatically if you don't run a loop script.
-  3. *Crash Lockout Safety*: Implements safety lockout timers to prevent endless boot hammering if files get corrupted.
+- **Do I need a custom backend?** If your server is already wrapped in a startup loop script (a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **SHUTDOWN_ONLY works out of the box.** When the restart timer runs out, the engine stops the server cleanly and your script starts it again.
+- **Why configure a custom backend then?**
+  1. *Clean handoff (Pterodactyl / panels)*: Avoid panel desyncs or false offline indicators by requesting a clean power cycle through the panel's API.
+  2. *Self-healing bootups*: The LOCALSCRIPT backend spawns a new process to bring the server back up if you don't run a loop script.
+  3. *Crash lockout safety*: Custom backends add safety lockout timers to stop endless boot hammering if files get corrupted.
 
-### 🔔 Rich Alerts & Integrations
+### Rich Alerts & Integrations
 - Chat messages, titles, action bar, and configurable sounds
 - **PlaceholderAPI**: 8 placeholders for scoreboards, tab lists, and MOTD plugins
 - **LuckPerms**: full permission resolution with group support
@@ -69,7 +69,7 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-### 🌍 Platform Compatibility
+### Platform Compatibility
 - **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.x
 - **Folia**: 1.20.1+ to 26.x
 - **Fabric**: 1.20.1+ to 26.x
@@ -78,7 +78,7 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 1. Download the correct file for your platform.
 2. Place it in `plugins/`.
@@ -88,7 +88,7 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-## 🎮 Commands
+## Commands
 
 | Command | Permission | Description |
 |---------|------------|-------------|
@@ -103,7 +103,7 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-## 📊 PlaceholderAPI
+## PlaceholderAPI
 
 | Placeholder | Output |
 |-------------|--------|
@@ -118,14 +118,14 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-## 🔗 Quick Links
+## Quick Links
 
-- 📖 [**Complete Wiki**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki)
-- 💻 [**GitHub Repository**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot)
-- 🛠️ [**Developer API Docs**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/blob/main/docs/api/README.md)
-- 📊 [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
-- 🐛 [**Bug Tracker & Issues**](https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues)
+- [**Complete Wiki**](https://github.com/DemonZ-Development/RedstoneReboot/wiki)
+- [**GitHub Repository**](https://github.com/DemonZ-Development/RedstoneReboot)
+- [**Developer API Docs**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
+- [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+- [**Bug Tracker & Issues**](https://github.com/DemonZ-Development/RedstoneReboot/issues)
 
 ---
 
-Crafted with ❤️ by [**DemonZ Development**](https://demonzdevelopment.online)
+Made by [**DemonZ Development**](https://demonzdevelopment.online)

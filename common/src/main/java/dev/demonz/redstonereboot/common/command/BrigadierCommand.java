@@ -93,6 +93,17 @@ public class BrigadierCommand {
                 return 1;
             }));
 
+        // history
+        reboot.then(LiteralArgumentBuilder.<S>literal("history")
+            .requires(src -> {
+                CommandProcessor.CommandSender sender = factory.create(src);
+                return sender.hasPermission("redstonereboot.status") || sender.hasPermission("redstonereboot.use");
+            })
+            .executes(ctx -> {
+                processor.processHistory(factory.create(ctx.getSource()));
+                return 1;
+            }));
+
         // help
         reboot.then(LiteralArgumentBuilder.<S>literal("help")
             .executes(ctx -> {
