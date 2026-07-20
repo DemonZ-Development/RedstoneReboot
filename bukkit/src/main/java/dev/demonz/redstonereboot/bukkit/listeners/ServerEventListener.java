@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public class ServerEventListener implements Listener {
 
@@ -38,7 +39,7 @@ public class ServerEventListener implements Listener {
                 if (nextRestart != null) {
                     event.getPlayer().sendMessage(plugin.getConfigManager().getPrefix()
                         + " §aNext restart: §e"
-                        + nextRestart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                        + nextRestart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.ROOT))
                         + " " + plugin.getConfigManager().getTimezone());
                 }
             }
