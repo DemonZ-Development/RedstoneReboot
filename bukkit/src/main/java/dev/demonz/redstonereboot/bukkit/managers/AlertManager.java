@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Manages all player-facing alerts using Kyori Adventure for cross-version support.
@@ -244,7 +245,7 @@ public class AlertManager {
             int remainder = seconds % 60;
             return remainder == 0
                 ? minutes + " minute" + (minutes != 1 ? "s" : "")
-                : minutes + ":" + String.format("%02d", remainder);
+                : minutes + ":" + String.format(Locale.ROOT, "%02d", remainder);
         }
         int hours = seconds / 3600;
         int minutes = (seconds % 3600) / 60;

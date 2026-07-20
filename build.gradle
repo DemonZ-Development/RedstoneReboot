@@ -10,7 +10,7 @@ allprojects {
     apply plugin: 'java'
     
     group = 'dev.demonz.redstonereboot'
-    version = '1.4.2'
+    version = '1.5.0'
 
     repositories {
         mavenCentral()

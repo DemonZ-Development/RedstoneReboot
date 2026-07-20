@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.5.0] — 2026-07-19
+
+### Added
+- **`/reboot history` command**: Shows the last 10 restart lifecycle events (scheduled, executed, cancelled, postponed, lockout) with timestamp, reason, and initiator. Events are also appended to `restarts.log` in the data folder for review across server restarts.
+- **Doctor command overhaul**: `/reboot doctor` now reports live stats (TPS, memory, player count), current restart state with remaining seconds and initiator, and the next scheduled restart time — previously it only reported backend state, which made it look like restarts were not happening.
+- **Mod initialization fix**: On Fabric, Forge, and NeoForge, health monitoring now starts *after* the core engine finishes enabling, so monitoring and scheduled restarts no longer run against an uninitialized backend registry.
+- Marketplace/README copy rewritten without emojis and in plain language.
+
+### Fixed
+- Doctor command no longer silently omits restart status, giving a false "won't restart" impression while a restart was actually in progress.
+
+---
+
 ## [1.4.2] — 2026-05-27
 
 ### Added

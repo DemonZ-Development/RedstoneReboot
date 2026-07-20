@@ -48,6 +48,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             }
             case "info" -> handleInfo(sender);
             case "doctor" -> handleDoctor(sender);
+            case "history" -> handleHistory(sender);
             case "reload" -> handleReload(sender);
             case "help" -> {
                 sendHelp(sender);
@@ -64,7 +65,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "doctor", "reload", "help")) {
+            for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "doctor", "history", "reload", "help")) {
                 if (candidate.startsWith(args[0].toLowerCase()) && hasTabPermission(sender, candidate)) {
                     completions.add(candidate);
                 }
@@ -83,6 +84,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             case "cancel" -> sender.hasPermission("redstonereboot.restart.cancel");
             case "reload" -> sender.hasPermission("redstonereboot.config.reload");
             case "doctor" -> sender.hasPermission("redstonereboot.doctor");
+            case "history" -> sender.hasPermission("redstonereboot.status");
             default -> true;
         };
     }
@@ -228,6 +230,20 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleHistory(CommandSender sender) {
+        if (sender instanceof Player player && !plugin.getPermissionManager().canViewStatus(player)) {
+            msg(sender, "No permission.", NamedTextColor.RED);
+            return true;
+        }
+        if (!(sender instanceof Player) && !sender.hasPermission("redstonereboot.status")) {
+            msg(sender, "No permission.", NamedTextColor.RED);
+            return true;
+        }
+
+        processor.processHistory(new BukkitSender(sender));
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         msg(sender, "=== RedstoneReboot Commands ===", NamedTextColor.GOLD);
         msg(sender, "/reboot status - View restart status", NamedTextColor.GRAY);
@@ -236,6 +252,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         msg(sender, "/reboot schedule <seconds> - Schedule restart", NamedTextColor.GRAY);
         msg(sender, "/reboot cancel - Cancel restart", NamedTextColor.GRAY);
         msg(sender, "/reboot doctor - Backend diagnostics", NamedTextColor.GRAY);
+        msg(sender, "/reboot history - Recent restart events", NamedTextColor.GRAY);
         msg(sender, "/reboot reload - Reload config", NamedTextColor.GRAY);
     }
 

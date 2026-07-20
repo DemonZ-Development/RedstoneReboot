@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public final class RestartScheduleCalculator {
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("H:mm");
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("H:mm").withLocale(Locale.ROOT);
 
     private RestartScheduleCalculator() {
     }
