@@ -1,7 +1,7 @@
-# RedstoneReboot v1.4.2 Configuration
+# RedstoneReboot v1.5.0 Configuration
 # Advanced multi-platform server restart engine.
-# GitHub: https://github.com/sdemonzdevelopment-spec/RedstoneReboot
-# Wiki: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki
+# GitHub: https://github.com/DemonZ-Development/RedstoneReboot
+# Wiki: https://github.com/DemonZ-Development/RedstoneReboot/wiki
 #
 # === Migration Guide ===
 # v1.4.1 -> v1.4.2:
@@ -21,7 +21,7 @@
 # Set up your restart schedule under `scheduled-restarts:`.
 # Configure a backend (Pterodactyl, Systemd, Docker, or LocalScript) via
 # the `restart-backends.properties` file in the plugin data folder.
-# Tutorial: https://github.com/sdemonzdevelopment-spec/RedstoneReboot/wiki/Getting-Started
+# Tutorial: https://github.com/DemonZ-Development/RedstoneReboot/wiki/Getting-Started
 
 general:
   plugin-prefix: "§8[§cRedstone§8] §aReboot"

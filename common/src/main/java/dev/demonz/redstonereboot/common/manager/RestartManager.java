@@ -9,6 +9,8 @@ import dev.demonz.redstonereboot.common.schedule.RestartScheduleCalculator;
 import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
 import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 
+import java.nio.file.Path;
+
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.Locale;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,11 +51,16 @@ public class RestartManager {
     private volatile String restartInitiator = "System";
     private final AtomicInteger secondsUntilRestart = new AtomicInteger(-1);
     private final BackendRegistry backendRegistry;
+    private final RestartHistory history;
     private final AtomicBoolean controllerRestartPending = new AtomicBoolean(false);
     private final AtomicBoolean restartExecuting = new AtomicBoolean(false);
     private final AtomicBoolean shutdownGuard = new AtomicBoolean(false);
     private final AtomicLong restartGeneration = new AtomicLong(0);
     private volatile long lockoutEndTime = 0;
+
+    public RestartManager(Logger logger, ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, BackendRegistry backendRegistry, Path dataFolder) {
+        this(logger, platform, scheduler, config, backendRegistry, () -> ZonedDateTime.now(config.getZoneId()), dataFolder);
+    }
 
     public RestartManager(Logger logger, ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, BackendRegistry backendRegistry) {
         this(logger, platform, scheduler, config, backendRegistry, () -> ZonedDateTime.now(config.getZoneId()));
@@ -66,12 +74,25 @@ public class RestartManager {
         BackendRegistry backendRegistry,
         Supplier<ZonedDateTime> nowSupplier
     ) {
+        this(logger, platform, scheduler, config, backendRegistry, nowSupplier, null);
+    }
+
+    RestartManager(
+        Logger logger,
+        ServerPlatform platform,
+        PlatformTaskScheduler scheduler,
+        PlatformConfig config,
+        BackendRegistry backendRegistry,
+        Supplier<ZonedDateTime> nowSupplier,
+        Path dataFolder
+    ) {
         this.logger = logger;
         this.platform = platform;
         this.scheduler = scheduler;
         this.config = config;
         this.backendRegistry = backendRegistry;
         this.nowSupplier = nowSupplier;
+        this.history = new RestartHistory(dataFolder, nowSupplier);
     }
 
     /**
@@ -98,7 +119,7 @@ public class RestartManager {
 
         logger.info("Next restart: "
             + (nextScheduledRestart != null
-            ? nextScheduledRestart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+            ? nextScheduledRestart.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.ROOT))
                 + " " + config.getTimezone()
             : "None"));
     }
@@ -176,6 +197,7 @@ public class RestartManager {
 
         currentRestartReason = reason;
         restartInitiator = initiator;
+        history.record("SCHEDULED", reason.getDisplayName(), initiator);
 
         if (normalizedDelay == 0) {
             executeRestart();
@@ -195,6 +217,7 @@ public class RestartManager {
         cancelCurrentCountdown(false);
         this.currentRestartReason = reason;
         this.restartInitiator = initiator;
+        history.record("IMMEDIATE", reason.getDisplayName(), initiator);
         executeRestart();
     }
 
@@ -238,6 +261,7 @@ public class RestartManager {
 
         final long currentGeneration = restartGeneration.incrementAndGet();
         RestartReason reason = currentRestartReason;
+        String initiator = restartInitiator;
         RestartBackend backend = backendRegistry.getActiveBackend();
 
         cancelCurrentCountdown(false);
@@ -263,7 +287,7 @@ public class RestartManager {
                                 logger.fine("Discarding stale restart result (generation mismatch).");
                                 return;
                             }
-                            handleExecutionResult(result, reason, backend);
+                            handleExecutionResult(result, reason, backend, initiator);
                         }, 0);
                     } catch (Exception innerException) {
                         if (restartGeneration.get() != currentGeneration) {
@@ -291,7 +315,7 @@ public class RestartManager {
         }
     }
 
-    private void handleExecutionResult(BackendResult result, RestartReason reason, RestartBackend backend) {
+    private void handleExecutionResult(BackendResult result, RestartReason reason, RestartBackend backend, String initiator) {
         if (result == BackendResult.ACCEPTED) {
             if (backend.isControllerOwned()) {
                 if (config.isAlertsEnabled()) {
@@ -299,6 +323,7 @@ public class RestartManager {
                 }
                 controllerRestartPending.set(true);
                 logger.info("Restart accepted by Controller (" + backend.getName() + "). Local process ownership relinquished.");
+                history.record("EXECUTED", reason.getDisplayName(), initiator);
 
                 scheduler.runLater(() -> {
                     if (controllerRestartPending.compareAndSet(true, false)) {
@@ -310,11 +335,13 @@ public class RestartManager {
                     platform.sendFinalRestartAlert(reason);
                 }
                 platform.shutdownServer(reason.getDisplayName());
+                history.record("EXECUTED", reason.getDisplayName(), initiator);
             }
         } else if (result == BackendResult.FAILED) {
             String detail = "Backend " + backend.getName() + " explicitly failed the restart request.";
             platform.sendPostponedAlert(detail);
             logger.severe("RESTART FAILED: " + detail);
+            history.record("POSTPONED", reason.getDisplayName(), initiator);
         } else if (result == BackendResult.UNKNOWN) {
             int duration = backendRegistry.getConfig().getLockoutDuration();
             this.lockoutEndTime = System.currentTimeMillis() + (duration * 1000L);
@@ -322,6 +349,7 @@ public class RestartManager {
             String detail = "Backend " + backend.getName() + " returned UNKNOWN status (Timeout?). Entering " + duration + "s lockout.";
             platform.sendPostponedAlert(detail);
             logger.warning("RESTART STATE UNKNOWN: " + detail);
+            history.record("LOCKOUT", reason.getDisplayName(), initiator);
         }
     }
 
@@ -334,7 +362,10 @@ public class RestartManager {
             return false;
         }
 
+        String reason = currentRestartReason.getDisplayName();
+        String initiator = restartInitiator;
         cancelCurrentCountdown(true);
+        history.record("CANCELLED", reason, initiator);
         return true;
     }
 
@@ -368,6 +399,14 @@ public class RestartManager {
 
     public boolean isControllerRestartPending() {
         return controllerRestartPending.get();
+    }
+
+    public String getRestartInitiator() {
+        return restartInitiator;
+    }
+
+    public RestartHistory getHistory() {
+        return history;
     }
 
     public ZonedDateTime getNextScheduledRestart() {

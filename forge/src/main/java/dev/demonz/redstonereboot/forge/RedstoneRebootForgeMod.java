@@ -39,7 +39,6 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             MinecraftForge.EVENT_BUS.addListener(this::onServerStarted);
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopping);
 
-            startPlatformMonitoring();
             getLogger().info("Forge dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
             getLogger().severe("Failed to initialize RedstoneReboot: " + exception.getMessage());
@@ -56,6 +55,7 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
         if (core != null) {
             try {
                 core.onEnable();
+                startPlatformMonitoring();
             } catch (Exception onEnableException) {
                 getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
             }

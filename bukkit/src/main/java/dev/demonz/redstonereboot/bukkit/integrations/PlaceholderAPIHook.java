@@ -25,7 +25,7 @@ import java.util.Locale;
 public class PlaceholderAPIHook extends PlaceholderExpansion {
 
     private static final DateTimeFormatter DATETIME_FORMAT =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.ROOT);
 
     private final RedstoneRebootPlugin plugin;
 

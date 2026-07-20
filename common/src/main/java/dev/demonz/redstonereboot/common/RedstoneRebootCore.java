@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.4.2";
+    public static final String VERSION = "1.5.0";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
@@ -51,7 +51,7 @@ public class RedstoneRebootCore {
         
         BackendConfig backendConfig = new BackendConfig(dataFolder, LOGGER);
         this.backendRegistry = new BackendRegistry(LOGGER, backendConfig, dataFolder);
-        this.restartManager = new RestartManager(LOGGER, platform, scheduler, config, backendRegistry);
+        this.restartManager = new RestartManager(LOGGER, platform, scheduler, config, backendRegistry, dataFolder);
     }
 
     /**

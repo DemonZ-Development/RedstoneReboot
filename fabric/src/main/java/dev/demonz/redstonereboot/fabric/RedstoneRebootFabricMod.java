@@ -44,7 +44,14 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
 
             ServerLifecycleEvents.SERVER_STARTED.register(startedServer -> {
                 this.server = startedServer;
-                if (core != null) core.onEnable();
+                if (core != null) {
+                    try {
+                        core.onEnable();
+                        startPlatformMonitoring();
+                    } catch (Exception onEnableException) {
+                        getLogger().severe("Failed to enable RedstoneReboot core: " + onEnableException.getMessage());
+                    }
+                }
             });
             ServerLifecycleEvents.SERVER_STOPPING.register(stoppingServer -> {
                 this.server = stoppingServer;
@@ -60,7 +67,6 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
                 getLogger().info("RedstoneReboot command registered.");
             });
 
-            startPlatformMonitoring();
             getLogger().info("Fabric dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
             getLogger().severe("Failed to initialize RedstoneReboot: " + exception.getMessage());

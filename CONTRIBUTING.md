@@ -11,7 +11,7 @@ This repository builds multiple platform targets from one shared restart engine.
 ## Setup
 
 ```bash
-git clone https://github.com/sdemonzdevelopment-spec/RedstoneReboot.git
+git clone https://github.com/DemonZ-Development/RedstoneReboot.git
 cd RedstoneReboot
 ./gradlew build
 ```
@@ -70,6 +70,6 @@ Good pull requests usually include:
 
 ## Need Help
 
-- Issues: <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues>
-- Discussions: <https://github.com/sdemonzdevelopment-spec/RedstoneReboot/discussions>
+- Issues: <https://github.com/DemonZ-Development/RedstoneReboot/issues>
+- Discussions: <https://github.com/DemonZ-Development/RedstoneReboot/discussions>
 - Discord: <https://discord.gg/GYsTt96ypf>

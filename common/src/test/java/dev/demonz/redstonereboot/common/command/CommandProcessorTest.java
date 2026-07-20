@@ -87,8 +87,8 @@ class CommandProcessorTest {
         processor.processStatus(sender);
         // Version is in one of the messages (not necessarily the last one)
         String allMessages = String.join(" ", sender.messages);
-        assertTrue(allMessages.contains("1.4.2"),
-            "Status should include version 1.4.2");
+        assertTrue(allMessages.contains("1.5.0"),
+            "Status should include version 1.5.0");
     }
 
     @Test

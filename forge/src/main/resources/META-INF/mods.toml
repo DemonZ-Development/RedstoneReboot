@@ -1,7 +1,7 @@
 modLoader="javafml"
 loaderVersion="[49,)"
 license="Apache-2.0"
-issueTrackerURL="https://github.com/sdemonzdevelopment-spec/RedstoneReboot/issues"
+issueTrackerURL="https://github.com/DemonZ-Development/RedstoneReboot/issues"
 
 [[mods]]
 modId="redstonereboot"

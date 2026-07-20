@@ -66,7 +66,7 @@ class RestartScheduleCalculatorEdgeTest {
 
     @Test
     void emptyTimesReturnsEmpty() {
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, List.of(), List.of("ALL")).isEmpty());
     }
 
@@ -74,7 +74,7 @@ class RestartScheduleCalculatorEdgeTest {
 
     @Test
     void nullTimesReturnsEmpty() {
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, null, List.of("ALL")).isEmpty());
     }
 
@@ -82,7 +82,7 @@ class RestartScheduleCalculatorEdgeTest {
 
     @Test
     void emptyDaysReturnsEmpty() {
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, List.of("12:00"), List.of()).isEmpty());
     }
 
@@ -90,7 +90,7 @@ class RestartScheduleCalculatorEdgeTest {
 
     @Test
     void nullDaysReturnsEmpty() {
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, List.of("12:00"), null).isEmpty());
     }
 
