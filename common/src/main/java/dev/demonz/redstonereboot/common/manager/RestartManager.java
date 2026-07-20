@@ -91,7 +91,7 @@ public class RestartManager {
         this.config = config;
         this.backendRegistry = backendRegistry;
         this.nowSupplier = nowSupplier;
-        this.history = new RestartHistory(dataFolder);
+        this.history = new RestartHistory(dataFolder, nowSupplier);
     }
 
     /**
@@ -260,6 +260,7 @@ public class RestartManager {
 
         final long currentGeneration = restartGeneration.incrementAndGet();
         RestartReason reason = currentRestartReason;
+        String initiator = restartInitiator;
         RestartBackend backend = backendRegistry.getActiveBackend();
 
         cancelCurrentCountdown(false);
@@ -285,7 +286,7 @@ public class RestartManager {
                                 logger.fine("Discarding stale restart result (generation mismatch).");
                                 return;
                             }
-                            handleExecutionResult(result, reason, backend);
+                            handleExecutionResult(result, reason, backend, initiator);
                         }, 0);
                     } catch (Exception innerException) {
                         if (restartGeneration.get() != currentGeneration) {
@@ -313,7 +314,7 @@ public class RestartManager {
         }
     }
 
-    private void handleExecutionResult(BackendResult result, RestartReason reason, RestartBackend backend) {
+    private void handleExecutionResult(BackendResult result, RestartReason reason, RestartBackend backend, String initiator) {
         if (result == BackendResult.ACCEPTED) {
             if (backend.isControllerOwned()) {
                 if (config.isAlertsEnabled()) {
@@ -321,7 +322,7 @@ public class RestartManager {
                 }
                 controllerRestartPending.set(true);
                 logger.info("Restart accepted by Controller (" + backend.getName() + "). Local process ownership relinquished.");
-                history.record("EXECUTED", reason.getDisplayName(), restartInitiator);
+                history.record("EXECUTED", reason.getDisplayName(), initiator);
 
                 scheduler.runLater(() -> {
                     if (controllerRestartPending.compareAndSet(true, false)) {
@@ -333,13 +334,13 @@ public class RestartManager {
                     platform.sendFinalRestartAlert(reason);
                 }
                 platform.shutdownServer(reason.getDisplayName());
-                history.record("EXECUTED", reason.getDisplayName(), restartInitiator);
+                history.record("EXECUTED", reason.getDisplayName(), initiator);
             }
         } else if (result == BackendResult.FAILED) {
             String detail = "Backend " + backend.getName() + " explicitly failed the restart request.";
             platform.sendPostponedAlert(detail);
             logger.severe("RESTART FAILED: " + detail);
-            history.record("POSTPONED", reason.getDisplayName(), restartInitiator);
+            history.record("POSTPONED", reason.getDisplayName(), initiator);
         } else if (result == BackendResult.UNKNOWN) {
             int duration = backendRegistry.getConfig().getLockoutDuration();
             this.lockoutEndTime = System.currentTimeMillis() + (duration * 1000L);
@@ -347,7 +348,7 @@ public class RestartManager {
             String detail = "Backend " + backend.getName() + " returned UNKNOWN status (Timeout?). Entering " + duration + "s lockout.";
             platform.sendPostponedAlert(detail);
             logger.warning("RESTART STATE UNKNOWN: " + detail);
-            history.record("LOCKOUT", reason.getDisplayName(), restartInitiator);
+            history.record("LOCKOUT", reason.getDisplayName(), initiator);
         }
     }
 

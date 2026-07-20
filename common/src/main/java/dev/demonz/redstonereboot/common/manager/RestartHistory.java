@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 /**
  * Records restart lifecycle events (scheduled, executed, cancelled, postponed)
@@ -25,13 +26,19 @@ public class RestartHistory {
 
     private final Deque<Entry> memory = new ArrayDeque<>();
     private final Path logFile;
+    private final Supplier<ZonedDateTime> nowSupplier;
 
     public RestartHistory(Path dataFolder) {
+        this(dataFolder, ZonedDateTime::now);
+    }
+
+    public RestartHistory(Path dataFolder, Supplier<ZonedDateTime> nowSupplier) {
         this.logFile = (dataFolder != null) ? dataFolder.resolve("restarts.log") : null;
+        this.nowSupplier = nowSupplier;
     }
 
     public synchronized void record(String type, String reason, String initiator) {
-        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime now = nowSupplier.get();
         Entry entry = new Entry(now, type, reason, initiator);
         memory.addLast(entry);
         while (memory.size() > MAX_MEMORY) {
