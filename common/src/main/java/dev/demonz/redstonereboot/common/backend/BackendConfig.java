@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend;
 
 import java.io.InputStream;
@@ -53,7 +70,6 @@ public class BackendConfig {
                 try (InputStream in = Files.newInputStream(configPath)) {
                     properties.load(in);
                 }
-                // Warn if API token is stored in plaintext
                 String pteroToken = properties.getProperty("ptero-token", "");
                 if (pteroToken != null && !pteroToken.isBlank() && !pteroToken.startsWith("${env.")) {
                     logger.warning("Pterodactyl API token detected in properties file. "
@@ -70,7 +86,7 @@ public class BackendConfig {
     private void saveDefaults() throws Exception {
         Files.createDirectories(configPath.getParent());
         properties.setProperty("backends-enabled", "false");
-        properties.setProperty("active-backend", "SHUTDOWN_ONLY");
+        properties.setProperty("active-backend", "DEPEND_ON_HOST");
         properties.setProperty("lockout-duration-seconds", "300");
         
         properties.setProperty("ptero-url", "");
@@ -86,16 +102,13 @@ public class BackendConfig {
             out.write("# When disabled (default), the plugin will only stop the server without auto-restart.\n".getBytes());
             out.write("#\n".getBytes());
             out.write("# WARNING: Storing API tokens in plaintext is insecure. Use environment variable REBOOT_PTERO_TOKEN instead.\n".getBytes());
-            // Write the actual properties (skipping the date header that Properties.store adds)
             properties.store(out, null);
         }
 
-        // Attempt to set owner-only read/write permissions (Unix only)
         try {
             Files.setPosixFilePermissions(configPath,
                 PosixFilePermissions.fromString("rw-------"));
         } catch (UnsupportedOperationException e) {
-            // Not a POSIX filesystem (e.g., Windows) — ignore
         } catch (Exception e) {
             logger.log(Level.FINE, "Could not set file permissions on " + configPath, e);
         }
@@ -119,7 +132,7 @@ public class BackendConfig {
 
     public String getActiveBackend() {
         synchronized (propsLock) {
-            return properties.getProperty("active-backend", "SHUTDOWN_ONLY").toUpperCase();
+            return properties.getProperty("active-backend", "DEPEND_ON_HOST").toUpperCase();
         }
     }
 
@@ -150,7 +163,6 @@ public class BackendConfig {
                 envVar = inner.substring(0, colonIndex);
                 fallback = inner.substring(colonIndex + 2);
             }
-            // Enforce env-var allowlist: only resolve vars with approved prefixes
             if (!isEnvVarAllowed(envVar)) {
                 logger.warning("Environment variable '" + envVar + "' is not in the allowlist "
                     + "(allowed prefixes: " + ALLOWED_ENV_PREFIXES + "). Using fallback value.");

@@ -51,11 +51,11 @@ This Hangar page serves the plugin builds for Paper and its forks:
 - Graceful stop handling with world-save delay
 
 ### Backend Handoff System
-- **SHUTDOWN_ONLY** — graceful shutdown for external restarters
+- **DEPEND_ON_HOST** — graceful shutdown for external restarters
 - **LOCALSCRIPT** — auto-generated wrapper script restart loop
 - **SYSTEMD** / **DOCKER** / **PTERODACTYL** — native environment integration
 - Hot-reload: edit `restart-backends.properties` and `/reboot reload`
-- **Do I need a custom backend?** If your server is already wrapped in a startup loop script (a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **SHUTDOWN_ONLY works out of the box.** When the restart timer runs out, the engine stops the server cleanly and your script starts it again.
+- **Do I need a custom backend?** If your server runs inside a loop script, Docker container with `restart: always`, or systemd service, **DEPEND_ON_HOST works out of the box.** The engine stops the server cleanly and your host supervisor starts it again.
 - **Why configure a custom backend then?**
   1. *Clean handoff (Pterodactyl / panels)*: Avoid panel desyncs or false offline indicators by requesting a clean power cycle through the panel's API.
   2. *Self-healing bootups*: The LOCALSCRIPT backend spawns a new process to bring the server back up if you don't run a loop script.
@@ -70,11 +70,11 @@ This Hangar page serves the plugin builds for Paper and its forks:
 ---
 
 ### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.x
-- **Folia**: 1.20.1+ to 26.x
-- **Fabric**: 1.20.1+ to 26.x
-- **Forge**: 1.20.4+ to 26.x
-- **NeoForge**: 1.21.1+ to 26.x (Java 21+)
+- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.2+
+- **Folia**: 1.20.1+ to 26.2+
+- **Fabric**: 1.20.1+ to 26.2+
+- **Forge**: 1.20.4+ to 26.2+
+- **NeoForge**: 1.21.1+ to 26.2+ (Java 21+)
 
 ---
 

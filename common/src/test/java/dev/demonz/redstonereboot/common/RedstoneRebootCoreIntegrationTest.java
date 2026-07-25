@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
@@ -46,7 +63,6 @@ class RedstoneRebootCoreIntegrationTest {
         platform = new FakePlatform();
     }
 
-    // --- Version is correct ---
 
     @Test
     void versionIs150() {
@@ -59,7 +75,6 @@ class RedstoneRebootCoreIntegrationTest {
         assertEquals(RedstoneRebootCore.VERSION, core.getVersion());
     }
 
-    // --- onEnable initializes all components ---
 
     @Test
     void onEnableInitializesComponents() {
@@ -74,7 +89,6 @@ class RedstoneRebootCoreIntegrationTest {
         assertNotNull(core.getUpdateChecker());
     }
 
-    // --- onDisable cleans up ---
 
     @Test
     void onDisableCleansUp() {
@@ -82,26 +96,20 @@ class RedstoneRebootCoreIntegrationTest {
         core.onEnable();
         core.onDisable();
 
-        // After disable, the restart manager should be cleaned up
-        // (scheduler tasks cancelled)
     }
 
-    // --- Reload refreshes state ---
 
     @Test
     void reloadRuntimeStateRefreshesComponents() {
         RedstoneRebootCore core = new RedstoneRebootCore(platform, scheduler, config, tempDir);
         core.onEnable();
 
-        // Reload should not throw
         core.reloadRuntimeState();
 
-        // Platform should have been reloaded
         assertTrue(platform.reloadCalled.get(),
             "Reload should call platform.reloadPlatformState()");
     }
 
-    // --- Emergency restart triggers RestartManager ---
 
     @Test
     void emergencyRestartTriggersManager() {
@@ -118,13 +126,11 @@ class RedstoneRebootCoreIntegrationTest {
             core.getRestartManager().getCurrentRestartReason());
     }
 
-    // --- Emergency restart with zero delay uses performImmediateRestart ---
 
     @Test
     void emergencyRestartWithZeroDelay() {
         config.setEmergencyDelay(0);
 
-        // Use a scheduler that actually runs async tasks
         AsyncTestScheduler asyncScheduler = new AsyncTestScheduler();
 
         RedstoneRebootCore core = new RedstoneRebootCore(platform, asyncScheduler, config, tempDir);
@@ -132,15 +138,10 @@ class RedstoneRebootCoreIntegrationTest {
 
         core.triggerEmergencyRestart("Zero delay emergency");
 
-        // With 0 delay, it should call performImmediateRestart
-        // The backend executes async, so wait briefly
         try { Thread.sleep(200); } catch (InterruptedException ignored) {}
 
-        // Verify the restart was attempted (platform shutdown may or may not be called
-        // depending on the async execution timing)
     }
 
-    // --- Backends disabled by default ---
 
     @Test
     void backendsDisabledByDefault() {
@@ -154,7 +155,6 @@ class RedstoneRebootCoreIntegrationTest {
             "Default backend should NOT be controller-owned");
     }
 
-    // --- Helper classes ---
 
     private static class FakeScheduler implements PlatformTaskScheduler {
         private final List<Runnable> repeatingTasks = new ArrayList<>();

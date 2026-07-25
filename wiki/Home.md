@@ -1,9 +1,15 @@
 # RedstoneReboot Wiki Home
 
 <div align="center">
-<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot" width="128" />
 
-Repository-backed documentation for installing, configuring, and operating RedstoneReboot.
+![RedstoneReboot Banner](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
+
+<br/>
+
+![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+
+**Documentation for installing, configuring, and operating RedstoneReboot.**
+
 </div>
 
 ---
@@ -19,7 +25,15 @@ Repository-backed documentation for installing, configuring, and operating Redst
 - [FAQ](FAQ.md)
 - [Developer API](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
 
-## What RedstoneReboot Covers
+---
+
+## Capabilities Overview
+
+<div align="center">
+
+![RedstoneReboot Features](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/features.png)
+
+</div>
 
 - Scheduled restarts with timezone and weekday rules
 - Manual and emergency restart flows
@@ -33,9 +47,9 @@ Repository-backed documentation for installing, configuring, and operating Redst
 |----------|------|----------------|
 | Bukkit / Spigot / Paper / Purpur | Plugin | `plugins/RedstoneReboot/config.yml` |
 | Folia | Plugin | `plugins/RedstoneReboot/config.yml` |
-| Fabric | Mod | `config/redstonereboot.properties` |
-| Forge | Mod | `config/redstonereboot.properties` |
-| NeoForge | Mod | `config/redstonereboot.properties` |
+| Fabric | Mod | `config/redstonereboot/redstonereboot.properties` |
+| Forge | Mod | `config/redstonereboot/redstonereboot.properties` |
+| NeoForge | Mod | `config/redstonereboot/redstonereboot.properties` |
 
 Backend handoff is configured separately through `restart-backends.properties`.
 

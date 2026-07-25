@@ -1,0 +1,186 @@
+name: E2E Live Server Workflows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-live-servers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-artifacts:
+    name: Build & Package Platform JARs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build and Run Unit/Integration Tests
+        run: ./gradlew build --no-daemon
+
+      - name: Upload Build Artifacts for E2E Testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: E2E-Server-JARs
+          path: |
+            bukkit/build/libs/RedstoneReboot-Bukkit-*.jar
+            folia/build/libs/RedstoneReboot-Folia-*.jar
+            fabric/build/libs/RedstoneReboot-Fabric-*.jar
+            forge/build/libs/RedstoneReboot-Forge-*.jar
+            neoforge/build/libs/RedstoneReboot-NeoForge-*.jar
+
+  e2e-paper-server:
+    name: Live E2E - Paper Server (MC 1.20.4)
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: E2E-Server-JARs
+          path: build-output
+
+      - name: Prepare Paper Server Environment
+        run: |
+          mkdir -p paper-server/plugins/RedstoneReboot
+          echo "eula=true" > paper-server/eula.txt
+          cp build-output/RedstoneReboot-Bukkit-*.jar paper-server/plugins/
+          
+          # Create test configuration
+          cat << 'EOF' > paper-server/plugins/RedstoneReboot/config.yml
+          enabled: true
+          scheduled_restarts:
+            enabled: false
+          health_monitoring:
+            enabled: true
+            tps_threshold: 15.0
+            memory_threshold_percent: 90.0
+            check_interval_seconds: 5
+            consecutive_checks_required: 2
+          EOF
+
+      - name: Download Paper Server API Jar
+        run: |
+          cd paper-server
+          curl -sSL -o paper.jar "https://api.papermc.io/v2/projects/paper/versions/1.20.4/builds/496/downloads/paper-1.20.4-496.jar"
+
+      - name: Launch Live Paper Server & Verify Plugin Enable
+        run: |
+          cd paper-server
+          # Run paper server headlessly, pipe stop command after startup
+          (sleep 30 && echo "reboot status" && sleep 5 && echo "reboot info" && sleep 5 && echo "stop") | java -Xms512M -Xmx1024M -jar paper.jar --nogui > server.log 2>&1 || true
+          
+          cat server.log
+          grep -i "Enabling RedstoneReboot" server.log || (echo "ERROR: RedstoneReboot plugin failed to enable on Paper server" && exit 1)
+          grep -i "RedstoneReboot" server.log || exit 1
+
+  e2e-folia-server:
+    name: Live E2E - Folia Regional Server (MC 1.20.4)
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: E2E-Server-JARs
+          path: build-output
+
+      - name: Prepare Folia Server Environment
+        run: |
+          mkdir -p folia-server/plugins/RedstoneReboot
+          echo "eula=true" > folia-server/eula.txt
+          cp build-output/RedstoneReboot-Folia-*.jar folia-server/plugins/
+
+      - name: Download Folia Server Jar
+        run: |
+          cd folia-server
+          curl -sSL -o folia.jar "https://api.papermc.io/v2/projects/folia/versions/1.20.4/builds/18/downloads/folia-1.20.4-18.jar"
+
+      - name: Launch Live Folia Server & Verify Plugin Enable
+        run: |
+          cd folia-server
+          (sleep 30 && echo "stop") | java -Xms512M -Xmx1024M -jar folia.jar --nogui > server.log 2>&1 || true
+          
+          cat server.log
+          grep -i "RedstoneReboot" server.log || (echo "ERROR: RedstoneReboot plugin failed to enable on Folia server" && exit 1)
+
+  e2e-fabric-server:
+    name: Live E2E - Fabric Server (MC 1.20.1)
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: E2E-Server-JARs
+          path: build-output
+
+      - name: Prepare Fabric Server Environment
+        run: |
+          mkdir -p fabric-server/mods
+          echo "eula=true" > fabric-server/eula.txt
+          cp build-output/RedstoneReboot-Fabric-*.jar fabric-server/mods/
+
+      - name: Download Fabric Installer & Setup Server
+        run: |
+          cd fabric-server
+          curl -sSL -o fabric-installer.jar "https://maven.fabricmc.net/net/fabricmc/fabric-installer/1.0.1/fabric-installer-1.0.1.jar"
+          java -jar fabric-installer.jar server -mcversion 1.20.1 -downloadMinecraft
+
+      - name: Launch Live Fabric Server & Verify Mod Loading
+        run: |
+          cd fabric-server
+          (sleep 30 && echo "stop") | java -Xms512M -Xmx1024M -jar fabric-server-launch.jar nogui > server.log 2>&1 || true
+          
+          cat server.log
+          grep -i "RedstoneReboot" server.log || (echo "ERROR: RedstoneReboot mod failed to initialize on Fabric server" && exit 1)

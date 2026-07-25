@@ -63,11 +63,11 @@ It runs on a single Paper server, a Folia network, or a set of modded Fabric/For
 
 | Platform | Type | Minecraft Versions | Java |
 |----------|------|--------------------|------|
-| Bukkit / Spigot / Paper / Purpur | Plugin | MC 1.9 to 26.x | 8+ (legacy), 17+ (modern), 25 (26.x+) |
-| Folia | Plugin | MC 1.20.1+ to 26.x | 17+, 25 (26.x+) |
-| Fabric | Mod | MC 1.20.1+ to 26.x | 17+ (Fabric API required) |
-| Forge | Mod | MC 1.20.4+ to 26.x | 17+ |
-| NeoForge | Mod | MC 1.21.1+ to 26.x | 21+ |
+| Bukkit / Spigot / Paper / Purpur | Plugin | MC 1.9 to 26.2+ | 8+ (legacy), 17+ (modern), 25 (26.x+) |
+| Folia | Plugin | MC 1.20.1+ to 26.2+ | 17+, 25 (26.x+) |
+| Fabric | Mod | MC 1.20.1+ to 26.2+ | 17+ (Fabric API required) |
+| Forge | Mod | MC 1.20.4+ to 26.2+ | 17+ |
+| NeoForge | Mod | MC 1.21.1+ to 26.2+ | 21+ |
 
 ---
 
@@ -111,7 +111,7 @@ RedstoneReboot separates the **"when to restart"** from the **"how to restart"**
 
 | Backend | Use Case |
 |---------|----------|
-| `SHUTDOWN_ONLY` | Default — graceful shutdown, external process manager restarts |
+| `DEPEND_ON_HOST` | Default — graceful shutdown, relies on external host environment (Pterodactyl, systemd, Docker, panel, script) |
 | `LOCALSCRIPT` | Auto-generated wrapper script handles restart loop |
 | `SYSTEMD` | Linux servers managed by systemd services |
 | `DOCKER` | Docker containers with restart policies |

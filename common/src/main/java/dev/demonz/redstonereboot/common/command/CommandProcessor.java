@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.command;
 
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
@@ -245,8 +262,8 @@ public class CommandProcessor {
                     } else {
                         sender.sendMessage("\u00A7e[!] Backend is not wired! Please add -Dredstonereboot.active=true to your server startup command or set environment variable REDSTONEREBOOT_ACTIVE=1.");
                     }
-                } else if (state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
-                    sender.sendMessage("\u00A77[i] Server will stop gracefully. Restart relies on your hosting environment (Pterodactyl, systemd, Docker, etc.). To manage the restart yourself, configure a backend in restart-backends.properties.");
+                } else if (state == RestartBackend.BackendState.DEPEND_ON_HOST || state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
+                    sender.sendMessage("\u00A77[i] Mode: \u00A7bDEPEND_ON_HOST \u00A77— Server relies on your hosting environment (Pterodactyl, systemd, Docker, auto-restart script, etc.) to perform the reboot after shutdown.");
                 }
 
                 if (!detected.isEmpty()) {

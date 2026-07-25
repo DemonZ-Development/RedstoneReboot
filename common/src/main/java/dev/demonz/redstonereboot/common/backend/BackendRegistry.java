@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend;
 
 import dev.demonz.redstonereboot.common.backend.impl.*;
@@ -50,7 +67,6 @@ public class BackendRegistry {
             return;
         }
 
-        // Check if backends are disabled — use ShutdownOnly if so
         if (!config.isBackendsEnabled()) {
             logger.info("Backends are disabled in configuration. Using shutdown-only mode. "
                 + "Enable backends in restart-backends.properties if you need automatic server restart.");
@@ -64,7 +80,6 @@ public class BackendRegistry {
 
         String type = config.getActiveBackend();
 
-        // Clean up any previous backend instance before replacing
         if (activeBackend != null) {
             activeBackend.cleanup();
         }
@@ -88,6 +103,8 @@ public class BackendRegistry {
                 case "LOCALSCRIPT":
                     activeBackend = new LocalScriptBackend(logger, config.getProperty("localscript-file"), dataFolder);
                     break;
+                case "DEPEND_ON_HOST":
+                case "SHUTDOWN_ONLY":
                 default:
                     activeBackend = getOrCreateFallback();
                     break;

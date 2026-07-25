@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.monitor;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
@@ -50,7 +67,6 @@ class PlatformLoadMonitorIntegrationTest {
         return reg;
     }
 
-    // --- TPS monitoring: consecutive low TPS triggers restart ---
 
     @Test
     void consecutiveLowTPSTriggersMonitoringRestart() {
@@ -67,22 +83,18 @@ class PlatformLoadMonitorIntegrationTest {
 
         monitor.startMonitoring();
 
-        // Tick 1: consecutiveLowTPS = 1
         scheduler.tickRepeating(0);
         assertFalse(manager.isRestartInProgress());
 
-        // Tick 2: consecutiveLowTPS = 2
         scheduler.tickRepeating(0);
         assertFalse(manager.isRestartInProgress());
 
-        // Tick 3: consecutiveLowTPS = 3 → triggers restart
         scheduler.tickRepeating(0);
         assertTrue(manager.isRestartInProgress(),
             "After 3 consecutive low TPS checks, restart should be triggered");
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
     }
 
-    // --- TPS recovery resets consecutive counter ---
 
     @Test
     void tpsRecoveryResetsConsecutiveCounter() {
@@ -98,30 +110,25 @@ class PlatformLoadMonitorIntegrationTest {
 
         monitor.startMonitoring();
 
-        // Tick 1: low TPS
         platform.setTps(10.0);
         scheduler.tickRepeating(0);
         assertFalse(manager.isRestartInProgress());
 
-        // Tick 2: TPS recovers
         platform.setTps(19.0);
         scheduler.tickRepeating(0);
         assertFalse(manager.isRestartInProgress());
 
-        // Tick 3: low TPS again — counter should have reset, so consecutive = 1
         platform.setTps(10.0);
         scheduler.tickRepeating(0);
         assertFalse(manager.isRestartInProgress(),
             "Counter should have reset after recovery, so 1 check is not enough");
 
-        // Ticks 4-5: more low TPS
         scheduler.tickRepeating(0);
         scheduler.tickRepeating(0);
         assertTrue(manager.isRestartInProgress(),
             "After 3 consecutive low TPS checks (post-recovery), restart should trigger");
     }
 
-    // --- Monitoring disabled: no restart triggered even with low TPS ---
 
     @Test
     void monitoringDisabledPreventsAutoRestart() {
@@ -136,7 +143,6 @@ class PlatformLoadMonitorIntegrationTest {
 
         monitor.startMonitoring();
 
-        // Many ticks
         for (int i = 0; i < 10; i++) {
             scheduler.tickRepeating(0);
         }
@@ -144,7 +150,6 @@ class PlatformLoadMonitorIntegrationTest {
             "Monitoring disabled should prevent auto-restart");
     }
 
-    // --- Emergency TPS: immediate trigger without consecutive checks ---
 
     @Test
     void emergencyTPSUsesShorterDelay() {
@@ -161,7 +166,6 @@ class PlatformLoadMonitorIntegrationTest {
 
         monitor.startMonitoring();
 
-        // Single tick should trigger emergency (no consecutive check pattern)
         scheduler.tickRepeating(0);
         assertTrue(manager.isRestartInProgress(),
             "Emergency TPS should trigger immediately");
@@ -169,7 +173,6 @@ class PlatformLoadMonitorIntegrationTest {
         assertEquals(15, manager.getSecondsUntilRestart());
     }
 
-    // --- Emergency TPS: does not re-trigger if already triggered ---
 
     @Test
     void emergencyTPSDoesNotRetrigger() {
@@ -186,27 +189,19 @@ class PlatformLoadMonitorIntegrationTest {
 
         monitor.startMonitoring();
 
-        // First trigger
         scheduler.tickRepeating(0);
         assertTrue(manager.isRestartInProgress());
         int firstSeconds = manager.getSecondsUntilRestart();
 
-        // Second tick — emergency already triggered, should not re-trigger
-        // (restart is already in progress, so checkTPS/checkMemory bail out)
         platform.setTps(4.0);
         scheduler.tickRepeating(0);
-        // Should still have the same or similar countdown (may have decremented by 1)
         assertTrue(manager.getSecondsUntilRestart() <= firstSeconds,
             "Emergency should not re-trigger while already in progress");
     }
 
-    // --- Emergency memory threshold ---
 
     @Test
     void emergencyMemoryTriggersRestart() {
-        // We can't easily control actual memory usage, but we can test the
-        // monitoring flow with TPS since memory is checked the same way.
-        // Instead, verify the config values are accessible
         config.setEmergencyRestartEnabled(true);
         config.setEmergencyMemoryThreshold(90.0);
         config.setEmergencyDelay(10);
@@ -214,7 +209,6 @@ class PlatformLoadMonitorIntegrationTest {
         assertEquals(10, config.getEmergencyDelay());
     }
 
-    // --- Monitor tracks last TPS ---
 
     @Test
     void monitorTracksLastTPS() {
@@ -235,7 +229,6 @@ class PlatformLoadMonitorIntegrationTest {
             "Monitor should track the last TPS reading");
     }
 
-    // --- Stop monitoring cancels the task ---
 
     @Test
     void stopMonitoringCancelsTask() {
@@ -254,7 +247,6 @@ class PlatformLoadMonitorIntegrationTest {
             "Stop monitoring should cancel the task");
     }
 
-    // --- Helper classes ---
 
     private static class ControllablePlatform implements ServerPlatform {
         private double tps = 20.0;

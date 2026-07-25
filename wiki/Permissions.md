@@ -1,6 +1,12 @@
 # Permissions Reference
 
-RedstoneReboot uses Bukkit permissions with optional LuckPerms integration. On mod platforms (Fabric, Forge, NeoForge), permissions fall back to operator level checks.
+<div align="center">
+
+![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+
+</div>
+
+All plugin permissions use the `redstonereboot.` prefix. RedstoneReboot uses Bukkit permissions with optional LuckPerms integration. On mod platforms (Fabric, Forge, NeoForge), permissions fall back to operator level checks.
 
 ## Permission Nodes
 

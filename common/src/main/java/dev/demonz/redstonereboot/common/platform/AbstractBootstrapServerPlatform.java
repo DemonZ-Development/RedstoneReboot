@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.platform;
 
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
@@ -65,7 +82,22 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
 
         try {
             if (!Files.exists(configPath)) {
-                createDefaultConfig(configPath);
+                Path parent = configPath.getParent();
+                if (parent != null) {
+                    Files.createDirectories(parent);
+                }
+                Path legacyPath = parent != null && parent.getParent() != null
+                    ? parent.getParent().resolve(configPath.getFileName())
+                    : null;
+                if (legacyPath != null && Files.exists(legacyPath)) {
+                    try {
+                        Files.copy(legacyPath, configPath);
+                    } catch (Exception ignored) {
+                        createDefaultConfig(configPath);
+                    }
+                } else {
+                    createDefaultConfig(configPath);
+                }
             }
 
             Properties props = new Properties();
@@ -195,7 +227,6 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
                 try {
                     Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
                 } catch (IllegalStateException ignored) {
-                    // JVM is already shutting down
                 }
                 shutdownHookThread = null;
             }

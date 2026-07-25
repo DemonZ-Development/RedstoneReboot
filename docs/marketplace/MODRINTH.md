@@ -84,11 +84,11 @@ Choose the file that matches your server platform:
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
-| Bukkit-family servers | `1.9` through `26.x` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
-| Folia | `1.20+` through `26.x` | Dedicated region-threaded build |
-| Fabric | `1.20.1+` through `26.x` | Requires Fabric API |
-| Forge | `1.20.4+` through `26.x` | Dedicated server-side mod build |
-| NeoForge | `1.21.1+` through `26.x` | Dedicated server-side mod build |
+| Bukkit-family servers | `1.9` through `26.2+` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
+| Folia | `1.20+` through `26.2+` | Dedicated region-threaded build |
+| Fabric | `1.20.1+` through `26.2+` | Requires Fabric API |
+| Forge | `1.20.4+` through `26.2+` | Dedicated server-side mod build |
+| NeoForge | `1.21.1+` through `26.2+` | Dedicated server-side mod build |
 
 ---
 
