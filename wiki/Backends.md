@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="96" />
 
 </div>
 
@@ -76,3 +76,12 @@ Backend states:
 ## Lockout Behavior
 
 If a backend execution returns an uncertain state, RedstoneReboot enforces a temporary lockout based on `lockout-duration-seconds` to block redundant restart requests.
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>

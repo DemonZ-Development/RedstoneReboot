@@ -16,3 +16,12 @@ This folder is the repository-backed wiki for RedstoneReboot. It lives at the re
 ## Why This Folder Exists
 
 The project keeps wiki content in version control alongside the codebase instead of hiding it in a separate wiki repository. That makes documentation reviewable in pull requests and easy to browse from GitHub.
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>

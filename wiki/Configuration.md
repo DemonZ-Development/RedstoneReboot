@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="96" />
 
 </div>
 
@@ -255,3 +255,12 @@ localscript-file=start.sh
 - Pterodactyl requires the URL, token, and server identifier properties.
 
 If backend behavior is unclear, run `/reboot doctor` and compare the reported backend state with the detected environment.
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>

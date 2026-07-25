@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="96" />
 
 </div>
 
@@ -53,3 +53,12 @@ RedstoneReboot registers the `%redstonereboot_%` expansion when PlaceholderAPI i
 - The `time_until` placeholder returns `N/A` when no restart is scheduled and `Soon` when the restart is imminent.
 - The `reason` placeholder returns `None` when no restart is in progress.
 - PlaceholderAPI integration is only available on Bukkit-family and Folia servers. Mod platforms (Fabric, Forge, NeoForge) do not support PlaceholderAPI.
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>

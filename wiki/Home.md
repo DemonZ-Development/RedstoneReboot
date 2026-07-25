@@ -6,7 +6,7 @@
 
 <br/>
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="128" />
 
 **Documentation for installing, configuring, and operating RedstoneReboot.**
 
@@ -70,3 +70,12 @@ Backend handoff is configured separately through `restart-backends.properties`.
 - Issues: <https://github.com/DemonZ-Development/RedstoneReboot/issues>
 - Discussions: <https://github.com/DemonZ-Development/RedstoneReboot/discussions>
 - Discord: <https://discord.gg/GYsTt96ypf>
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>
