@@ -36,16 +36,11 @@ This page serves the plugin builds for Bukkit, Spigot, Paper, and Folia:
 
 ---
 
-## Key Capabilities
+## Features
 
-### Intelligent Scheduling
-- Multiple restart windows per day with timezone-aware timing
-- Day-of-week filtering and configurable warning countdowns
-
-### Health Monitoring & Emergency Fail-safes
-- TPS and memory threshold monitoring with consecutive-check protection
-- Dedicated emergency thresholds for critical situations
-- Graceful stop handling with world-save delay
+- **Scheduling**: Multiple daily restart times with timezone support and day-of-week filtering
+- **Health Checks & Emergency Restarts**: Real-time TPS and memory tracking with consecutive checks to prevent false triggers
+- **Graceful Shutdown**: World save delay before server stop
 
 ### Backend Handoff System
 - **DEPEND_ON_HOST** — graceful shutdown for external restarters

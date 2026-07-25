@@ -31,19 +31,19 @@ This page provides builds for [B]Bukkit-family servers and Folia[/B]. [I](Fabric
 
 [HR][/HR]
 
-[SIZE=5][B]What Sets It Apart[/B][/SIZE]
+[SIZE=5][B]Features[/B][/SIZE]
 
 [LIST]
-[*] [B]Intelligent Scheduling[/B] — Multiple daily restart windows with global timezone support and day-of-week filtering.
-[*] [B]Real-Time Health Monitoring[/B] — TPS and memory tracking with consecutive-check protection against false positives.
-[*] [B]Emergency Fail-safes[/B] — Automatic emergency restarts when critical TPS or memory thresholds are breached.
-[*] [B]Rich Multi-Channel Alerts[/B] — Chat, titles, action bar notifications, and configurable sounds.
-[*] [B]Backend Handoff System[/B] — Delegate restart execution to Pterodactyl, Systemd, Docker, or local scripts.
-[*] [B]Hot-Reload Config[/B] — Change backend settings and run [CODE]/reboot reload[/CODE]. No full server restart.
-[*] [B]PlaceholderAPI Integration[/B] — 8 placeholders for scoreboards, tab lists, and MOTD plugins.
-[*] [B]bStats Metrics[/B] — Anonymous server telemetry at [URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751']bstats.org[/URL].
-[*] [B]Complete Folia Support[/B] — Dedicated build designed around region-threaded logic.
-[*] [B]LuckPerms Integration[/B] — Full permission resolution with group and context support.
+[*] [B]Scheduling[/B] — Multiple daily restart times with timezone support and day-of-week filtering.
+[*] [B]Health Monitoring[/B] — TPS and memory tracking with consecutive checks to prevent false triggers.
+[*] [B]Emergency Restarts[/B] — Restarts server if TPS drops or memory usage exceeds safety limits.
+[*] [B]Notifications[/B] — Chat, titles, action bar, and sounds for warning countdowns.
+[*] [B]Backend Integration[/B] — Hand off restarts to Pterodactyl, systemd, Docker, or local scripts.
+[*] [B]Hot Reload[/B] — Update settings using [CODE]/reboot reload[/CODE] without restarting the server.
+[*] [B]PlaceholderAPI[/B] — 8 placeholders for scoreboards, tab lists, and MOTD plugins.
+[*] [B]bStats Metrics[/B] — Anonymous server statistics at [URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751']bstats.org[/URL].
+[*] [B]Folia Support[/B] — Dedicated build designed for region-threaded servers.
+[*] [B]LuckPerms Support[/B] — Full permission checks with group and context resolution.
 [/LIST]
 
 [HR][/HR]

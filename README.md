@@ -20,42 +20,42 @@
 
 ## Overview
 
-RedstoneReboot gives server administrators control over restart scheduling, health-based automation, and multi-platform backend handoff.
+RedstoneReboot manages automated server restarts, health monitoring, and backend process handoff for Minecraft servers.
 
-It runs on a single Paper server, a Folia network, or a set of modded Fabric/Forge servers behind Pterodactyl.
+Works on single Paper instances, Folia networks, and Fabric, Forge, or NeoForge servers running standalone or behind Pterodactyl.
 
-### Key Capabilities
+### Features
 
 | Feature | Description |
 |---------|-------------|
-| **Intelligent Scheduling** | Multiple daily restart windows with timezone awareness and day-of-week filters |
-| **Health Monitoring** | Real-time TPS and memory tracking with consecutive-check protection against false positives |
-| **Emergency Fail-safes** | Automatic emergency restarts when critical TPS or memory thresholds are breached |
-| **Rich Alerts** | Chat messages, titles, action bar, and configurable sounds with countdown warnings |
-| **Backend Handoff** | Delegate restart execution to Pterodactyl, Systemd, Docker, or local scripts |
-| **Hot-Reload** | Change backend config and `/reboot reload` — no full server restart needed |
-| **bStats Metrics** | Anonymous usage telemetry via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) |
-| **PlaceholderAPI** | 8 placeholders for scoreboards, tab lists, and MOTD plugins |
+| **Scheduling** | Set multiple restart times per day with timezone support and day-of-week filters |
+| **Health Checks** | Tracks TPS and memory usage with consecutive checks to prevent false restarts |
+| **Emergency Restarts** | Trigger immediate restarts if TPS drops or memory usage exceeds safety limits |
+| **Notifications** | Countdown warnings via chat messages, titles, action bars, and sounds |
+| **Backend Integration** | Delegates process restart to Pterodactyl API, systemd, Docker, or local scripts |
+| **Hot Reload** | Update configuration live using `/reboot reload` without restarting the server |
+| **PlaceholderAPI** | 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit/Folia) |
+| **bStats Telemetry** | Anonymous usage statistics via [bStats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) |
 
 ---
 
 ## Quick Start
 
-### Plugin Install (Bukkit / Paper / Folia)
+### Plugins (Bukkit / Paper / Folia)
 
-1. Download the correct JAR from [Releases](https://github.com/DemonZ-Development/RedstoneReboot/releases/latest).
-2. Place it in your `plugins/` folder.
-3. Start the server — config files are generated automatically.
-4. Edit `plugins/RedstoneReboot/config.yml` and `plugins/RedstoneReboot/restart-backends.properties`.
-5. Run `/reboot reload` to apply changes.
+1. Download the JAR from [Releases](https://github.com/DemonZ-Development/RedstoneReboot/releases/latest).
+2. Place it in your `plugins/` directory.
+3. Start the server to generate default configuration files.
+4. Configure `plugins/RedstoneReboot/config.yml` and `plugins/RedstoneReboot/restart-backends.properties`.
+5. Run `/reboot reload` to apply settings.
 
-### Mod Install (Fabric / Forge / NeoForge)
+### Mods (Fabric / Forge / NeoForge)
 
-1. Download the correct mod JAR.
-2. Place it in your `mods/` folder (Fabric requires Fabric API).
-3. Start the server.
-4. Edit `config/redstonereboot.properties` and `config/restart-backends.properties`.
-5. Run `/reboot reload` to apply changes.
+1. Download the matching mod JAR (Fabric requires Fabric API).
+2. Place it in your `mods/` directory.
+3. Start the server to generate `config/redstonereboot/`.
+4. Configure `config/redstonereboot/redstonereboot.properties` and `config/redstonereboot/restart-backends.properties`.
+5. Run `/reboot reload` to apply settings.
 
 ---
 
