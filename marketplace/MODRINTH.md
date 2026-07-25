@@ -12,6 +12,12 @@
 
 ## Features
 
+<div align="center">
+
+![RedstoneReboot Features](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/features.png)
+
+</div>
+
 RedstoneReboot manages automated restarts, performance monitoring, and backend process integration across single servers and server networks.
 
 - **Scheduling** — Multiple daily restart times with timezone support and day-of-week filters
