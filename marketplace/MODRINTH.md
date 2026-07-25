@@ -6,8 +6,6 @@
 
 **A restart engine for Minecraft servers across every major platform**
 
-[![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
-
 </div>
 
 ---
@@ -139,6 +137,16 @@ Choose the file that matches your server platform:
 - [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 - [**Bug Reports & Issues**](https://github.com/DemonZ-Development/RedstoneReboot/issues)
 - [**Discord Support**](https://discord.gg/GYsTt96ypf)
+
+---
+
+## Live Telemetry
+
+<div align="center">
+
+[![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+
+</div>
 
 ---
 
