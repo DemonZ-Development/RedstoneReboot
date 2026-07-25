@@ -23,7 +23,7 @@
 - [Permissions](Permissions.md)
 - [Placeholders](Placeholders.md)
 - [FAQ](FAQ.md)
-- [Developer API](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
+- [Developer API](Developer-API.md)
 
 ---
 
@@ -63,8 +63,7 @@ Backend handoff is configured separately through `restart-backends.properties`.
 
 - [Root README](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/README.md)
 - [Contributing Guide](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/CONTRIBUTING.md)
-- [Marketplace Copy](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/marketplace/SPIGOT.md)
-- [Release Copy](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/release/DISCORD.md)
+- [Marketplace Copy](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/marketplace/SPIGOT.md)
 
 ## Support
 
