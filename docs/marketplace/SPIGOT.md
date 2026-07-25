@@ -11,11 +11,11 @@
 [SIZE=5][B]Platform Compatibility[/B][/SIZE]
 
 [LIST]
-[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: 1.9.x to 26.x
-[*] [B]Folia[/B]: 1.20.1+ to 26.x
-[*] [B]Fabric[/B]: 1.20.1+ to 26.x
-[*] [B]Forge[/B]: 1.20.4+ to 26.x
-[*] [B]NeoForge[/B]: 1.21.1+ to 26.x (Java 21+)
+[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: 1.9.x to 26.2+
+[*] [B]Folia[/B]: 1.20.1+ to 26.2+
+[*] [B]Fabric[/B]: 1.20.1+ to 26.2+
+[*] [B]Forge[/B]: 1.20.4+ to 26.2+
+[*] [B]NeoForge[/B]: 1.21.1+ to 26.2+ (Java 21+)
 [/LIST]
 [/CENTER]
 

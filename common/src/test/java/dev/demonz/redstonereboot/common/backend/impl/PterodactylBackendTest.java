@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend.impl;
 
 import dev.demonz.redstonereboot.common.backend.BackendResult;
@@ -22,7 +39,6 @@ class PterodactylBackendTest {
 
     private final Logger logger = Logger.getLogger("PterodactylBackendTest");
 
-    // --- Constructor validation ---
 
     @Test
     void constructorRejectsUrlWithoutScheme() {
@@ -46,7 +62,6 @@ class PterodactylBackendTest {
         assertEquals("Pterodactyl", backend.getName());
     }
 
-    // --- Misconfigured backend returns FAILED ---
 
     @Test
     void executeReturnsFailedWhenUrlIsBlank() {
@@ -76,7 +91,6 @@ class PterodactylBackendTest {
         assertEquals(BackendResult.FAILED, backend.execute());
     }
 
-    // --- Controller ownership ---
 
     @Test
     void isControllerOwnedReturnsTrue() {
@@ -86,7 +100,6 @@ class PterodactylBackendTest {
             "Pterodactyl backend should be controller-owned");
     }
 
-    // --- BackendState when misconfigured ---
 
     @Test
     void getStateReturnsMisconfiguredWhenUrlIsBlank() {
@@ -102,7 +115,6 @@ class PterodactylBackendTest {
         assertEquals(RestartBackend.BackendState.MISCONFIGURED, backend.getState());
     }
 
-    // --- toString masks API key ---
 
     @Test
     void toStringMasksApiKey() {
@@ -114,7 +126,6 @@ class PterodactylBackendTest {
             "toString should NOT contain the actual API key");
     }
 
-    // --- Null server ID handled gracefully ---
 
     @Test
     void nullServerIdHandledGracefully() {
@@ -124,7 +135,6 @@ class PterodactylBackendTest {
         assertEquals(RestartBackend.BackendState.MISCONFIGURED, backend.getState());
     }
 
-    // --- Cleanup does not throw ---
 
     @Test
     void cleanupDoesNotThrow() {
@@ -133,7 +143,6 @@ class PterodactylBackendTest {
         backend.cleanup();
     }
 
-    // --- Execute against non-existent host ---
 
     @Test
     void executeConnectionRefusedReturnsFailedOrUnknown() {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.schedule;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class RestartScheduleCalculatorEdgeTest {
 
-    // --- Midnight restart time ---
 
     @Test
     void midnightRestartTime() {
@@ -32,7 +48,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertEquals(ZonedDateTime.of(2026, 5, 26, 0, 0, 0, 0, ZoneId.of("UTC")), next);
     }
 
-    // --- Multiple times on the same day picks the nearest future one ---
 
     @Test
     void multipleTimesPicksNearestFuture() {
@@ -47,7 +62,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertEquals(ZonedDateTime.of(2026, 5, 25, 18, 0, 0, 0, ZoneId.of("UTC")), next);
     }
 
-    // --- All times passed today rolls to tomorrow ---
 
     @Test
     void allTimesPassedTodayRollsToTomorrow() {
@@ -62,7 +76,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertEquals(ZonedDateTime.of(2026, 5, 26, 6, 0, 0, 0, ZoneId.of("UTC")), next);
     }
 
-    // --- Empty times returns empty ---
 
     @Test
     void emptyTimesReturnsEmpty() {
@@ -70,7 +83,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, List.of(), List.of("ALL")).isEmpty());
     }
 
-    // --- Null times returns empty ---
 
     @Test
     void nullTimesReturnsEmpty() {
@@ -78,7 +90,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, null, List.of("ALL")).isEmpty());
     }
 
-    // --- Empty days returns empty ---
 
     @Test
     void emptyDaysReturnsEmpty() {
@@ -86,7 +97,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, List.of("12:00"), List.of()).isEmpty());
     }
 
-    // --- Null days returns empty ---
 
     @Test
     void nullDaysReturnsEmpty() {
@@ -94,16 +104,11 @@ class RestartScheduleCalculatorEdgeTest {
         assertTrue(RestartScheduleCalculator.calculateNextRestart(now, List.of("12:00"), null).isEmpty());
     }
 
-    // --- Single day that has already passed this week ---
 
     @Test
     void singleDayAlreadyPassedThisWeek() {
-        // Monday May 25 2026 is a Monday
-        // If today is Monday at 20:00 and the restart is at 08:00 on Monday only,
-        // it should roll to next Monday
         ZonedDateTime now = ZonedDateTime.of(2026, 5, 25, 20, 0, 0, 0, ZoneId.of("UTC"));
 
-        // Verify May 25 2026 is a Monday
         assertEquals(DayOfWeek.MONDAY, now.getDayOfWeek());
 
         ZonedDateTime next = RestartScheduleCalculator.calculateNextRestart(
@@ -112,13 +117,11 @@ class RestartScheduleCalculatorEdgeTest {
             List.of("MONDAY")
         ).orElseThrow();
 
-        // Should be next Monday at 08:00
         assertEquals(DayOfWeek.MONDAY, next.getDayOfWeek());
         assertTrue(next.isAfter(now));
         assertEquals(8, next.getHour());
     }
 
-    // --- "ALL" days covers every day ---
 
     @Test
     void allDaysCoversEveryDay() {
@@ -126,7 +129,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertEquals(7, days.size(), "ALL should cover all 7 days");
     }
 
-    // --- Case-insensitive day names ---
 
     @Test
     void dayNamesAreCaseInsensitive() {
@@ -139,7 +141,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertTrue(upper.contains(DayOfWeek.MONDAY));
     }
 
-    // --- Invalid day names are ignored ---
 
     @Test
     void invalidDayNamesAreIgnored() {
@@ -149,7 +150,6 @@ class RestartScheduleCalculatorEdgeTest {
         assertTrue(days.contains(DayOfWeek.FRIDAY));
     }
 
-    // --- parseTime handles various formats ---
 
     @Test
     void parseTimeHandles24HourFormat() {
@@ -177,11 +177,9 @@ class RestartScheduleCalculatorEdgeTest {
             "Null time should be rejected");
     }
 
-    // --- Timezone-aware calculation ---
 
     @Test
     void timezoneAwareCalculation() {
-        // 12:00 UTC = 17:30 IST
         ZonedDateTime nowIST = ZonedDateTime.of(2026, 5, 25, 17, 30, 0, 0, ZoneId.of("Asia/Kolkata"));
 
         ZonedDateTime next = RestartScheduleCalculator.calculateNextRestart(
@@ -190,7 +188,6 @@ class RestartScheduleCalculatorEdgeTest {
             List.of("ALL")
         ).orElseThrow();
 
-        // 18:00 IST is the next restart
         assertEquals(ZoneId.of("Asia/Kolkata"), next.getZone());
         assertEquals(18, next.getHour());
         assertEquals(0, next.getMinute());

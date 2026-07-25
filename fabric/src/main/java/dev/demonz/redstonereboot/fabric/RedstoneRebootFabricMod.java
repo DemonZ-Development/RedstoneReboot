@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.fabric;
 
 import dev.demonz.redstonereboot.common.command.BrigadierCommand;
@@ -15,6 +32,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 import java.lang.reflect.Constructor;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
@@ -39,8 +57,19 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
     public void onInitializeServer() {
         try {
             scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
-            Path configPath = FabricLoader.getInstance().getConfigDir().resolve("redstonereboot.properties");
-            startCore(scheduler, loadSimpleConfig(configPath), FabricLoader.getInstance().getConfigDir());
+            Path baseConfigDir = FabricLoader.getInstance().getConfigDir();
+            Path modConfigDir = baseConfigDir.resolve("redstonereboot");
+            Files.createDirectories(modConfigDir);
+
+            Path configPath = modConfigDir.resolve("redstonereboot.properties");
+            Path legacyConfigPath = baseConfigDir.resolve("redstonereboot.properties");
+            if (Files.exists(legacyConfigPath) && !Files.exists(configPath)) {
+                try {
+                    Files.copy(legacyConfigPath, configPath);
+                } catch (Exception ignored) {}
+            }
+
+            startCore(scheduler, loadSimpleConfig(configPath), modConfigDir);
 
             ServerLifecycleEvents.SERVER_STARTED.register(startedServer -> {
                 this.server = startedServer;

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend.impl;
 
 import dev.demonz.redstonereboot.common.backend.BackendResult;
@@ -17,7 +34,6 @@ class DockerAndSystemdBackendTest {
 
     private final Logger logger = Logger.getLogger("DockerAndSystemdBackendTest");
 
-    // --- Docker Backend ---
 
     @Test
     void dockerBackendIsNotControllerOwned() {
@@ -29,10 +45,7 @@ class DockerAndSystemdBackendTest {
     @Test
     void dockerBackendStateOnNonDockerHost() {
         DockerBackend backend = new DockerBackend(logger);
-        // If we're not in Docker (/.dockerenv doesn't exist), state should be MISCONFIGURED
         RestartBackend.BackendState state = backend.getState();
-        // On a dev machine, either MISCONFIGURED (not Docker) or ASSISTED/FULL (if Docker)
-        // We just verify it returns a valid state
         assertTrue(state == RestartBackend.BackendState.MISCONFIGURED
                 || state == RestartBackend.BackendState.ASSISTED
                 || state == RestartBackend.BackendState.FULL,
@@ -43,8 +56,6 @@ class DockerAndSystemdBackendTest {
     void dockerBackendExecuteOnNonDockerHost() {
         DockerBackend backend = new DockerBackend(logger);
         BackendResult result = backend.execute();
-        // If not in Docker, should return FAILED
-        // If somehow in Docker, could return ACCEPTED or FAILED depending on wiring
         assertTrue(result == BackendResult.FAILED || result == BackendResult.ACCEPTED,
             "Docker execute should return FAILED or ACCEPTED, got " + result);
     }
@@ -55,7 +66,6 @@ class DockerAndSystemdBackendTest {
         backend.cleanup();
     }
 
-    // --- Systemd Backend ---
 
     @Test
     void systemdBackendIsNotControllerOwned() {
@@ -68,8 +78,6 @@ class DockerAndSystemdBackendTest {
     void systemdBackendStateOnNonSystemdHost() {
         SystemdBackend backend = new SystemdBackend(logger, "minecraft");
         RestartBackend.BackendState state = backend.getState();
-        // On a dev machine without systemd, should be MISCONFIGURED
-        // On a machine with systemd, could be ASSISTED/FULL
         assertTrue(state == RestartBackend.BackendState.MISCONFIGURED
                 || state == RestartBackend.BackendState.ASSISTED
                 || state == RestartBackend.BackendState.FULL,

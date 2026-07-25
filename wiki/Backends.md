@@ -1,15 +1,21 @@
 # Backend Guide
 
-RedstoneReboot can either stop the server itself or hand restart ownership to an environment-specific backend.
+<div align="center">
+
+![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+
+</div>
+
+RedstoneReboot can perform a server shutdown or hand restart ownership to an external host backend.
 
 ## Backend Overview
 
 | Backend | Ownership Model | Typical Use |
 |---------|------------------|-------------|
-| `SHUTDOWN_ONLY` | Local stop only | Basic hosts where another process already handles startup or where manual restart is acceptable |
+| `DEPEND_ON_HOST` | Local stop only | Default mode — relies on host environment (Pterodactyl, systemd, Docker, panel script) to handle post-shutdown restart |
 | `SYSTEMD` | Supervisor-managed | Linux services managed by `systemd` |
 | `DOCKER` | Container-managed | Docker-based deployments |
-| `LOCALSCRIPT` | Custom script | Bespoke restart scripts or wrappers |
+| `LOCALSCRIPT` | Custom script | Custom restart scripts or wrappers |
 | `PTERODACTYL` | Controller-owned | Pterodactyl panel-managed servers |
 
 ## Config File
@@ -18,7 +24,7 @@ Backends are configured through `restart-backends.properties`.
 
 ```properties
 backends-enabled=false
-active-backend=SHUTDOWN_ONLY
+active-backend=DEPEND_ON_HOST
 lockout-duration-seconds=300
 ptero-url=
 ptero-token=
@@ -29,48 +35,44 @@ localscript-file=start.sh
 
 ### Key Properties
 
-- **`backends-enabled`**: Must be `true` for backend processing to occur; otherwise defaults to `SHUTDOWN_ONLY`.
-- **Environment Variables**: Sensitive properties support dynamic resolution using `${env.VAR_NAME:-fallback}` (e.g., `ptero-token=${env.PTERO_API_KEY}`). This works for variables prefixed with `REBOOT_`, `PTERO_`, `MINECRAFT_`, or `JAVA_`.
-- **Supervisor Wiring Requirements**: Supervisor backends (`LOCALSCRIPT`, `SYSTEMD`, and `DOCKER`) require wiring proof so they know they are running under their respective wrappers or supervisors. You **must** pass the system property `-Dredstonereboot.active=true` or set the environment variable `REDSTONEREBOOT_ACTIVE=1` in your container, systemd service unit, or startup script to satisfy this check, otherwise restarts will fail and postpone. (The auto-generated LocalScript wrapper templates export this environment variable automatically).
+- **`backends-enabled`**: Set to `true` to enable external backend handling; otherwise defaults to `DEPEND_ON_HOST`.
+- **Environment Variables**: Sensitive properties support dynamic resolution using `${env.VAR_NAME:-fallback}` (e.g., `ptero-token=${env.PTERO_API_KEY}`). Allowed prefixes include `REBOOT_`, `PTERO_`, `MINECRAFT_`, and `JAVA_`.
+- **Supervisor Wiring Requirements**: Supervisor backends (`LOCALSCRIPT`, `SYSTEMD`, and `DOCKER`) check for wiring proof. Pass the system property `-Dredstonereboot.active=true` or set environment variable `REDSTONEREBOOT_ACTIVE=1` in your container or script to satisfy this check. (Auto-generated LocalScript wrapper templates export this environment variable automatically).
 
 ## Choosing a Backend
 
-### SHUTDOWN_ONLY
+### DEPEND_ON_HOST
 
-Use this when RedstoneReboot should only issue a clean server stop. This is the safest default and the fallback used when no explicit backend is configured.
-
-If you are running under systemd, Docker, or Pterodactyl, SHUTDOWN_ONLY still works — the external supervisor detects the exit and restarts the process. See [FAQ: SHUTDOWN_ONLY but restarts work](FAQ.md#reboot-doctor-shows-shutdown_only-but-restarts-work-fine).
+Use this when RedstoneReboot should issue a clean server stop and rely on your panel, Docker policy, or systemd service to restart the server process.
 
 ### SYSTEMD
 
-Use this when the server process is already managed as a Linux service. RedstoneReboot requests the stop or restart flow through the named service.
+Use this when the server process is managed as a Linux service unit. RedstoneReboot triggers stop or restart calls via systemd.
 
 ### DOCKER
 
-Use this when the server runs in a Docker container and container restart policy or external orchestration is responsible for bringing it back.
+Use this when the server runs in a Docker container and container restart policy handles container lifecycle.
 
 ### LOCALSCRIPT
 
-Use this when you need a custom wrapper script. This is useful for panel-less VPS setups or hosts with unusual startup flows.
+Use this when using a wrapper script on standalone servers.
 
 ### PTERODACTYL
 
-Use this when the Pterodactyl panel owns the restart lifecycle. In this mode RedstoneReboot requests the restart and then relinquishes local process ownership.
+Use this when the Pterodactyl panel API manages the restart lifecycle.
 
 ## Doctor Output
 
-`/reboot doctor` reports the active backend, backend state, and detected environment.
+`/reboot doctor` reports active backend state and detects potential environment mismatches.
 
 Backend states:
 
-- `FULL`: configured and verified
-- `ASSISTED`: configured, but verification is incomplete
-- `GENERATED`: artifacts exist, but wiring is incomplete
-- `SHUTDOWN_ONLY`: graceful stop only
-- `MISCONFIGURED`: required values are missing or invalid
-
-The doctor command also warns about environment mismatches such as selecting `SYSTEMD` while the host looks like a Docker or Pterodactyl deployment.
+- `FULL`: Configured and verified
+- `ASSISTED`: Configured with partial verification
+- `GENERATED`: Script or configuration exists, wiring incomplete
+- `DEPEND_ON_HOST`: Relies on host environment post-shutdown
+- `MISCONFIGURED`: Missing or invalid settings
 
 ## Lockout Behavior
 
-When a backend returns an uncertain result, RedstoneReboot enters a temporary lockout using `lockout-duration-seconds`. During that window, new restart requests are blocked to avoid stacking conflicting restart attempts.
+If a backend execution returns an uncertain state, RedstoneReboot enforces a temporary lockout based on `lockout-duration-seconds` to block redundant restart requests.

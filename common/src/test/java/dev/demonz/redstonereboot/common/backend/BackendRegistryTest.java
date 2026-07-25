@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend;
 
 import dev.demonz.redstonereboot.common.backend.impl.ShutdownOnlyBackend;
@@ -26,7 +43,6 @@ class BackendRegistryTest {
         BackendConfig config = new BackendConfig(tempDir, logger);
         BackendRegistry registry = new BackendRegistry(logger, config, tempDir);
 
-        // Before initialize(), activeBackend is null — should return fallback
         RestartBackend backend = registry.getActiveBackend();
         assertNotNull(backend);
         assertEquals("ShutdownOnly", backend.getName());
@@ -38,7 +54,6 @@ class BackendRegistryTest {
         BackendConfig config = new BackendConfig(tempDir, logger);
         BackendRegistry registry = new BackendRegistry(logger, config, tempDir);
 
-        // Calling getActiveBackend() twice should return the same cached instance
         RestartBackend first = registry.getActiveBackend();
         RestartBackend second = registry.getActiveBackend();
         assertSame(first, second, "Fallback backend should be cached, not re-created each call");
@@ -50,7 +65,6 @@ class BackendRegistryTest {
         BackendConfig config = new BackendConfig(tempDir, logger);
         BackendRegistry registry = new BackendRegistry(logger, config, tempDir);
 
-        // By default, backends-enabled=false in the generated properties file
         registry.initialize();
 
         RestartBackend backend = registry.getActiveBackend();
@@ -61,7 +75,6 @@ class BackendRegistryTest {
     @Test
     void initializeWithLoadFailureFallsBackToShutdownOnly() {
         Logger logger = Logger.getLogger("BackendRegistryTest");
-        // Use a non-existent path deep enough that the parent dir creation will fail
         BackendConfig config = new BackendConfig(
             Path.of("/proc/nonexistent-path-that-will-fail"), logger);
         BackendRegistry registry = new BackendRegistry(logger, config, tempDir);
@@ -96,6 +109,6 @@ class BackendRegistryTest {
     void shutdownOnlyBackendStateIsShutdownOnly() {
         Logger logger = Logger.getLogger("BackendRegistryTest");
         ShutdownOnlyBackend backend = new ShutdownOnlyBackend(logger);
-        assertEquals(RestartBackend.BackendState.SHUTDOWN_ONLY, backend.getState());
+        assertEquals(RestartBackend.BackendState.DEPEND_ON_HOST, backend.getState());
     }
 }

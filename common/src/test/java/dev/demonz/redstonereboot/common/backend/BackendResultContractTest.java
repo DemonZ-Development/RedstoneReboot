@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend;
 
 import org.junit.jupiter.api.Test;
@@ -17,13 +34,10 @@ class BackendResultContractTest {
 
     @Test
     void timeoutMapsToUnknownNotFailed() {
-        // A timeout should be treated as UNKNOWN (ambiguous), not FAILED (explicit rejection).
-        // This is the core contract: timeouts lead to lockout, not cancellation.
         BackendResult timeoutResult = BackendResult.UNKNOWN;
         assertNotNull(timeoutResult);
         assertEquals("UNKNOWN", timeoutResult.name());
 
-        // Verify UNKNOWN is distinct from FAILED
         assertNotNull(BackendResult.FAILED);
         assertNotNull(BackendResult.ACCEPTED);
     }
@@ -36,7 +50,6 @@ class BackendResultContractTest {
 
     @Test
     void acceptedIsDistinctFromFailedAndUnknown() {
-        // ACCEPTED should not equal FAILED or UNKNOWN
         assertEquals(false, BackendResult.ACCEPTED == BackendResult.FAILED);
         assertEquals(false, BackendResult.ACCEPTED == BackendResult.UNKNOWN);
         assertEquals(false, BackendResult.FAILED == BackendResult.UNKNOWN);

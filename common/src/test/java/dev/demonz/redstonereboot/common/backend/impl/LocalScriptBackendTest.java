@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend.impl;
 
 import dev.demonz.redstonereboot.common.backend.BackendResult;
@@ -25,31 +42,26 @@ class LocalScriptBackendTest {
 
     private final Logger logger = Logger.getLogger("LocalScriptBackendTest");
 
-    // --- Not wired by default ---
 
     @Test
     void executeReturnsFailedWhenNotWired() {
         LocalScriptBackend backend = new LocalScriptBackend(logger, null, tempDir);
-        // Without the wiring property/env, execute should return FAILED
         BackendResult result = backend.execute();
         assertEquals(BackendResult.FAILED, result,
             "LocalScript should return FAILED when not wired");
     }
 
-    // --- State is SHUTDOWN_ONLY when not wired and no script ---
 
     @Test
     void stateIsShutdownOnlyWhenNotWired() {
         LocalScriptBackend backend = new LocalScriptBackend(logger, null, tempDir);
-        // On a dev machine, the script may or may not exist. Check the state is valid.
         RestartBackend.BackendState state = backend.getState();
-        assertTrue(state == RestartBackend.BackendState.SHUTDOWN_ONLY
+        assertTrue(state == RestartBackend.BackendState.DEPEND_ON_HOST
                 || state == RestartBackend.BackendState.GENERATED
                 || state == RestartBackend.BackendState.FULL,
             "State should be one of the valid states, got " + state);
     }
 
-    // --- Not controller-owned ---
 
     @Test
     void isNotControllerOwned() {
@@ -58,26 +70,17 @@ class LocalScriptBackendTest {
             "LocalScript should NOT be controller-owned");
     }
 
-    // --- Custom script name ---
 
     @Test
     void customScriptNameIsUsed() {
         LocalScriptBackend backend = new LocalScriptBackend(logger, "my-custom-script.sh", tempDir);
-        // Just verify no crash — the script name is internal
         assertEquals("LocalScript", backend.getName());
     }
 
-    // --- Sensitive arg filtering ---
 
     @Test
     void sensitiveArgsAreFiltered() {
-        // This tests the internal pattern via the public API indirectly.
-        // We verify that the generated script doesn't contain sensitive patterns.
         LocalScriptBackend backend = new LocalScriptBackend(logger, null, tempDir);
-        // The prepare() method generates the script, but we can't easily test
-        // the contents without file system access. At minimum, verify it doesn't crash.
-        // The actual filtering logic is tested via the isSensitiveArg pattern match.
-        // Let's verify the pattern works as expected:
         assertTrue(isSensitive("-Dspring.datasource.password=secret"),
             "Spring datasource password should be filtered");
         assertTrue(isSensitive("-Ddb.password=secret"),
@@ -98,11 +101,9 @@ class LocalScriptBackendTest {
         return pattern.matcher(arg).find();
     }
 
-    // --- Shell escaping for Linux ---
 
     @Test
     void linuxEscapeWrapsInSingleQuotes() {
-        // Verify the escaping strategy via reflection or direct test
         String result = linuxEscape("hello world");
         assertEquals("'hello world'", result);
     }
@@ -110,7 +111,6 @@ class LocalScriptBackendTest {
     @Test
     void linuxEscapeHandlesEmbeddedSingleQuotes() {
         String result = linuxEscape("it's here");
-        // Single quotes in the value should be escaped as '\''
         assertEquals("'it'\\''s here'", result);
     }
 
@@ -118,7 +118,6 @@ class LocalScriptBackendTest {
         return "'" + arg.replace("'", "'\\''") + "'";
     }
 
-    // --- Windows escaping ---
 
     @Test
     void windowsEscapeWrapsInDoubleQuotes() {
@@ -156,7 +155,6 @@ class LocalScriptBackendTest {
         return sb.toString();
     }
 
-    // --- Cleanup does not throw ---
 
     @Test
     void cleanupDoesNotThrow() {

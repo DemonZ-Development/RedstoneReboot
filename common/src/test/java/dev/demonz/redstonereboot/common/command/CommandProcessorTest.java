@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.command;
 
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
@@ -47,7 +64,6 @@ class CommandProcessorTest {
         processor = new CommandProcessor(core);
     }
 
-    // --- Public permission checks ---
 
     @Test
     void isPublicPermissionReturnsTrueForStatus() {
@@ -79,13 +95,11 @@ class CommandProcessorTest {
         assertFalse(CommandProcessor.isPublicPermission("some.other.permission"));
     }
 
-    // --- Status command ---
 
     @Test
     void processStatusSendsVersionInfo() {
         CapturingSender sender = new CapturingSender(true);
         processor.processStatus(sender);
-        // Version is in one of the messages (not necessarily the last one)
         String allMessages = String.join(" ", sender.messages);
         assertTrue(allMessages.contains("1.5.0"),
             "Status should include version 1.5.0");
@@ -100,7 +114,6 @@ class CommandProcessorTest {
             "Should show normal operation when no restart in progress");
     }
 
-    // --- Cancel command ---
 
     @Test
     void processCancelReportsNoRestartPending() {
@@ -121,7 +134,6 @@ class CommandProcessorTest {
         assertFalse(core.getRestartManager().isRestartInProgress());
     }
 
-    // --- Now command ---
 
     @Test
     void processNowTriggersRestart() {
@@ -132,7 +144,6 @@ class CommandProcessorTest {
         assertTrue(core.getRestartManager().isRestartInProgress());
     }
 
-    // --- Help command ---
 
     @Test
     void processHelpListsAllCommands() {
@@ -148,7 +159,6 @@ class CommandProcessorTest {
         assertTrue(allMessages.contains("help"));
     }
 
-    // --- Info command ---
 
     @Test
     void processInfoShowsTPSAndMemory() {
@@ -160,7 +170,6 @@ class CommandProcessorTest {
         assertTrue(allMessages.contains("Players"), "Info should show Players");
     }
 
-    // --- Reload command ---
 
     @Test
     void processReloadRefreshesConfig() {
@@ -170,7 +179,6 @@ class CommandProcessorTest {
             "Reload should confirm re-initialization");
     }
 
-    // --- Helper classes ---
 
     private static class FakeScheduler implements PlatformTaskScheduler {
         private final List<Runnable> repeatingTasks = new ArrayList<>();

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.manager;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
@@ -56,7 +73,6 @@ class RestartManagerConcurrencyTest {
         backendRegistry.initialize();
     }
 
-    // --- Concurrent restart scheduling: only one should win ---
 
     @Test
     void concurrentScheduleRestartOnlyOneWins() throws Exception {
@@ -98,9 +114,6 @@ class RestartManagerConcurrencyTest {
         assertTrue(manager.isRestartInProgress());
     }
 
-    // --- Countdown decrements properly ---
-    // Note: scheduleRestart → startCountdown which runs the first tick immediately (initialDelay=0).
-    // So after scheduling with 5s, the first tick decrements to 4.
 
     @Test
     void countdownDecrementsEachTick() {
@@ -112,21 +125,16 @@ class RestartManagerConcurrencyTest {
         );
 
         manager.scheduleRestart(5, RestartReason.MANUAL, "TickTest");
-        // After scheduleRestart, startCountdown runs the first tick which reads remaining=5,
-        // sends alert if needed, then decrements to 4.
         assertEquals(4, manager.getSecondsUntilRestart(),
             "After initial tick, should be 4");
 
-        // Tick 2
         tickScheduler.tickRepeating();
         assertEquals(3, manager.getSecondsUntilRestart());
 
-        // Tick 3
         tickScheduler.tickRepeating();
         assertEquals(2, manager.getSecondsUntilRestart());
     }
 
-    // --- Cancel during countdown resets state ---
 
     @Test
     void cancelDuringCountdownResetsAllState() {
@@ -148,10 +156,6 @@ class RestartManagerConcurrencyTest {
         assertEquals(-1, manager.getSecondsUntilRestart());
     }
 
-    // --- Sooner restart replaces longer one ---
-    // Note: After scheduleRestart, the initial tick decrements by 1.
-    // So after 120s schedule, remaining is 119.
-    // After 30s replacement, remaining is 29.
 
     @Test
     void soonerRestartReplacesLongerOne() {
@@ -162,12 +166,10 @@ class RestartManagerConcurrencyTest {
             () -> ZonedDateTime.now(ZoneId.of("UTC"))
         );
 
-        // Schedule a 120s restart — initial tick decrements to 119
         manager.scheduleRestart(120, RestartReason.SCHEDULED, "LongRestart");
         assertEquals(119, manager.getSecondsUntilRestart(),
             "After initial tick, 120 → 119");
 
-        // Schedule a 30s restart — should replace, initial tick decrements to 29
         boolean result = manager.scheduleRestart(30, RestartReason.EMERGENCY_TPS, "ShortRestart");
         assertTrue(result, "Sooner restart should replace longer one");
         assertEquals(29, manager.getSecondsUntilRestart(),
@@ -175,7 +177,6 @@ class RestartManagerConcurrencyTest {
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
     }
 
-    // --- Longer restart does NOT replace shorter one ---
 
     @Test
     void longerRestartDoesNotReplaceShorterOne() {
@@ -187,7 +188,6 @@ class RestartManagerConcurrencyTest {
         );
 
         manager.scheduleRestart(30, RestartReason.EMERGENCY_TPS, "ShortRestart");
-        // After initial tick: 30 → 29
         int afterFirst = manager.getSecondsUntilRestart();
 
         boolean result = manager.scheduleRestart(120, RestartReason.SCHEDULED, "LongRestart");
@@ -196,8 +196,6 @@ class RestartManagerConcurrencyTest {
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
     }
 
-    // --- Controller-owned restart: verify the mechanism ---
-    // The controllerRestartPending flag is set in handleExecutionResult which runs async.
 
     @Test
     void controllerRestartSetsPendingFlag() throws Exception {
@@ -209,7 +207,6 @@ class RestartManagerConcurrencyTest {
             }
         };
 
-        // Use a FullAsyncScheduler that counts down after all async work completes
         java.util.concurrent.CountDownLatch completionLatch = new java.util.concurrent.CountDownLatch(1);
         FullAsyncScheduler asyncScheduler = new FullAsyncScheduler(completionLatch);
 
@@ -220,22 +217,18 @@ class RestartManagerConcurrencyTest {
 
         manager.scheduleRestart(0, RestartReason.MANUAL, "ControllerTest");
 
-        // Wait for the entire async pipeline to complete
         boolean completed = completionLatch.await(5, TimeUnit.SECONDS);
         assertTrue(completed, "Async execution should complete within timeout");
 
-        // Give a small grace period for the flag to be set
         Thread.sleep(50);
 
         assertTrue(manager.isControllerRestartPending(),
             "Controller restart should be pending after ACCEPTED from controller backend");
 
-        // New restart should be blocked
         boolean result = manager.scheduleRestart(30, RestartReason.MANUAL, "BlockedByController");
         assertFalse(result, "New restart should be blocked when controller restart is pending");
     }
 
-    // --- Lockout: scheduling during lockout is rejected ---
 
     @Test
     void lockoutBlocksNewRestarts() throws Exception {
@@ -255,27 +248,21 @@ class RestartManagerConcurrencyTest {
             () -> ZonedDateTime.now(ZoneId.of("UTC"))
         );
 
-        // Execute a restart that returns UNKNOWN → triggers lockout
         manager.scheduleRestart(0, RestartReason.MANUAL, "LockoutTest");
 
-        // Wait for async execution + result handler
         boolean completed = completionLatch.await(5, TimeUnit.SECONDS);
         assertTrue(completed, "Async execution should complete");
         Thread.sleep(50);
 
-        // Now lockout should be active
         assertTrue(manager.isLockoutActive(), "Lockout should be active after UNKNOWN result");
 
-        // New restart attempts should be blocked
         boolean result = manager.scheduleRestart(60, RestartReason.MANUAL, "BlockedByLockout");
         assertFalse(result, "Restart during lockout should be rejected");
     }
 
-    // --- Generation counter: stale async results should be discarded ---
 
     @Test
     void generationCounterPreventsStaleAsyncResultHandling() throws Exception {
-        // Use a backend that takes a while to execute
         DelayedBackend slowBackend = new DelayedBackend(logger, 500);
         BackendRegistry customRegistry = new BackendRegistry(logger, new BackendConfig(tempDir, logger), tempDir) {
             @Override
@@ -284,7 +271,6 @@ class RestartManagerConcurrencyTest {
             }
         };
 
-        // Scheduler that runs async tasks on a real thread pool
         java.util.concurrent.CountDownLatch firstLatch = new java.util.concurrent.CountDownLatch(1);
         LatchingAsyncScheduler asyncScheduler = new LatchingAsyncScheduler(firstLatch);
 
@@ -293,51 +279,22 @@ class RestartManagerConcurrencyTest {
             () -> ZonedDateTime.now(ZoneId.of("UTC"))
         );
 
-        // Schedule restart with 0 delay → triggers executeRestart
         manager.scheduleRestart(0, RestartReason.MANUAL, "TestGen");
 
-        // Wait for async execution to complete
         boolean completed = firstLatch.await(5, TimeUnit.SECONDS);
         assertTrue(completed, "First async execution should complete");
         Thread.sleep(200); // Allow result handler to run
 
-        // The slow backend returns ACCEPTED and it's not controller-owned,
-        // so it will call platform.shutdownServer().
-        // With the generation counter, if we increment the generation before
-        // the result handler runs, the stale result is discarded.
-        // Since the backend takes 500ms and we wait 200ms after the latch,
-        // the result handler has already run. Let's test a different scenario:
-        // the platform should have been shut down since there was no generation mismatch.
         assertTrue(platform.shutdownCalled.get(),
             "First restart should have triggered shutdown (no generation mismatch)");
 
-        // Reset for the next test
         platform.shutdownCalled.set(false);
     }
 
-    // --- executeRestart blocks re-entrant calls via restartExecuting guard ---
 
     @Test
     void executeRestartGuardPreventsConcurrentExecution() throws Exception {
-        // The restartExecuting AtomicBoolean prevents two concurrent executeRestart calls.
-        // When scheduleRestart(0) is called, it sets restartExecuting=true,
-        // then launches the async work. While async is running, calling
-        // scheduleRestart() again will see isRestartInProgress() = true
-        // (because restartExecuting is true), and the new request will be
-        // rejected since a restart with 0 remaining is already in progress.
-        // However, the scheduleRestart logic checks remaining >= 0 && remaining <= normalizedDelay,
-        // which means it compares against the current countdown. When restartExecuting is true
-        // but no countdown is active, isRestartInProgress returns true and the second call
-        // sees currentRemaining = -1 and normalizedDelay = 0, so -1 >= 0 is false,
-        // meaning it doesn't short-circuit. It then checks isRestartInProgress() again
-        // and since it's true, cancels the current countdown and starts a new one.
-        // This is actually the intended behavior for the manager.
 
-        // Let's test that the restartExecuting guard itself works:
-        // The guard is internal to executeRestart() and prevents two
-        // executeRestart calls from running simultaneously.
-        // This is already covered by the concurrent test above.
-        // For a direct test, we verify the flag is reset after execution.
 
         DelayedBackend backend = new DelayedBackend(logger, 100);
         BackendRegistry customRegistry = new BackendRegistry(logger, new BackendConfig(tempDir, logger), tempDir) {
@@ -357,17 +314,12 @@ class RestartManagerConcurrencyTest {
 
         manager.scheduleRestart(0, RestartReason.MANUAL, "First");
 
-        // Wait for execution to fully complete
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         assertTrue(completed, "Execution should complete");
         Thread.sleep(200); // Allow result handler to run
 
-        // After completion, the restartExecuting guard should be reset,
-        // allowing a new restart to be scheduled
-        // (The platform was shut down in this case, but we're testing the guard)
     }
 
-    // --- Cleanup cancels everything ---
 
     @Test
     void cleanupCancelsActiveCountdown() {
@@ -392,11 +344,9 @@ class RestartManagerConcurrencyTest {
             "Cleanup should cancel any in-progress restart");
     }
 
-    // --- getRestartInfo returns consistent snapshot ---
 
     @Test
     void getRestartInfoReturnsConsistentSnapshot() {
-        // NoOpScheduler doesn't run the initial tick, so seconds stays at the scheduled value
         RestartManager manager = new RestartManager(
             logger, platform, new NoOpScheduler(), config, backendRegistry,
             () -> ZonedDateTime.now(ZoneId.of("UTC"))
@@ -409,11 +359,9 @@ class RestartManagerConcurrencyTest {
         assertEquals("Manual Restart", info.get("currentReason"),
             "MANUAL reason display name is 'Manual Restart'");
         assertEquals("InfoTest", info.get("initiator"));
-        // NoOpScheduler doesn't tick, so secondsUntilRestart stays at 60
         assertEquals(60, info.get("secondsUntilRestart"));
     }
 
-    // --- Helper classes ---
 
     private static class NoOpScheduler implements PlatformTaskScheduler {
         @Override
@@ -442,7 +390,6 @@ class RestartManagerConcurrencyTest {
         @Override
         public ScheduledTaskHandle runRepeating(Runnable task, long initialDelayTicks, long periodTicks) {
             this.repeatingTask = task;
-            // Run initial tick
             task.run();
             return () -> { this.repeatingTask = null; };
         }
@@ -541,7 +488,6 @@ class RestartManagerConcurrencyTest {
         @Override
         public ScheduledTaskHandle runLater(Runnable task, long delayTicks) {
             if (delayTicks > 0) {
-                // Delayed tasks (e.g., safety timeouts) should NOT run in tests
                 return () -> {};
             }
             pool.submit(() -> {

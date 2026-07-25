@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.manager;
 
 import dev.demonz.redstonereboot.common.backend.BackendRegistry;
@@ -146,8 +163,6 @@ public class RestartManager {
 
             ZonedDateTime triggeredTime = scheduled;
             scheduleRestart(countdownSeconds, RestartReason.SCHEDULED, "Scheduled System");
-            // Recalculate from just after the triggered time so that if the admin
-            // cancels, the 60s polling task won't immediately re-schedule the same occurrence.
             nextScheduledRestart = RestartScheduleCalculator.calculateNextRestart(
                 triggeredTime.plusSeconds(1),
                 config.getScheduledTimes(),
@@ -170,7 +185,6 @@ public class RestartManager {
      */
     public synchronized boolean scheduleRestart(int delay, RestartReason reason, String initiator) {
         if (restartExecuting.get()) return false;
-        // Clamp delay to prevent integer overflow for extreme values (max ~68 years → clamp to ~2 years)
         int normalizedDelay = Math.max(0, Math.min(delay, 63072000));
         long currentRemaining = getSecondsUntilRestart();
 
@@ -266,12 +280,6 @@ public class RestartManager {
 
         cancelCurrentCountdown(false);
 
-        // Run blocking backend operations async to avoid blocking the tick/command thread.
-        // Reset the guard in the async callback after the backend execution finishes,
-        // NOT in a finally block here — otherwise a second executeRestart() can race
-        // in before the async call completes.
-        // The generation check ensures stale results from a previous restart attempt
-        // are discarded if a new restart was triggered in the meantime.
         try {
             scheduler.runLaterAsync(() -> {
                 try {

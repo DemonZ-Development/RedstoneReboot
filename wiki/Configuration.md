@@ -1,5 +1,11 @@
 # Configuration Reference
 
+<div align="center">
+
+![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+
+</div>
+
 This page documents the main plugin configuration and the shared backend configuration.
 
 ## Main Plugin Config

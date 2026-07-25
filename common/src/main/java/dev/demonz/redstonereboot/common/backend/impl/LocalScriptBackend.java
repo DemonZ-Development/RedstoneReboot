@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend.impl;
 
 import dev.demonz.redstonereboot.common.backend.BackendResult;
@@ -78,12 +95,11 @@ public class LocalScriptBackend extends SupervisorBackend {
         if (Files.exists(executionRoot.resolve(scriptName).toAbsolutePath())) {
             return BackendState.GENERATED;
         }
-        return BackendState.SHUTDOWN_ONLY;
+        return BackendState.DEPEND_ON_HOST;
     }
 
     @Override
     protected boolean isWired() {
-        // Wiring proof: -D property, Env Var, or Marker File
         if (super.isWired()) return true;
         return Files.exists(dataFolder.resolve(".redstonereboot_wired").toAbsolutePath());
     }
@@ -184,7 +200,6 @@ public class LocalScriptBackend extends SupervisorBackend {
      * @return the full startup command string
      */
     private String buildFromSunJavaCommand(String cmd) {
-        // Extract and preserve JVM arguments, filtering sensitive ones
         List<String> safeArgs = new ArrayList<>();
         try {
             java.lang.management.RuntimeMXBean runtimeMxBean = java.lang.management.ManagementFactory.getRuntimeMXBean();
@@ -206,14 +221,12 @@ public class LocalScriptBackend extends SupervisorBackend {
             command.append(' ').append(isWindows ? windowsEscape(arg) : linuxEscape(arg));
         }
 
-        // Parse sun.java.command respecting embedded quotes
         List<String> parts = splitCommand(cmd);
         boolean hasJar = parts.stream()
             .map(p -> p.replaceAll("^\"|\"$", "").toLowerCase(Locale.ROOT))
             .anyMatch(p -> p.endsWith(".jar"));
         
         if (!hasJar) {
-            // Main-class run — add classpath from java.class.path BEFORE the main class
             String classPath = System.getProperty("java.class.path", "");
             if (!classPath.isEmpty()) {
                 command.append(" -cp ");
@@ -248,7 +261,6 @@ public class LocalScriptBackend extends SupervisorBackend {
      * @return a fallback command string using {@code -jar server.jar nogui}
      */
     private String buildFallbackCommand() {
-        // Extract and preserve JVM arguments, filtering sensitive ones
         List<String> safeArgs = new ArrayList<>();
         try {
             java.lang.management.RuntimeMXBean runtimeMxBean = java.lang.management.ManagementFactory.getRuntimeMXBean();
@@ -313,8 +325,6 @@ public class LocalScriptBackend extends SupervisorBackend {
      */
     private static String windowsEscape(String arg) {
         if (arg.isEmpty()) return "\"\"";
-        // If it's already properly wrapped in double quotes, we don't need to add carets
-        // for characters inside the quotes in cmd.exe.
         boolean wrapped = arg.length() >= 2 && arg.startsWith("\"") && arg.endsWith("\"");
         
         StringBuilder sb = new StringBuilder("\"");

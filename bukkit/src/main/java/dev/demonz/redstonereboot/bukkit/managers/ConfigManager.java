@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.bukkit.managers;
 
 import dev.demonz.redstonereboot.common.platform.PlatformConfig;
@@ -45,7 +62,6 @@ public class ConfigManager implements PlatformConfig {
 
         plugin.getLogger().info("Migrating config.yml from version " + version + " to " + CURRENT_CONFIG_VERSION + "...");
 
-        // Create backup of old config if enabled
         boolean backupEnabled = cfg.getBoolean("advanced.backup-on-migration", true);
         if (backupEnabled) {
             java.io.File configFile = new java.io.File(plugin.getDataFolder(), "config.yml");
@@ -60,15 +76,12 @@ public class ConfigManager implements PlatformConfig {
             }
         }
 
-        // v1.3.3 -> v1.4.0 removals and new default key additions
         if (version < 3) {
-            // Remove old unused keys
             cfg.set("permissions.luckperms.default-permission", null);
             cfg.set("permissions.luckperms.admin-permission", null);
             cfg.set("advanced.async-operations", null);
             cfg.set("advanced.thread-pool-size", null);
 
-            // Add new missing keys if they don't exist
             if (!cfg.contains("permissions.fallback.use-op-as-admin")) {
                 cfg.set("permissions.fallback.use-op-as-admin", true);
             }
@@ -89,10 +102,8 @@ public class ConfigManager implements PlatformConfig {
             }
         }
 
-        // Set to the current version
         cfg.set("config-version", CURRENT_CONFIG_VERSION);
 
-        // Save changes
         plugin.saveConfig();
         plugin.getLogger().info("Successfully migrated config.yml to version " + CURRENT_CONFIG_VERSION + "!");
     }
@@ -178,8 +189,6 @@ public class ConfigManager implements PlatformConfig {
         FileConfiguration newConfig = plugin.getConfig();
         migrateConfig(newConfig);
         if (isStrictValidationEnabled()) {
-            // Validate the new config BEFORE assigning it to this.config.
-            // If validation fails, the old config remains active.
             try {
                 validateConfiguration(newConfig);
             } catch (RuntimeException e) {

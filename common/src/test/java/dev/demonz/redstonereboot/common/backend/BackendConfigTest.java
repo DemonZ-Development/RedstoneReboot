@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.backend;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +47,6 @@ class BackendConfigTest {
         logger = Logger.getLogger("BackendConfigTest");
     }
 
-    // --- Default generation: backends should be disabled by default ---
 
     @Test
     void defaultsDisableBackends() {
@@ -39,11 +55,10 @@ class BackendConfigTest {
 
         assertFalse(config.isBackendsEnabled(),
             "Backends should be DISABLED by default");
-        assertEquals("SHUTDOWN_ONLY", config.getActiveBackend(),
-            "Default backend should be SHUTDOWN_ONLY");
+        assertEquals("DEPEND_ON_HOST", config.getActiveBackend(),
+            "Default backend should be DEPEND_ON_HOST");
     }
 
-    // --- Default lockout duration ---
 
     @Test
     void defaultLockoutDurationIs300() {
@@ -52,7 +67,6 @@ class BackendConfigTest {
         assertEquals(300, config.getLockoutDuration());
     }
 
-    // --- Properties file is generated on first load ---
 
     @Test
     void propertiesFileGeneratedOnFirstLoad() throws IOException {
@@ -65,13 +79,11 @@ class BackendConfigTest {
         assertTrue(Files.exists(configPath), "Config file should be generated");
         assertTrue(Files.size(configPath) > 0, "Config file should have content");
 
-        // Verify it contains the backends-enabled=false line
         String content = Files.readString(configPath);
         assertTrue(content.contains("backends-enabled=false"),
             "Generated config should have backends-enabled=false");
     }
 
-    // --- File permissions are owner-only on POSIX systems ---
 
     @Test
     void filePermissionsAreOwnerOnlyOnPosix() throws IOException {
@@ -85,12 +97,10 @@ class BackendConfigTest {
                 java.nio.file.attribute.PosixFilePermissions.toString(perms),
                 "Config file should have owner-only permissions (rw-------)");
         } catch (UnsupportedOperationException e) {
-            // Windows — skip this test
             System.out.println("Skipping POSIX permission test on non-POSIX filesystem");
         }
     }
 
-    // --- Custom lockout duration is read correctly ---
 
     @Test
     void customLockoutDurationIsRead() throws IOException {
@@ -104,7 +114,6 @@ class BackendConfigTest {
         assertEquals(600, config.getLockoutDuration());
     }
 
-    // --- Invalid lockout duration defaults to 300 ---
 
     @Test
     void invalidLockoutDurationDefaultsTo300() throws IOException {
@@ -119,7 +128,6 @@ class BackendConfigTest {
             "Invalid lockout duration should default to 300");
     }
 
-    // --- Negative lockout duration is clamped to 0 ---
 
     @Test
     void negativeLockoutDurationClampedToZero() throws IOException {
@@ -134,7 +142,6 @@ class BackendConfigTest {
             "Negative lockout duration should be clamped to 0");
     }
 
-    // --- Pterodactyl properties are read correctly ---
 
     @Test
     void pterodactylPropertiesAreRead() throws IOException {
@@ -154,7 +161,6 @@ class BackendConfigTest {
         assertEquals("abc-def", config.getProperty("ptero-id"));
     }
 
-    // --- Env var resolution with allowed prefix ---
 
     @Test
     void envVarResolutionWithAllowedPrefix() throws IOException {
@@ -167,11 +173,9 @@ class BackendConfigTest {
         assertTrue(config.load());
 
         String resolved = config.getProperty("ptero-token");
-        // REBOOT_ is in the allowlist; if the env var isn't set, it uses the fallback
         assertEquals("default_fallback", resolved);
     }
 
-    // --- Env var resolution with disallowed prefix uses fallback ---
 
     @Test
     void envVarResolutionWithDisallowedPrefixUsesFallback() throws IOException {
@@ -184,11 +188,9 @@ class BackendConfigTest {
         assertTrue(config.load());
 
         String resolved = config.getProperty("ptero-token");
-        // AWS_ is NOT in the allowlist, so fallback should be used
         assertEquals("fallback_value", resolved);
     }
 
-    // --- getProperty returns empty string for missing keys ---
 
     @Test
     void missingPropertyReturnsEmptyString() {
@@ -197,7 +199,6 @@ class BackendConfigTest {
         assertEquals("", config.getProperty("nonexistent-key"));
     }
 
-    // --- Reload picks up new values ---
 
     @Test
     void reloadPicksUpNewValues() throws IOException {
@@ -207,18 +208,15 @@ class BackendConfigTest {
         assertTrue(config.load());
         assertFalse(config.isBackendsEnabled());
 
-        // Modify the file
         Files.writeString(configPath,
             "backends-enabled=true\nactive-backend=PTERODACTYL\nlockout-duration-seconds=300\n");
 
-        // Reload
         assertTrue(config.load());
         assertTrue(config.isBackendsEnabled(),
             "Reload should pick up backends-enabled=true");
         assertEquals("PTERODACTYL", config.getActiveBackend());
     }
 
-    // --- Plaintext token warning is triggered ---
 
     @Test
     void plaintextTokenWarningDoesNotCrash() throws IOException {
@@ -227,13 +225,11 @@ class BackendConfigTest {
         Files.writeString(configPath,
             "backends-enabled=true\nptero-token=plaintext_token_here\n");
 
-        // This should not throw — just log a warning
         BackendConfig config = new BackendConfig(tempDir, logger);
         assertTrue(config.load());
         assertEquals("plaintext_token_here", config.getProperty("ptero-token"));
     }
 
-    // --- Case-insensitive active-backend ---
 
     @Test
     void activeBackendIsCaseInsensitive() throws IOException {

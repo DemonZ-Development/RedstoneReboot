@@ -1,7 +1,24 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.bukkit.integrations;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
-import dev.demonz.redstonereboot.bukkit.utils.ServerLoadMonitor;
+import dev.demonz.redstonereboot.common.RedstoneRebootCore;
 import dev.demonz.redstonereboot.common.manager.RestartManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
@@ -45,7 +62,9 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getDescription().getVersion();
+        return plugin != null && plugin.getDescription() != null
+            ? plugin.getDescription().getVersion()
+            : RedstoneRebootCore.VERSION;
     }
 
     @Override
@@ -60,7 +79,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
 
     @Override
     public String onRequest(OfflinePlayer player, @NotNull String params) {
-        // Guard against early-startup calls (MOTD pings before full initialization)
         RestartManager restartManager = safeGetRestartManager();
 
         switch (params.toLowerCase()) {
@@ -102,17 +120,19 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
             }
 
             case "tps": {
-                double tps = plugin.getTPS();
+                double tps = plugin != null ? plugin.getTPS() : 20.0;
                 return String.format(Locale.ROOT, "%.1f", tps);
             }
 
             case "memory": {
-                double memoryUsage = plugin.getCachedMemoryUsage();
+                double memoryUsage = plugin != null ? plugin.getCachedMemoryUsage() : 0.0;
                 return String.format(Locale.ROOT, "%.1f%%", memoryUsage);
             }
 
             case "version":
-                return plugin.getDescription().getVersion();
+                return plugin != null && plugin.getDescription() != null
+                    ? plugin.getDescription().getVersion()
+                    : RedstoneRebootCore.VERSION;
 
             case "timezone":
                 return safeGetTimezone();
@@ -126,6 +146,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
      * Safely get the restart manager, returning null if the core hasn't initialized yet.
      */
     private RestartManager safeGetRestartManager() {
+        if (plugin == null) return null;
         try {
             return plugin.getRestartManager();
         } catch (Exception e) {
@@ -138,6 +159,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
      * Safely get the configured timezone string, falling back to UTC.
      */
     private String safeGetTimezone() {
+        if (plugin == null) return "UTC";
         try {
             return plugin.getConfigManager() != null
                 ? plugin.getConfigManager().getTimezone()
@@ -151,6 +173,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
      * Safely get the configured ZoneId, falling back to UTC.
      */
     private java.time.ZoneId safeGetZoneId() {
+        if (plugin == null) return java.time.ZoneId.of("UTC");
         try {
             return plugin.getConfigManager() != null
                 ? plugin.getConfigManager().getZoneId()

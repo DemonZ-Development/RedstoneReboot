@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.forge;
 
 import dev.demonz.redstonereboot.common.command.BrigadierCommand;
@@ -14,6 +31,7 @@ import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
@@ -31,9 +49,19 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
 
         try {
             scheduler = new JavaPlatformScheduler(this::dispatchToServerThread);
-            Path configDir = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get();
-            Path configPath = configDir.resolve("redstonereboot.properties");
-            startCore(scheduler, loadSimpleConfig(configPath), configDir);
+            Path baseConfigDir = net.minecraftforge.fml.loading.FMLPaths.CONFIGDIR.get();
+            Path modConfigDir = baseConfigDir.resolve("redstonereboot");
+            Files.createDirectories(modConfigDir);
+
+            Path configPath = modConfigDir.resolve("redstonereboot.properties");
+            Path legacyConfigPath = baseConfigDir.resolve("redstonereboot.properties");
+            if (Files.exists(legacyConfigPath) && !Files.exists(configPath)) {
+                try {
+                    Files.copy(legacyConfigPath, configPath);
+                } catch (Exception ignored) {}
+            }
+
+            startCore(scheduler, loadSimpleConfig(configPath), modConfigDir);
 
             MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
             MinecraftForge.EVENT_BUS.addListener(this::onServerStarted);

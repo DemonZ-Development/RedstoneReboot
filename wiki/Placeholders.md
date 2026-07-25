@@ -1,6 +1,12 @@
-# PlaceholderAPI Placeholders
+# PlaceholderAPI Reference
 
-RedstoneReboot provides a PlaceholderAPI expansion for Bukkit-family and Folia servers.
+<div align="center">
+
+![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+
+</div>
+
+RedstoneReboot registers the `%redstonereboot_%` expansion when PlaceholderAPI is installed on Bukkit or Folia servers.
 
 ## Requirements
 

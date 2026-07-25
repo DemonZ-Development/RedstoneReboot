@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.bukkit;
 
 import dev.demonz.redstonereboot.bukkit.managers.ConfigManager;
@@ -50,7 +67,6 @@ public class RedstoneRebootBukkitTest {
 
         player.performCommand("reboot status");
 
-        // Verify status feedback was printed
         String statusMessage = player.nextMessage();
         assertNotNull(statusMessage);
         assertTrue(statusMessage.contains("RedstoneReboot Status"));
@@ -72,17 +88,14 @@ public class RedstoneRebootBukkitTest {
         regularPlayer.addAttachment(plugin, "redstonereboot.use", true);
         adminPlayer.addAttachment(plugin, "redstonereboot.use", true);
 
-        // 1. Attempt manual restart as regular player (should be denied)
         regularPlayer.performCommand("reboot now 10");
         String regularFeedback = regularPlayer.nextMessage();
         assertNotNull(regularFeedback);
         assertTrue(regularFeedback.contains("No permission") || regularFeedback.contains("I'm sorry"));
 
-        // 2. Attempt manual restart as admin player (should succeed)
         adminPlayer.addAttachment(plugin, "redstonereboot.restart.now", true);
         adminPlayer.performCommand("reboot now 10");
 
-        // Verify countdown initiated successfully
         RestartManager rm = plugin.getRestartManager();
         assertNotNull(rm);
         assertTrue(rm.isRestartInProgress());
@@ -97,17 +110,14 @@ public class RedstoneRebootBukkitTest {
         player.addAttachment(plugin, "redstonereboot.restart.now", true);
         player.addAttachment(plugin, "redstonereboot.notify", true);
 
-        // Trigger manual restart countdown with 5 seconds
         player.performCommand("reboot now 5");
 
         RestartManager rm = plugin.getRestartManager();
         assertTrue(rm.isRestartInProgress());
         assertEquals(5, rm.getSecondsUntilRestart());
 
-        // Fast-forward the Bukkit scheduler in memory by 2 seconds (40 ticks)
         server.getScheduler().performTicks(40L);
 
-        // Verify time decremented correctly
         assertEquals(3, rm.getSecondsUntilRestart());
     }
 
@@ -118,26 +128,21 @@ public class RedstoneRebootBukkitTest {
         admin.addAttachment(plugin, "redstonereboot.restart.now", true);
         admin.addAttachment(plugin, "redstonereboot.restart.cancel", true);
 
-        // Start a restart
         admin.performCommand("reboot now 30");
         RestartManager rm = plugin.getRestartManager();
         assertTrue(rm.isRestartInProgress());
 
-        // Cancel it
         admin.performCommand("reboot cancel");
         
-        // Assert restart countdown was completely cancelled
         assertFalse(rm.isRestartInProgress());
         assertEquals(-1, rm.getSecondsUntilRestart());
     }
 
     @Test
     public void testPlaceholderAPISupport() {
-        // Assert that getTPS() and getCachedMemoryUsage() return correct values
         assertTrue(plugin.getTPS() >= 0.0D);
         assertTrue(plugin.getCachedMemoryUsage() >= 0.0D);
 
-        // Instantiate PlaceholderAPI expansion and assert requests
         dev.demonz.redstonereboot.bukkit.integrations.PlaceholderAPIHook hook = new dev.demonz.redstonereboot.bukkit.integrations.PlaceholderAPIHook(plugin);
         
         String tpsPlaceholder = hook.onRequest(null, "tps");
@@ -153,19 +158,15 @@ public class RedstoneRebootBukkitTest {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
         assertTrue(configFile.exists());
 
-        // Read active config version
         int activeVersion = cfg.getConfigVersion();
         assertEquals(ConfigManager.CURRENT_CONFIG_VERSION, activeVersion);
 
-        // Intentionally write a broken syntax configuration into config.yml
         try (FileWriter writer = new FileWriter(configFile)) {
             writer.write("general:\n  plugin-prefix: \"&8[&cRedstone&8]\"\n  [broken: invalid syntax yaml\n");
         }
 
-        // Trigger config reloading and assert it throws an exception (preventing config override)
         assertThrows(RuntimeException.class, () -> plugin.reloadPluginState());
 
-        // Verify that config in memory did not change and remains safe
         assertEquals(ConfigManager.CURRENT_CONFIG_VERSION, cfg.getConfigVersion());
     }
 
@@ -174,7 +175,6 @@ public class RedstoneRebootBukkitTest {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
         assertTrue(configFile.exists());
 
-        // Intentionally write an outdated v1 configuration
         try (FileWriter writer = new FileWriter(configFile)) {
             writer.write("general:\n" +
                          "  plugin-prefix: \"§8[§cRedstone§8] §aReboot\"\n" +
@@ -191,14 +191,11 @@ public class RedstoneRebootBukkitTest {
                          "config-version: 1\n");
         }
 
-        // Reload the plugin so it triggers loadConfig() which calls migrateConfig()
         plugin.reloadPluginState();
 
         ConfigManager cfg = plugin.getConfigManager();
-        // Assert version was migrated to current
         assertEquals(ConfigManager.CURRENT_CONFIG_VERSION, cfg.getConfigVersion());
 
-        // Assert new default keys were injected
         FileConfiguration fileConfig = plugin.getConfig();
         assertTrue(fileConfig.getBoolean("permissions.fallback.use-op-as-admin"));
         assertEquals(2, fileConfig.getInt("permissions.fallback.default-level"));
@@ -207,17 +204,14 @@ public class RedstoneRebootBukkitTest {
         assertTrue(fileConfig.getBoolean("advanced.metrics-enabled"));
         assertEquals(60, fileConfig.getInt("advanced.shutdown-delay-ticks"));
 
-        // Assert old obsolete keys were completely removed
         assertFalse(fileConfig.contains("permissions.luckperms.default-permission"));
         assertFalse(fileConfig.contains("permissions.luckperms.admin-permission"));
         assertFalse(fileConfig.contains("advanced.async-operations"));
         assertFalse(fileConfig.contains("advanced.thread-pool-size"));
 
-        // Assert backup file was created
         File backupFile = new File(plugin.getDataFolder(), "config.yml.v1.backup");
         assertTrue(backupFile.exists());
 
-        // Clean up backup file
         backupFile.delete();
     }
 }

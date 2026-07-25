@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2026 DemonZ Development
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 package dev.demonz.redstonereboot.common.command;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -23,7 +40,6 @@ public class BrigadierCommand {
     public <S> void register(CommandDispatcher<S> dispatcher, CommandSourceFactory<S> factory) {
         LiteralArgumentBuilder<S> reboot = LiteralArgumentBuilder.literal("reboot");
 
-        // status
         reboot.then(LiteralArgumentBuilder.<S>literal("status")
             .requires(src -> {
                 CommandProcessor.CommandSender sender = factory.create(src);
@@ -34,7 +50,6 @@ public class BrigadierCommand {
                 return 1;
             }));
 
-        // cancel
         reboot.then(LiteralArgumentBuilder.<S>literal("cancel")
             .requires(src -> factory.create(src).hasPermission("redstonereboot.restart.cancel"))
             .executes(ctx -> {
@@ -42,7 +57,6 @@ public class BrigadierCommand {
                 return 1;
             }));
 
-        // now [delay]
         reboot.then(LiteralArgumentBuilder.<S>literal("now")
             .requires(src -> factory.create(src).hasPermission("redstonereboot.restart.now"))
             .executes(ctx -> {
@@ -56,7 +70,6 @@ public class BrigadierCommand {
                     return 1;
                 })));
 
-        // schedule <delay>
         reboot.then(LiteralArgumentBuilder.<S>literal("schedule")
             .requires(src -> factory.create(src).hasPermission("redstonereboot.restart.schedule"))
             .then(RequiredArgumentBuilder.<S, Integer>argument("delay", IntegerArgumentType.integer(1, 86400))
@@ -66,7 +79,6 @@ public class BrigadierCommand {
                     return 1;
                 })));
 
-        // reload
         reboot.then(LiteralArgumentBuilder.<S>literal("reload")
             .requires(src -> factory.create(src).hasPermission("redstonereboot.config.reload"))
             .executes(ctx -> {
@@ -74,7 +86,6 @@ public class BrigadierCommand {
                 return 1;
             }));
 
-        // info
         reboot.then(LiteralArgumentBuilder.<S>literal("info")
             .requires(src -> {
                 CommandProcessor.CommandSender sender = factory.create(src);
@@ -85,7 +96,6 @@ public class BrigadierCommand {
                 return 1;
             }));
 
-        // doctor
         reboot.then(LiteralArgumentBuilder.<S>literal("doctor")
             .requires(src -> factory.create(src).hasPermission("redstonereboot.doctor"))
             .executes(ctx -> {
@@ -93,7 +103,6 @@ public class BrigadierCommand {
                 return 1;
             }));
 
-        // history
         reboot.then(LiteralArgumentBuilder.<S>literal("history")
             .requires(src -> {
                 CommandProcessor.CommandSender sender = factory.create(src);
@@ -104,7 +113,6 @@ public class BrigadierCommand {
                 return 1;
             }));
 
-        // help
         reboot.then(LiteralArgumentBuilder.<S>literal("help")
             .executes(ctx -> {
                 processor.processHelp(factory.create(ctx.getSource()));
