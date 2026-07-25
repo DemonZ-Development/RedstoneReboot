@@ -38,16 +38,21 @@ jobs:
       - name: Build and Run Unit/Integration Tests
         run: ./gradlew build --no-daemon
 
+      - name: Collect E2E JARs
+        run: |
+          mkdir -p build-output
+          cp bukkit/build/libs/RedstoneReboot-Bukkit-*.jar build-output/
+          cp folia/build/libs/RedstoneReboot-Folia-*.jar build-output/
+          cp fabric/build/libs/RedstoneReboot-Fabric-*.jar build-output/
+          cp forge/build/libs/RedstoneReboot-Forge-*.jar build-output/
+          cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar build-output/
+          rm -f build-output/*-thin.jar
+
       - name: Upload Build Artifacts for E2E Testing
         uses: actions/upload-artifact@v4
         with:
           name: E2E-Server-JARs
-          path: |
-            bukkit/build/libs/RedstoneReboot-Bukkit-*.jar
-            folia/build/libs/RedstoneReboot-Folia-*.jar
-            fabric/build/libs/RedstoneReboot-Fabric-*.jar
-            forge/build/libs/RedstoneReboot-Forge-*.jar
-            neoforge/build/libs/RedstoneReboot-NeoForge-*.jar
+          path: build-output/*
 
   e2e-paper-server:
     name: Live E2E - Paper Server (MC 1.20.4)
