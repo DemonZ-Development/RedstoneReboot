@@ -1,6 +1,6 @@
 <div align="center">
 
-![RedstoneReboot Banner](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
+![RedstoneReboot Banner](assets/banner.png)
 
 # RedstoneReboot
 
