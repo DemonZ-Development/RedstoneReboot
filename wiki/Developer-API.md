@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="96" />
 
 </div>
 
@@ -175,3 +175,12 @@ int warningTime = config.getScheduledWarningTime();
 - The API is available on Bukkit, Paper, and Folia server runtimes.
 - Fabric, Forge, and NeoForge builds operate as standalone server mod modules.
 - Always null-check the plugin instance before accessing managers if RedstoneReboot is an optional soft dependency.
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>

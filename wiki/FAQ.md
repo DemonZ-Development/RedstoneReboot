@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="96" />
 
 </div>
 
@@ -98,3 +98,12 @@ When a backend returns an uncertain result (e.g., a Pterodactyl API timeout), Re
 ### How do I opt out of bStats?
 
 Set `metrics-enabled: false` under the `advanced:` section in `config.yml`. Alternatively, you can disable bStats globally through the bStats config file at `plugins/bStats/config.yml`.
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>

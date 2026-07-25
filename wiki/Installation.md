@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+<img src="https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png" alt="RedstoneReboot Logo" width="96" />
 
 </div>
 
@@ -86,3 +86,12 @@ Use the Bukkit-family jar for Bukkit-compatible servers, the Folia jar for Folia
 ### Restart backend not taking ownership
 
 Run `/reboot doctor` and compare the active backend with the environment RedstoneReboot detected. Backend state and mismatch warnings are explained in [Backends.md](Backends.md).
+
+---
+
+<div align="center">
+
+**RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
+*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+
+</div>
