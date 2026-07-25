@@ -6,16 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [1.5.0] — 2026-07-19
+## [1.5.0] — 2026-07-25 (Stable Release)
 
 ### Added
-- **`/reboot history` command**: Shows the last 10 restart lifecycle events (scheduled, executed, cancelled, postponed, lockout) with timestamp, reason, and initiator. Events are also appended to `restarts.log` in the data folder for review across server restarts.
-- **Doctor command overhaul**: `/reboot doctor` now reports live stats (TPS, memory, player count), current restart state with remaining seconds and initiator, and the next scheduled restart time — previously it only reported backend state, which made it look like restarts were not happening.
-- **Mod initialization fix**: On Fabric, Forge, and NeoForge, health monitoring now starts *after* the core engine finishes enabling, so monitoring and scheduled restarts no longer run against an uninitialized backend registry.
-- Marketplace/README copy rewritten without emojis and in plain language.
+- **`DEPEND_ON_HOST` Backend State**: Renamed `SHUTDOWN_ONLY` state to `DEPEND_ON_HOST` in `/reboot doctor` and backend diagnostics to clearly state host environment dependency (Pterodactyl, systemd, Docker, panel scripts).
+- **Dedicated Mod Config Directory**: Fabric, Forge, and NeoForge mod loaders now automatically create and use `config/redstonereboot/` for `redstonereboot.properties` and `restart-backends.properties` with legacy migration support.
+- **Apache 2.0 License Headers**: Added standard DemonZ Development Apache License headers across all Java source and test files.
+- **Headless Live E2E Workflows**: Added `.github/workflows/e2e-live-servers.yml` for real headless Paper, Folia, and Fabric server E2E integration testing.
+- **`/reboot history` command**: Shows the last 10 restart lifecycle events (scheduled, executed, cancelled, postponed, lockout) with timestamp, reason, and initiator. Events are also appended to `restarts.log` in the data folder.
 
 ### Fixed
-- Doctor command no longer silently omits restart status, giving a false "won't restart" impression while a restart was actually in progress.
+- Fixed missing config directory generation issue on modded platforms.
+- Fixed doctor command output to display active status and host-managed restart modes.
 
 ---
 
