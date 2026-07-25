@@ -10,7 +10,10 @@
 [![Release](https://img.shields.io/github/v/release/DemonZ-Development/RedstoneReboot?color=green&label=latest)](https://github.com/DemonZ-Development/RedstoneReboot/releases/latest)
 [![License](https://img.shields.io/github/license/DemonZ-Development/RedstoneReboot)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-17%2B-ED8B00?logo=openjdk)](https://adoptium.net/)
-[![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+[![bStats Servers](https://img.shields.io/bstats/servers/30751?label=Servers&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+[![bStats Players](https://img.shields.io/bstats/players/30751?label=Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+
+[![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 **Bukkit** · **Paper** · **Purpur** · **Folia** · **Fabric** · **Forge** · **NeoForge**
 

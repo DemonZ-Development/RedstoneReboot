@@ -10,7 +10,10 @@
 
 **A restart engine for Bukkit-family Minecraft servers**
 
-[![bStats](https://img.shields.io/bstats/players/30751?label=bStats%20Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+[![bStats Servers](https://img.shields.io/bstats/servers/30751?label=Servers&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+[![bStats Players](https://img.shields.io/bstats/players/30751?label=Players&color=blue)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
+
+[![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 </div>
 

@@ -17,6 +17,11 @@
 [*] [B]Forge[/B]: 1.20.4+ to 26.2+
 [*] [B]NeoForge[/B]: 1.21.1+ to 26.2+ (Java 21+)
 [/LIST]
+
+[URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751'][IMG]https://img.shields.io/bstats/servers/30751?label=Servers&color=blue[/IMG][/URL]
+[URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751'][IMG]https://img.shields.io/bstats/players/30751?label=Players&color=blue[/IMG][/URL]
+
+[URL='https://bstats.org/plugin/bukkit/RedstoneReboot/30751'][IMG]https://bstats.org/signatures/bukkit/RedstoneReboot.svg[/IMG][/URL]
 [/CENTER]
 
 [HR][/HR]
