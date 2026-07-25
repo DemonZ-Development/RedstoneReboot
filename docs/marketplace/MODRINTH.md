@@ -19,41 +19,38 @@
 
 ---
 
-## Why RedstoneReboot?
+## Features
 
-RedstoneReboot handles when, why, and how your server restarts. It combines live health monitoring, flexible scheduling, and a backend system that hands the actual restart off to whatever process manager you already use.
+RedstoneReboot manages automated restarts, performance monitoring, and backend process integration across single servers and server networks.
 
-It works for a single survival server or for a whole fleet running behind Pterodactyl.
-
-### Key Capabilities
-
-- **Intelligent Scheduling** — Multiple restart windows per day, with timezone support and day-of-week filtering
-- **Health Monitoring** — Live TPS and memory tracking, with consecutive-check logic that avoids false restarts from brief spikes
-- **Emergency Fail-safes** — Automatically restarts when TPS or memory crosses a critical threshold
-- **Rich Alerts** — Chat, title, action bar, and configurable sound notifications
-- **Backend Handoff** — Delegates the restart to Pterodactyl, Systemd, Docker, or a local wrapper script
-- **Hot-Reload** — Change the backend config and run `/reboot reload` — no full server restart needed
-- **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit builds)
-- **bStats Metrics** — Anonymous usage telemetry ([view live stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
+- **Scheduling** — Multiple daily restart times with timezone support and day-of-week filters
+- **Health Checks** — Real-time TPS and memory tracking with consecutive checks to prevent false triggers
+- **Emergency Restarts** — Triggers restarts if TPS drops or memory usage exceeds safety limits
+- **Notifications** — Countdown alerts via chat, titles, action bar, and sounds
+- **Backend Handoff** — Delegates process restarts to Pterodactyl API, systemd, Docker, or custom scripts
+- **Hot Reload** — Apply backend configuration changes using `/reboot reload`
+- **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit/Folia)
+- **bStats Metrics** — Anonymous usage telemetry ([live stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
 
 ---
 
-## The Backend System & Startup Loops
+## Backend System & Startup Loops
 
-RedstoneReboot keeps "when to restart" separate from "how to restart" by supporting several backends:
-* **SHUTDOWN_ONLY** — Graceful shutdown (your external wrapper restarts the process)
-* **LOCALSCRIPT** — An auto-generated shell script handles process restarts
-* **SYSTEMD** — Service integration on Linux
-* **DOCKER** — Container-native restart policies
-* **PTERODACTYL** — Direct panel API integration
+RedstoneReboot separates "when to restart" from "how to restart":
 
-### Do I need to set up a custom backend?
-**If your server is already wrapped in a startup loop script** (a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), **SHUTDOWN_ONLY works out of the box.** When the restart timer runs out, the engine stops the server cleanly and your script starts it again.
+- **DEPEND_ON_HOST** — Clean shutdown (your panel, Docker policy, or script restarts the process)
+- **LOCALSCRIPT** — Auto-generated shell script handles process restarts
+- **SYSTEMD** — System service integration on Linux
+- **DOCKER** — Container restart policy integration
+- **PTERODACTYL** — Direct panel API power actions
 
-### Why configure a custom backend then?
-1. **Clean handoff (Pterodactyl / panels):** Avoid panel desyncs or false offline indicators. Instead of just shutting down, the plugin talks to your panel's API to request a clean power cycle.
-2. **Self-healing bootups:** If you don't run a startup loop script, the LOCALSCRIPT backend spawns a new process to bring the server back up.
-3. **Crash lockout safety:** Simple loops can get stuck in endless crash loops if a file gets corrupted. Custom backends add safety lockout timers to stop boot hammering.
+### Do I need a custom backend?
+If your server runs inside a loop script, Docker container with `restart: always`, or systemd service, **DEPEND_ON_HOST works out of the box.** When the countdown ends, the engine shuts down the server cleanly and your supervisor starts it again.
+
+### Why configure a custom backend?
+1. **API Integration (Pterodactyl / panels):** Triggers power cycles directly through panel APIs to avoid false offline status indicators.
+2. **Auto Startup Scripts:** LOCALSCRIPT generates and manages process wrappers for standalone VPS setups.
+3. **Safety Lockouts:** Enforces cooldown lockouts to prevent rapid crash loops if server files are corrupt.
 
 ---
 
