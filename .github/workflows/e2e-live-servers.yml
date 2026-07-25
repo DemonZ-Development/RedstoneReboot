@@ -97,7 +97,8 @@ jobs:
       - name: Download Paper Server API Jar
         run: |
           cd paper-server
-          curl -sSL -o paper.jar "https://api.papermc.io/v2/projects/paper/versions/1.20.4/builds/496/downloads/paper-1.20.4-496.jar"
+          LATEST_BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/1.20.4 | jq -r '.builds[-1]')
+          curl -sSL -o paper.jar "https://api.papermc.io/v2/projects/paper/versions/1.20.4/builds/${LATEST_BUILD}/downloads/paper-1.20.4-${LATEST_BUILD}.jar"
 
       - name: Launch Live Paper Server & Verify Plugin Enable
         run: |
@@ -139,7 +140,8 @@ jobs:
       - name: Download Folia Server Jar
         run: |
           cd folia-server
-          curl -sSL -o folia.jar "https://api.papermc.io/v2/projects/folia/versions/1.20.4/builds/18/downloads/folia-1.20.4-18.jar"
+          LATEST_BUILD=$(curl -s https://api.papermc.io/v2/projects/folia/versions/1.20.4 | jq -r '.builds[-1]')
+          curl -sSL -o folia.jar "https://api.papermc.io/v2/projects/folia/versions/1.20.4/builds/${LATEST_BUILD}/downloads/folia-1.20.4-${LATEST_BUILD}.jar"
 
       - name: Launch Live Folia Server & Verify Plugin Enable
         run: |
