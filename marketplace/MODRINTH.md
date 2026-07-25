@@ -138,10 +138,18 @@ Choose the file that matches your server platform:
 
 - [**Complete Wiki**](https://github.com/DemonZ-Development/RedstoneReboot/wiki)
 - [**GitHub Repository**](https://github.com/DemonZ-Development/RedstoneReboot)
-- [**Developer API Docs**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
+- [**Developer API Docs**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/wiki/Developer-API.md)
 - [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 - [**Bug Reports & Issues**](https://github.com/DemonZ-Development/RedstoneReboot/issues)
 - [**Discord Support**](https://discord.gg/GYsTt96ypf)
+
+---
+
+## Sponsored by Nexeu Hosting
+
+[![nexeu-sponsor](https://whodoesntloveavatars.s3.fra.databucket.eu/assets/promo.png)](https://nexeu.zip/)
+
+High-performance, affordable hosting for your Minecraft server. Premium hardware, instant setup, 24/7 support.
 
 ---
 

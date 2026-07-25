@@ -127,5 +127,11 @@ Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE
 [/LIST]
 
 [CENTER]
+[SIZE=5][B]Sponsored by Nexeu Hosting[/B][/SIZE]
+
+[URL='https://nexeu.zip/'][IMG]https://whodoesntloveavatars.s3.fra.databucket.eu/assets/promo.png[/IMG][/URL]
+
+High-performance, affordable hosting for your Minecraft server. Premium hardware, instant setup, 24/7 support.
+
 [I]Made by [URL='https://demonzdevelopment.online']DemonZ Development[/URL][/I]
 [/CENTER]
