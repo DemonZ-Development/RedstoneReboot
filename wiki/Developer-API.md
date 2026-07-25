@@ -1,18 +1,18 @@
 # RedstoneReboot Developer API
 
 <div align="center">
-<img src="../../assets/logo.png" alt="RedstoneReboot" width="96" />
 
-Current integration surface for Bukkit-side plugins that want to read RedstoneReboot state or trigger restart actions.
+![RedstoneReboot Logo](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/logo.png)
+
 </div>
+
+Integration guide for Bukkit-side plugins that need to interact with RedstoneReboot state or trigger restart actions.
 
 ---
 
 ## Scope
 
-The currently documented integration path is the Bukkit plugin instance exposed at runtime.
-
-RedstoneReboot currently exposes useful managers and status objects through `RedstoneRebootPlugin`, but this repository does **not** currently ship the custom `RestartEvent` API that older draft docs referenced.
+The documented integration path accesses the `RedstoneRebootPlugin` instance exposed at runtime on Bukkit, Paper, and Folia servers.
 
 ---
 
@@ -53,7 +53,7 @@ public final class MyPlugin extends JavaPlugin {
 
 ## Restart Manager
 
-`RedstoneRebootPlugin#getRestartManager()` gives access to the shared restart controller.
+`RedstoneRebootPlugin#getRestartManager()` provides access to the shared restart controller.
 
 ### Schedule a Restart
 
@@ -100,7 +100,7 @@ Available reasons include:
 
 ## Server Health Monitor
 
-`RedstoneRebootPlugin#getServerLoadMonitor()` exposes the plugin-side health monitor when monitoring is enabled.
+`RedstoneRebootPlugin#getServerLoadMonitor()` exposes the health monitor when monitoring is enabled.
 
 ```java
 var monitor = reboot.getServerLoadMonitor();
@@ -116,7 +116,7 @@ if (monitor != null) {
 
 ## Alert Manager
 
-`RedstoneRebootPlugin#getAlertManager()` can be used to send the same player-facing alerts RedstoneReboot uses internally.
+`RedstoneRebootPlugin#getAlertManager()` can be used to send player-facing notifications.
 
 ```java
 import dev.demonz.redstonereboot.common.manager.RestartReason;
@@ -138,7 +138,7 @@ alerts.sendAlert(
 
 ## Permission Manager
 
-`RedstoneRebootPlugin#getPermissionManager()` exposes Bukkit/LuckPerms-aware permission helpers.
+`RedstoneRebootPlugin#getPermissionManager()` exposes permission check helpers.
 
 ```java
 var permissions = reboot.getPermissionManager();
@@ -170,9 +170,8 @@ int warningTime = config.getScheduledWarningTime();
 
 ---
 
-## Notes
+## Implementation Notes
 
-- The documented API above is Bukkit-side.
-- Plugin deployments use `plugins/RedstoneReboot/config.yml`.
-- Fabric, Forge, and NeoForge builds are standalone server modules and do not expose the same Bukkit integration surface.
-- If RedstoneReboot is not installed or not enabled, always null-check the plugin instance before using any managers.
+- The API is available on Bukkit, Paper, and Folia server runtimes.
+- Fabric, Forge, and NeoForge builds operate as standalone server mod modules.
+- Always null-check the plugin instance before accessing managers if RedstoneReboot is an optional soft dependency.

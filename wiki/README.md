@@ -11,7 +11,7 @@ This folder is the repository-backed wiki for RedstoneReboot. It lives at the re
 - [Permissions](Permissions.md)
 - [Placeholders](Placeholders.md)
 - [FAQ](FAQ.md)
-- [Developer API](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
+- [Developer API](Developer-API.md)
 
 ## Why This Folder Exists
 

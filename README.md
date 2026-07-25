@@ -118,7 +118,7 @@ RedstoneReboot separates the **"when to restart"** from the **"how to restart"**
 ## Documentation
 
 - [**Wiki**](https://github.com/DemonZ-Development/RedstoneReboot/wiki) — Installation, configuration, backends, and troubleshooting
-- [**Developer API**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md) — Bukkit API for plugin developers
+- [**Developer API**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/wiki/Developer-API.md) — Bukkit API for plugin developers
 - [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751) — Server usage statistics
 - [**Discord**](https://discord.gg/GYsTt96ypf) — Support and community
 - [**Instagram**](https://instagram.com/demonzdevelopment) — Updates and announcements

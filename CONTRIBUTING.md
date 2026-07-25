@@ -28,10 +28,8 @@ RedstoneReboot/
 |- fabric/      Fabric server module
 |- forge/       Forge server module
 |- neoforge/    NeoForge server module
-|- wiki/        Repository-backed user documentation
-|- docs/api/    Developer integration docs
-|- docs/release/ Marketing and release copy
-|- docs/marketplace/ Store listing copy
+|- wiki/        User & Developer API documentation
+|- marketplace/ Store listing copy
 `- assets/      Images and branding assets
 ```
 
@@ -55,8 +53,7 @@ RedstoneReboot/
 
 If your change affects users, operators, or integrators:
 
-- update the relevant page in `wiki/`
-- update `docs/api/` when the Bukkit integration surface changes
+- update the relevant page in `wiki/` (including `wiki/Developer-API.md` for API changes)
 - keep README links and command/config examples aligned with the code
 
 ## Pull Requests
