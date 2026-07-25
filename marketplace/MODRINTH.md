@@ -1,7 +1,3 @@
-# RedstoneReboot — Modrinth Project Description
-
-<!-- Modrinth Markdown description -->
-
 <div align="center">
 
 ![RedstoneReboot Banner](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
@@ -9,6 +5,8 @@
 # RedstoneReboot
 
 **A restart engine for Minecraft servers across every major platform**
+
+[![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 </div>
 
@@ -25,7 +23,6 @@ RedstoneReboot manages automated restarts, performance monitoring, and backend p
 - **Backend Handoff** — Delegates process restarts to Pterodactyl API, systemd, Docker, or custom scripts
 - **Hot Reload** — Apply backend configuration changes using `/reboot reload`
 - **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit/Folia)
-- **bStats Metrics** — Anonymous usage telemetry ([live stats](https://bstats.org/plugin/bukkit/RedstoneReboot/30751))
 
 ---
 
