@@ -44,6 +44,7 @@ tests/servers/
 out/
 *.class
 release-artifacts/
+dist/
 
 # Tool metadata
 .antigravityignore
