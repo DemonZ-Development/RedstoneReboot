@@ -87,6 +87,7 @@ jobs:
           cp fabric/build/libs/RedstoneReboot-Fabric-*.jar release-artifacts/
           cp forge/build/libs/RedstoneReboot-Forge-*.jar release-artifacts/
           cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar release-artifacts/
+          rm -f release-artifacts/*-thin.jar
 
       - name: Generate checksums
         run: |
