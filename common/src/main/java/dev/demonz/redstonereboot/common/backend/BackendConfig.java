@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.backend;
 
 import java.io.InputStream;
@@ -27,25 +10,15 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Handles loading and saving of the {@code restart-backends.properties} backend configuration file.
- * <p>
- * This file controls which restart backend is active, its connection parameters, and lockout
- * behavior. It is automatically generated with safe defaults on first run and can be reloaded
- * at runtime via {@code /reboot reload}.
- * </p>
- *
- * @see BackendRegistry
- * @since 1.0.0
- */
 public class BackendConfig {
+
+    public static final int CURRENT_BACKEND_CONFIG_VERSION = 2;
 
     private final Path configPath;
     private final Logger logger;
     private final Object propsLock = new Object();
     private final Properties properties = new Properties();
 
-    /** Environment variable prefixes that are allowed for ${env.VAR:-fallback} resolution. */
     private static final Set<String> ALLOWED_ENV_PREFIXES = Set.of(
         "REBOOT_", "PTERO_", "MINECRAFT_", "JAVA_"
     );
@@ -55,11 +28,6 @@ public class BackendConfig {
         this.logger = logger;
     }
 
-    /**
-     * Load (or reload) the backend configuration from the properties file.
-     *
-     * @return {@code true} if the configuration was loaded successfully, {@code false} on failure
-     */
     public boolean load() {
         try {
             synchronized (propsLock) {
@@ -69,6 +37,10 @@ public class BackendConfig {
                 }
                 try (InputStream in = Files.newInputStream(configPath)) {
                     properties.load(in);
+                }
+                int version = parseVersion(properties.getProperty("config-version", "1"));
+                if (version < CURRENT_BACKEND_CONFIG_VERSION) {
+                    migrate(version);
                 }
                 String pteroToken = properties.getProperty("ptero-token", "");
                 if (pteroToken != null && !pteroToken.isBlank() && !pteroToken.startsWith("${env.")) {
@@ -83,21 +55,91 @@ public class BackendConfig {
         }
     }
 
+    private int parseVersion(String raw) {
+        try {
+            return Integer.parseInt(raw.trim());
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    private void migrate(int oldVersion) throws Exception {
+        logger.info("Migrating restart-backends.properties from version " + oldVersion + " to " + CURRENT_BACKEND_CONFIG_VERSION + "...");
+
+        if (Files.exists(configPath)) {
+            Path backup = configPath.resolveSibling("restart-backends.properties.v" + oldVersion + ".backup");
+            try {
+                Files.copy(configPath, backup, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                logger.info("Created backend config backup: " + backup.getFileName());
+            } catch (Exception e) {
+                logger.warning("Failed to create backend config backup: " + e.getMessage());
+            }
+        }
+
+        if (oldVersion < 2) {
+
+            String active = properties.getProperty("active-backend", "DEPEND_ON_HOST");
+            if (active != null && active.trim().equalsIgnoreCase("SHUTDOWN_ONLY")) {
+                properties.setProperty("active-backend", "DEPEND_ON_HOST");
+                logger.info("Migrated active-backend SHUTDOWN_ONLY -> DEPEND_ON_HOST");
+            }
+
+            if (!properties.containsKey("backends-enabled")) {
+                properties.setProperty("backends-enabled", "false");
+            }
+            if (!properties.containsKey("lockout-duration-seconds")) {
+                properties.setProperty("lockout-duration-seconds", "300");
+            }
+            if (!properties.containsKey("ptero-url")) {
+                properties.setProperty("ptero-url", "");
+            }
+            if (!properties.containsKey("ptero-token")) {
+                properties.setProperty("ptero-token", "");
+            }
+            if (!properties.containsKey("ptero-id")) {
+                properties.setProperty("ptero-id", "");
+            }
+            if (!properties.containsKey("systemd-service")) {
+                properties.setProperty("systemd-service", "minecraft");
+            }
+            if (!properties.containsKey("localscript-file")) {
+                properties.setProperty("localscript-file", "");
+            }
+            properties.setProperty("config-version", String.valueOf(CURRENT_BACKEND_CONFIG_VERSION));
+            persistWithHeader();
+            logger.info("Successfully migrated restart-backends.properties to version " + CURRENT_BACKEND_CONFIG_VERSION + "!");
+        }
+    }
+
+    private void persistWithHeader() throws Exception {
+        try (OutputStream out = Files.newOutputStream(configPath)) {
+            out.write("# RedstoneReboot Backend Configuration\n".getBytes());
+            out.write(("# config-version: " + CURRENT_BACKEND_CONFIG_VERSION + " (do not edit manually)\n").getBytes());
+            out.write("# Set backends-enabled=true to enable automatic server restart backends.\n".getBytes());
+            out.write("# When disabled (default), the plugin will only stop the server without auto-restart.\n".getBytes());
+            out.write("#\n".getBytes());
+            out.write("# WARNING: Storing API tokens in plaintext is insecure. Use environment variable REBOOT_PTERO_TOKEN instead.\n".getBytes());
+            properties.store(out, null);
+        }
+    }
+
     private void saveDefaults() throws Exception {
         Files.createDirectories(configPath.getParent());
+        properties.setProperty("config-version", String.valueOf(CURRENT_BACKEND_CONFIG_VERSION));
         properties.setProperty("backends-enabled", "false");
         properties.setProperty("active-backend", "DEPEND_ON_HOST");
         properties.setProperty("lockout-duration-seconds", "300");
-        
+
         properties.setProperty("ptero-url", "");
         properties.setProperty("ptero-token", "");
         properties.setProperty("ptero-id", "");
-        
+
         properties.setProperty("systemd-service", "minecraft");
         properties.setProperty("localscript-file", "");
 
         try (OutputStream out = Files.newOutputStream(configPath)) {
             out.write("# RedstoneReboot Backend Configuration\n".getBytes());
+            out.write(("# config-version: " + CURRENT_BACKEND_CONFIG_VERSION + " (do not edit manually)\n").getBytes());
             out.write("# Set backends-enabled=true to enable automatic server restart backends.\n".getBytes());
             out.write("# When disabled (default), the plugin will only stop the server without auto-restart.\n".getBytes());
             out.write("#\n".getBytes());
@@ -114,16 +156,6 @@ public class BackendConfig {
         }
     }
 
-    /**
-     * Check whether backends are enabled in the configuration.
-     * <p>
-     * When disabled (the default), the plugin uses ShutdownOnlyBackend which simply
-     * stops the server without any automatic restart mechanism. Users who need automatic
-     * server restart must explicitly enable this option.
-     * </p>
-     *
-     * @return {@code true} if backends are enabled, {@code false} otherwise
-     */
     public boolean isBackendsEnabled() {
         synchronized (propsLock) {
             return Boolean.parseBoolean(properties.getProperty("backends-enabled", "false").trim());
@@ -172,15 +204,11 @@ public class BackendConfig {
             if (envVal != null && !envVal.isEmpty()) {
                 return envVal;
             }
-            return fallback != null ? fallback : val;
+            return fallback != null ? fallback : "";
         }
         return val != null ? val : "";
     }
 
-    /**
-     * Check whether an environment variable name is in the allowlist.
-     * Only variables starting with one of the approved prefixes are allowed.
-     */
     private boolean isEnvVarAllowed(String envVar) {
         if (envVar == null || envVar.isEmpty()) return false;
         for (String prefix : ALLOWED_ENV_PREFIXES) {

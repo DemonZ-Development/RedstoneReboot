@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.backend;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +14,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Practical tests for {@link BackendConfig} — configuration loading, default generation,
- * env-var resolution, security hardening, and edge cases.
- */
 class BackendConfigTest {
 
     @TempDir
@@ -47,7 +26,6 @@ class BackendConfigTest {
         logger = Logger.getLogger("BackendConfigTest");
     }
 
-
     @Test
     void defaultsDisableBackends() {
         BackendConfig config = new BackendConfig(tempDir, logger);
@@ -59,14 +37,12 @@ class BackendConfigTest {
             "Default backend should be DEPEND_ON_HOST");
     }
 
-
     @Test
     void defaultLockoutDurationIs300() {
         BackendConfig config = new BackendConfig(tempDir, logger);
         assertTrue(config.load());
         assertEquals(300, config.getLockoutDuration());
     }
-
 
     @Test
     void propertiesFileGeneratedOnFirstLoad() throws IOException {
@@ -84,7 +60,6 @@ class BackendConfigTest {
             "Generated config should have backends-enabled=false");
     }
 
-
     @Test
     void filePermissionsAreOwnerOnlyOnPosix() throws IOException {
         BackendConfig config = new BackendConfig(tempDir, logger);
@@ -101,7 +76,6 @@ class BackendConfigTest {
         }
     }
 
-
     @Test
     void customLockoutDurationIsRead() throws IOException {
         Path configPath = tempDir.resolve("restart-backends.properties");
@@ -113,7 +87,6 @@ class BackendConfigTest {
         assertTrue(config.load());
         assertEquals(600, config.getLockoutDuration());
     }
-
 
     @Test
     void invalidLockoutDurationDefaultsTo300() throws IOException {
@@ -128,7 +101,6 @@ class BackendConfigTest {
             "Invalid lockout duration should default to 300");
     }
 
-
     @Test
     void negativeLockoutDurationClampedToZero() throws IOException {
         Path configPath = tempDir.resolve("restart-backends.properties");
@@ -141,7 +113,6 @@ class BackendConfigTest {
         assertEquals(0, config.getLockoutDuration(),
             "Negative lockout duration should be clamped to 0");
     }
-
 
     @Test
     void pterodactylPropertiesAreRead() throws IOException {
@@ -161,7 +132,6 @@ class BackendConfigTest {
         assertEquals("abc-def", config.getProperty("ptero-id"));
     }
 
-
     @Test
     void envVarResolutionWithAllowedPrefix() throws IOException {
         Path configPath = tempDir.resolve("restart-backends.properties");
@@ -175,7 +145,6 @@ class BackendConfigTest {
         String resolved = config.getProperty("ptero-token");
         assertEquals("default_fallback", resolved);
     }
-
 
     @Test
     void envVarResolutionWithDisallowedPrefixUsesFallback() throws IOException {
@@ -191,14 +160,12 @@ class BackendConfigTest {
         assertEquals("fallback_value", resolved);
     }
 
-
     @Test
     void missingPropertyReturnsEmptyString() {
         BackendConfig config = new BackendConfig(tempDir, logger);
         assertTrue(config.load());
         assertEquals("", config.getProperty("nonexistent-key"));
     }
-
 
     @Test
     void reloadPicksUpNewValues() throws IOException {
@@ -217,7 +184,6 @@ class BackendConfigTest {
         assertEquals("PTERODACTYL", config.getActiveBackend());
     }
 
-
     @Test
     void plaintextTokenWarningDoesNotCrash() throws IOException {
         Path configPath = tempDir.resolve("restart-backends.properties");
@@ -229,7 +195,6 @@ class BackendConfigTest {
         assertTrue(config.load());
         assertEquals("plaintext_token_here", config.getProperty("ptero-token"));
     }
-
 
     @Test
     void activeBackendIsCaseInsensitive() throws IOException {

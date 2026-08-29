@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.manager;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
@@ -45,14 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Practical concurrency and thread-safety tests for {@link RestartManager}.
- * <p>
- * Validates that the restart manager handles concurrent restart requests,
- * race conditions in countdown execution, stale generation discarding,
- * and lockout state correctly under multi-threaded access.
- * </p>
- */
 class RestartManagerConcurrencyTest {
 
     @TempDir
@@ -72,7 +47,6 @@ class RestartManagerConcurrencyTest {
         backendRegistry = new BackendRegistry(logger, new BackendConfig(tempDir, logger), tempDir);
         backendRegistry.initialize();
     }
-
 
     @Test
     void concurrentScheduleRestartOnlyOneWins() throws Exception {
@@ -114,7 +88,6 @@ class RestartManagerConcurrencyTest {
         assertTrue(manager.isRestartInProgress());
     }
 
-
     @Test
     void countdownDecrementsEachTick() {
         TickableScheduler tickScheduler = new TickableScheduler();
@@ -134,7 +107,6 @@ class RestartManagerConcurrencyTest {
         tickScheduler.tickRepeating();
         assertEquals(2, manager.getSecondsUntilRestart());
     }
-
 
     @Test
     void cancelDuringCountdownResetsAllState() {
@@ -156,7 +128,6 @@ class RestartManagerConcurrencyTest {
         assertEquals(-1, manager.getSecondsUntilRestart());
     }
 
-
     @Test
     void soonerRestartReplacesLongerOne() {
         TickableScheduler tickScheduler = new TickableScheduler();
@@ -177,7 +148,6 @@ class RestartManagerConcurrencyTest {
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
     }
 
-
     @Test
     void longerRestartDoesNotReplaceShorterOne() {
         TickableScheduler tickScheduler = new TickableScheduler();
@@ -195,7 +165,6 @@ class RestartManagerConcurrencyTest {
         assertEquals(afterFirst, manager.getSecondsUntilRestart());
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
     }
-
 
     @Test
     void controllerRestartSetsPendingFlag() throws Exception {
@@ -229,7 +198,6 @@ class RestartManagerConcurrencyTest {
         assertFalse(result, "New restart should be blocked when controller restart is pending");
     }
 
-
     @Test
     void lockoutBlocksNewRestarts() throws Exception {
         UnknownResultBackend unknownBackend = new UnknownResultBackend(logger);
@@ -260,7 +228,6 @@ class RestartManagerConcurrencyTest {
         assertFalse(result, "Restart during lockout should be rejected");
     }
 
-
     @Test
     void generationCounterPreventsStaleAsyncResultHandling() throws Exception {
         DelayedBackend slowBackend = new DelayedBackend(logger, 500);
@@ -283,7 +250,7 @@ class RestartManagerConcurrencyTest {
 
         boolean completed = firstLatch.await(5, TimeUnit.SECONDS);
         assertTrue(completed, "First async execution should complete");
-        Thread.sleep(200); // Allow result handler to run
+        Thread.sleep(200);
 
         assertTrue(platform.shutdownCalled.get(),
             "First restart should have triggered shutdown (no generation mismatch)");
@@ -291,10 +258,8 @@ class RestartManagerConcurrencyTest {
         platform.shutdownCalled.set(false);
     }
 
-
     @Test
     void executeRestartGuardPreventsConcurrentExecution() throws Exception {
-
 
         DelayedBackend backend = new DelayedBackend(logger, 100);
         BackendRegistry customRegistry = new BackendRegistry(logger, new BackendConfig(tempDir, logger), tempDir) {
@@ -316,10 +281,9 @@ class RestartManagerConcurrencyTest {
 
         boolean completed = latch.await(5, TimeUnit.SECONDS);
         assertTrue(completed, "Execution should complete");
-        Thread.sleep(200); // Allow result handler to run
+        Thread.sleep(200);
 
     }
-
 
     @Test
     void cleanupCancelsActiveCountdown() {
@@ -344,7 +308,6 @@ class RestartManagerConcurrencyTest {
             "Cleanup should cancel any in-progress restart");
     }
 
-
     @Test
     void getRestartInfoReturnsConsistentSnapshot() {
         RestartManager manager = new RestartManager(
@@ -361,7 +324,6 @@ class RestartManagerConcurrencyTest {
         assertEquals("InfoTest", info.get("initiator"));
         assertEquals(60, info.get("secondsUntilRestart"));
     }
-
 
     private static class NoOpScheduler implements PlatformTaskScheduler {
         @Override
@@ -419,7 +381,6 @@ class RestartManagerConcurrencyTest {
         }
     }
 
-    /** An async scheduler that counts down a latch after runLaterAsync completes. */
     private static class LatchingAsyncScheduler implements PlatformTaskScheduler {
         private final ExecutorService pool = Executors.newCachedThreadPool();
         private final java.util.concurrent.CountDownLatch latch;
@@ -462,9 +423,6 @@ class RestartManagerConcurrencyTest {
         public boolean isFolia() { return false; }
     }
 
-    /** Full async scheduler that counts down after runLater completes.
-     *  Only runs tasks with delay=0 immediately; delayed tasks are skipped
-     *  to avoid interfering with safety timeouts. */
     private static class FullAsyncScheduler implements PlatformTaskScheduler {
         private final ExecutorService pool = Executors.newCachedThreadPool();
         private final java.util.concurrent.CountDownLatch latch;
@@ -525,7 +483,6 @@ class RestartManagerConcurrencyTest {
         }
     }
 
-    /** A backend that takes a configurable delay before returning ACCEPTED. */
     private static class DelayedBackend extends dev.demonz.redstonereboot.common.backend.BaseBackend {
         private final long delayMs;
 
@@ -547,7 +504,6 @@ class RestartManagerConcurrencyTest {
         public boolean isControllerOwned() { return false; }
     }
 
-    /** A backend that always returns UNKNOWN (simulates timeout). */
     private static class UnknownResultBackend extends dev.demonz.redstonereboot.common.backend.BaseBackend {
         UnknownResultBackend(Logger logger) { super(logger, "UnknownResult"); }
 
@@ -561,7 +517,6 @@ class RestartManagerConcurrencyTest {
         public boolean isControllerOwned() { return false; }
     }
 
-    /** A controller-owned backend that always returns ACCEPTED. */
     private static class ControllerTestBackend extends dev.demonz.redstonereboot.common.backend.ControllerBackend {
         ControllerTestBackend(Logger logger) { super(logger, "ControllerTest"); }
 

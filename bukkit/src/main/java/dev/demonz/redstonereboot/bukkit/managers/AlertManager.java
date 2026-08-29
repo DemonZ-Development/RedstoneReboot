@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.bukkit.managers;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
@@ -31,9 +14,6 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Manages all player-facing alerts using Kyori Adventure for cross-version support.
- */
 public class AlertManager {
 
     private final RedstoneRebootPlugin plugin;
@@ -47,9 +27,6 @@ public class AlertManager {
         this.permissionManager = plugin.getPermissionManager();
     }
 
-    /**
-     * Reset state that should be cleared on config reload.
-     */
     public void resetOnReload() {
         soundWarningLogged = false;
     }
@@ -97,6 +74,16 @@ public class AlertManager {
         }
 
         playConfiguredSound(recipients);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                String chatRaw = configManager.getChatAlertFormat().replace("{time}", timeString).replace("{reason}", reason.getDisplayName());
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.SCHEDULED_ALERT,
+                    seconds, reason, "System", chatRaw, configManager.getTitleMainText(), configManager.getTitleSubText().replace("{time}", timeString),
+                    System.currentTimeMillis(), plugin.getPlatformName(), plugin.getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     public void sendFinalRestartAlert(RestartReason reason) {
@@ -117,6 +104,16 @@ public class AlertManager {
             sendActionBar(recipients, message);
         }
         playConfiguredSound(recipients);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                String raw = configManager.getPrefix() + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName();
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.FINAL_ALERT,
+                    0, reason, "System", raw, null, null,
+                    System.currentTimeMillis(), plugin.getPlatformName(), plugin.getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     public void sendRestartCancelledAlert() {
@@ -136,6 +133,16 @@ public class AlertManager {
         if (configManager.isActionBarAlertsEnabled()) {
             sendActionBar(recipients, message);
         }
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                String raw = configManager.getPrefix() + " &aScheduled restart has been CANCELLED!";
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.CANCELLED,
+                    -1, null, "System", raw, null, null,
+                    System.currentTimeMillis(), plugin.getPlatformName(), plugin.getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     public void sendEmergencyAlert(String reason) {
@@ -163,6 +170,17 @@ public class AlertManager {
                 player.playSound(player.getLocation(), Sound.BLOCK_ANVIL_LAND, 1.0f, 0.5f);
             }
         }
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                String raw = configManager.getPrefix() + " &4&lEMERGENCY RESTART&r&c - " + reason;
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.EMERGENCY,
+                    -1, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS, "EmergencyMonitor", raw, "&4&lEmergency Restart", "&c" + reason,
+                    System.currentTimeMillis(), plugin.getPlatformName(), plugin.getMinecraftVersion()));
+                api.fireEmergency(reason, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS);
+            }
+        } catch (Exception ignored) {}
     }
 
     public void sendAlert(String message, String title, String subtitle) {
@@ -246,7 +264,7 @@ public class AlertManager {
             }
         } catch (IllegalArgumentException ignored) {
             if (!soundWarningLogged) {
-                plugin.getLogger().warning("Invalid sound name '" + configManager.getSoundName() 
+                plugin.getLogger().warning("Invalid sound name '" + configManager.getSoundName()
                     + "' configured in config.yml. Sound alerts will not play.");
                 soundWarningLogged = true;
             }

@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.platform;
 
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
@@ -40,11 +23,9 @@ import java.util.function.DoubleConsumer;
 import java.util.function.IntConsumer;
 import java.util.logging.Logger;
 
-/**
- * Shared bootstrap for loader-based platforms that do not yet have a native
- * scheduler and command bridge like the Bukkit implementation.
- */
 public abstract class AbstractBootstrapServerPlatform implements ServerPlatform {
+
+    public static final int CURRENT_MOD_CONFIG_VERSION = 2;
 
     private final Logger logger;
     private final String platformName;
@@ -106,6 +87,15 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             } catch (IllegalArgumentException exception) {
                 logger.warning("Malformed .properties file at " + configPath + ": " + exception.getMessage() + ". Using defaults.");
                 return config;
+            }
+
+            int fileVersion = parseConfigVersion(props.getProperty("config-version", "1"));
+            if (fileVersion < CURRENT_MOD_CONFIG_VERSION) {
+                try {
+                    migrateModConfig(props, fileVersion, configPath);
+                } catch (Exception migrateEx) {
+                    logger.warning("Failed to migrate mod config from v" + fileVersion + ": " + migrateEx.getMessage());
+                }
             }
 
             List<String> scheduledTimes = splitCsv(props.getProperty("scheduled-times", ""));
@@ -173,6 +163,15 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             String actionFormat = props.getProperty("actionbar-format");
             if (actionFormat != null) {
                 config.setActionBarFormat(actionFormat);
+            }
+            applyBoolean(props, "discord-enabled", config::setDiscordEnabled);
+            String discordUrl = props.getProperty("discord-webhook-url");
+            if (discordUrl != null) {
+                config.setDiscordWebhookUrl(discordUrl);
+            }
+            String discordUser = props.getProperty("discord-username");
+            if (discordUser != null && !discordUser.isBlank()) {
+                config.setDiscordUsername(discordUser);
             }
         } catch (IOException exception) {
             logger.warning("Failed to load config: " + exception.getMessage());
@@ -299,6 +298,16 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
                 .replace("{reason}", reason.getDisplayName());
             broadcastActionBar(LegacyTextUtil.translateAlternateColorCodes(actionFormat));
         }
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                String chatRaw = mutableConfig.getChatAlertFormat().replace("{time}", timeString).replace("{reason}", reason.getDisplayName());
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.SCHEDULED_ALERT,
+                    seconds, reason, "System", chatRaw, mutableConfig.getTitleMainText(), mutableConfig.getTitleSubText().replace("{time}", timeString),
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -307,9 +316,17 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             return;
         }
         String prefix = mutableConfig.getPrefix();
-        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
-            prefix + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName()
-        ));
+        String msg = prefix + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName();
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(msg));
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.FINAL_ALERT,
+                    0, reason, "System", msg, null, null,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -318,9 +335,17 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             return;
         }
         String prefix = mutableConfig.getPrefix();
-        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
-            prefix + " &aScheduled restart has been CANCELLED!"
-        ));
+        String msg = prefix + " &aScheduled restart has been CANCELLED!";
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(msg));
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.CANCELLED,
+                    -1, null, "System", msg, null, null,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -329,13 +354,22 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             return;
         }
         String prefix = mutableConfig.getPrefix();
-        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
-            prefix + " &4&lEMERGENCY RESTART&r&c - " + reason
-        ));
+        String chat = prefix + " &4&lEMERGENCY RESTART&r&c - " + reason;
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(chat));
         broadcastTitle(
             LegacyTextUtil.translateAlternateColorCodes("&4&lEmergency Restart"),
             LegacyTextUtil.translateAlternateColorCodes("&c" + reason)
         );
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.EMERGENCY,
+                    -1, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS, "EmergencyMonitor", chat, "&4&lEmergency Restart", "&c" + reason,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+                api.fireEmergency(reason, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS);
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -344,10 +378,19 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             return;
         }
         String prefix = mutableConfig.getPrefix();
-        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(
-            prefix + " &cScheduled restart postponed. &eThe server will remain online."
-        ));
+        String msg = prefix + " &cScheduled restart postponed. &eThe server will remain online.";
+        broadcastMessage(LegacyTextUtil.translateAlternateColorCodes(msg));
         logger.warning("RESTART POSTPONED - Admin Detail: " + adminDetail);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.POSTPONED,
+                    -1, null, "System", msg + " (" + adminDetail + ")", null, null,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+                api.fireFailed(adminDetail);
+            }
+        } catch (Exception ignored) {}
     }
 
     @Override
@@ -378,6 +421,7 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         }
 
         Properties props = new Properties();
+        props.setProperty("config-version", String.valueOf(CURRENT_MOD_CONFIG_VERSION));
         props.setProperty("scheduled-restarts-enabled", "false");
         props.setProperty("scheduled-times", "06:00,18:00");
         props.setProperty("scheduled-days", "ALL");
@@ -406,10 +450,81 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         props.setProperty("title-sub-text", "§ein §c{time}");
         props.setProperty("actionbar-alerts-enabled", "true");
         props.setProperty("actionbar-format", "§8[§cRedstone§8] §eRestart in: §c{time}");
+        props.setProperty("discord-enabled", "false");
+        props.setProperty("discord-webhook-url", "");
+        props.setProperty("discord-username", "RedstoneReboot");
 
         try (OutputStream out = Files.newOutputStream(configPath)) {
+            out.write(("# config-version: " + CURRENT_MOD_CONFIG_VERSION + " (do not edit manually)\n").getBytes());
             props.store(out, "RedstoneReboot Configuration");
         }
+    }
+
+    private static int parseConfigVersion(String raw) {
+        try {
+            return Integer.parseInt(raw.trim());
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    private void migrateModConfig(Properties props, int oldVersion, Path configPath) throws IOException {
+        logger.info("Migrating " + configPath.getFileName() + " from version " + oldVersion + " to " + CURRENT_MOD_CONFIG_VERSION + "...");
+        if (Files.exists(configPath)) {
+            Path backup = configPath.resolveSibling(configPath.getFileName().toString() + ".v" + oldVersion + ".backup");
+            try {
+                Files.copy(configPath, backup, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                logger.info("Created mod config backup: " + backup.getFileName());
+            } catch (Exception e) {
+                logger.warning("Failed to create mod config backup: " + e.getMessage());
+            }
+        }
+        if (oldVersion < 2) {
+
+            if (!props.containsKey("config-version")) {
+                props.setProperty("config-version", String.valueOf(CURRENT_MOD_CONFIG_VERSION));
+            } else {
+                props.setProperty("config-version", String.valueOf(CURRENT_MOD_CONFIG_VERSION));
+            }
+
+            props.putIfAbsent("scheduled-restarts-enabled", "false");
+            props.putIfAbsent("scheduled-times", "06:00,18:00");
+            props.putIfAbsent("scheduled-days", "ALL");
+            props.putIfAbsent("timezone", "UTC");
+            props.putIfAbsent("warning-time", "300");
+            props.putIfAbsent("warning-times", "300,60,30,10,5,4,3,2,1");
+            props.putIfAbsent("alerts-enabled", "true");
+            props.putIfAbsent("monitoring-enabled", "false");
+            props.putIfAbsent("tps-threshold", "18.0");
+            props.putIfAbsent("memory-threshold", "85.0");
+            props.putIfAbsent("check-interval", "30");
+            props.putIfAbsent("consecutive-checks", "3");
+            props.putIfAbsent("emergency-enabled", "false");
+            props.putIfAbsent("emergency-tps-threshold", "12.0");
+            props.putIfAbsent("emergency-memory-threshold", "95.0");
+            props.putIfAbsent("emergency-delay", "30");
+            props.putIfAbsent("shutdown-delay-ticks", "60");
+            props.putIfAbsent("use-op-as-admin", "true");
+            props.putIfAbsent("default-permission-level", "2");
+            props.putIfAbsent("public-permissions-enabled", "true");
+            props.putIfAbsent("plugin-prefix", "§8[§cRedstone§8] §aReboot");
+            props.putIfAbsent("chat-alerts-enabled", "true");
+            props.putIfAbsent("chat-alert-format", "§8[§cRedstone§8] §eServer will restart in §c{time}§e!");
+            props.putIfAbsent("title-alerts-enabled", "true");
+            props.putIfAbsent("title-main-text", "§c⚡ Server Restart");
+            props.putIfAbsent("title-sub-text", "§ein §c{time}");
+            props.putIfAbsent("actionbar-alerts-enabled", "true");
+            props.putIfAbsent("actionbar-format", "§8[§cRedstone§8] §eRestart in: §c{time}");
+            props.putIfAbsent("discord-enabled", "false");
+            props.putIfAbsent("discord-webhook-url", "");
+            props.putIfAbsent("discord-username", "RedstoneReboot");
+        }
+
+        try (OutputStream out = Files.newOutputStream(configPath)) {
+            out.write(("# config-version: " + CURRENT_MOD_CONFIG_VERSION + " (migrated from v" + oldVersion + ")\n").getBytes());
+            props.store(out, "RedstoneReboot Configuration (migrated)");
+        }
+        logger.info("Successfully migrated " + configPath.getFileName() + " to version " + CURRENT_MOD_CONFIG_VERSION + "!");
     }
 
     private void applyBoolean(Properties props, String key, Consumer<Boolean> setter) {
@@ -506,5 +621,8 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         target.setTitleSubText(source.getTitleSubText());
         target.setActionBarAlertsEnabled(source.isActionBarAlertsEnabled());
         target.setActionBarFormat(source.getActionBarFormat());
+        target.setDiscordEnabled(source.isDiscordEnabled());
+        target.setDiscordWebhookUrl(source.getDiscordWebhookUrl());
+        target.setDiscordUsername(source.getDiscordUsername());
     }
 }

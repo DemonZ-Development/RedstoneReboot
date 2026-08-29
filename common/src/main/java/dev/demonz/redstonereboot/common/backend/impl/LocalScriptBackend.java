@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.backend.impl;
 
 import dev.demonz.redstonereboot.common.backend.BackendResult;
@@ -30,9 +13,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-/**
- * Restart backend that relies on a local wrapper script.
- */
 public class LocalScriptBackend extends SupervisorBackend {
 
     private static final String RESTART_MARKER = ".redstonereboot_restart";
@@ -177,11 +157,6 @@ public class LocalScriptBackend extends SupervisorBackend {
         return buildFromSunJavaCommand(cmd);
     }
 
-    /**
-     * Check for an explicit override command from system property or environment variable.
-     *
-     * @return the escaped override command, or {@code null} if no override is set
-     */
     private String resolveOverrideCommand() {
         String override = System.getProperty("redstonereboot.localscript-command");
         if (override == null || override.isBlank()) {
@@ -193,12 +168,6 @@ public class LocalScriptBackend extends SupervisorBackend {
         return null;
     }
 
-    /**
-     * Build the startup command by inspecting {@code sun.java.command} and JVM input arguments.
-     *
-     * @param cmd the value of {@code sun.java.command}
-     * @return the full startup command string
-     */
     private String buildFromSunJavaCommand(String cmd) {
         List<String> safeArgs = new ArrayList<>();
         try {
@@ -225,7 +194,7 @@ public class LocalScriptBackend extends SupervisorBackend {
         boolean hasJar = parts.stream()
             .map(p -> p.replaceAll("^\"|\"$", "").toLowerCase(Locale.ROOT))
             .anyMatch(p -> p.endsWith(".jar"));
-        
+
         if (!hasJar) {
             String classPath = System.getProperty("java.class.path", "");
             if (!classPath.isEmpty()) {
@@ -255,11 +224,6 @@ public class LocalScriptBackend extends SupervisorBackend {
         return command.toString();
     }
 
-    /**
-     * Build a minimal fallback startup command when {@code sun.java.command} is unavailable.
-     *
-     * @return a fallback command string using {@code -jar server.jar nogui}
-     */
     private String buildFallbackCommand() {
         List<String> safeArgs = new ArrayList<>();
         try {
@@ -297,7 +261,7 @@ public class LocalScriptBackend extends SupervisorBackend {
             char c = cmd.charAt(i);
             if (c == '"') {
                 inQuote = !inQuote;
-                current.append(c); // Preserve the quote
+                current.append(c);
             } else if (c == ' ' && !inQuote) {
                 if (current.length() > 0) {
                     parts.add(current.toString());
@@ -313,20 +277,14 @@ public class LocalScriptBackend extends SupervisorBackend {
         return parts;
     }
 
-    /**
-     * Shell-escape a string for bash: single-quote wrapping with embedded single-quote escaping.
-     */
     private static String linuxEscape(String arg) {
         return "'" + arg.replace("'", "'\\''") + "'";
     }
 
-    /**
-     * Shell-escape a string for Windows cmd.exe: wrap in double quotes, escape inner quotes and special chars.
-     */
     private static String windowsEscape(String arg) {
         if (arg.isEmpty()) return "\"\"";
         boolean wrapped = arg.length() >= 2 && arg.startsWith("\"") && arg.endsWith("\"");
-        
+
         StringBuilder sb = new StringBuilder("\"");
         for (int i = 0; i < arg.length(); i++) {
             char c = arg.charAt(i);

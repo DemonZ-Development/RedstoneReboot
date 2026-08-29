@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.bukkit;
 
 import dev.demonz.redstonereboot.bukkit.managers.ConfigManager;
@@ -70,11 +53,11 @@ public class RedstoneRebootBukkitTest {
         String statusMessage = player.nextMessage();
         assertNotNull(statusMessage);
         assertTrue(statusMessage.contains("RedstoneReboot Status"));
-        
+
         String versionMessage = player.nextMessage();
         assertNotNull(versionMessage);
         assertTrue(versionMessage.contains("Version:"));
-        
+
         String platformMessage = player.nextMessage();
         assertNotNull(platformMessage);
         assertTrue(platformMessage.contains("Platform:"));
@@ -133,7 +116,7 @@ public class RedstoneRebootBukkitTest {
         assertTrue(rm.isRestartInProgress());
 
         admin.performCommand("reboot cancel");
-        
+
         assertFalse(rm.isRestartInProgress());
         assertEquals(-1, rm.getSecondsUntilRestart());
     }
@@ -144,10 +127,10 @@ public class RedstoneRebootBukkitTest {
         assertTrue(plugin.getCachedMemoryUsage() >= 0.0D);
 
         dev.demonz.redstonereboot.bukkit.integrations.PlaceholderAPIHook hook = new dev.demonz.redstonereboot.bukkit.integrations.PlaceholderAPIHook(plugin);
-        
+
         String tpsPlaceholder = hook.onRequest(null, "tps");
         assertNotNull(tpsPlaceholder);
-        
+
         String memoryPlaceholder = hook.onRequest(null, "memory");
         assertNotNull(memoryPlaceholder);
     }

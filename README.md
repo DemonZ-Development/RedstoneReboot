@@ -92,7 +92,7 @@ RedstoneReboot integrates with [PlaceholderAPI](https://www.spigotmc.org/resourc
 | `%redstonereboot_reason%` | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.5.0` |
+| `%redstonereboot_version%` | `1.6.0` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > **MOTD Compatible** — v1.3.3+ includes null-safety fixes for server-list MOTD plugins.

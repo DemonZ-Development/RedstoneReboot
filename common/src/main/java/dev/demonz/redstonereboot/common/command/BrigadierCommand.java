@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.command;
 
 import com.mojang.brigadier.CommandDispatcher;
@@ -24,9 +7,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
 
-/**
- * Shared Brigadier command registration for Fabric, Forge, and NeoForge.
- */
 public class BrigadierCommand {
 
     private final RedstoneRebootCore core;
@@ -113,6 +93,13 @@ public class BrigadierCommand {
                 return 1;
             }));
 
+        reboot.then(LiteralArgumentBuilder.<S>literal("dump")
+            .requires(src -> factory.create(src).hasPermission("redstonereboot.dump"))
+            .executes(ctx -> {
+                processor.processDump(factory.create(ctx.getSource()));
+                return 1;
+            }));
+
         reboot.then(LiteralArgumentBuilder.<S>literal("help")
             .executes(ctx -> {
                 processor.processHelp(factory.create(ctx.getSource()));
@@ -122,9 +109,6 @@ public class BrigadierCommand {
         dispatcher.register(reboot);
     }
 
-    /**
-     * Factory to wrap platform-specific command sources.
-     */
     public interface CommandSourceFactory<S> {
         CommandProcessor.CommandSender create(S source);
     }

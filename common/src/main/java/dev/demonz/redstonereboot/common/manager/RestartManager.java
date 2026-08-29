@@ -1,22 +1,7 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.manager;
 
+import dev.demonz.redstonereboot.common.api.MessageContext;
+import dev.demonz.redstonereboot.common.api.RedstoneRebootAPI;
 import dev.demonz.redstonereboot.common.backend.BackendRegistry;
 import dev.demonz.redstonereboot.common.backend.BackendResult;
 import dev.demonz.redstonereboot.common.backend.RestartBackend;
@@ -41,18 +26,6 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Central manager for scheduling, counting down, and executing server restarts.
- * <p>
- * Handles scheduled restarts, manual restarts, emergency restarts, backend execution
- * with lockout protection, and player-facing countdown alerts. Thread-safe for
- * concurrent access from monitoring threads and command handlers.
- * </p>
- *
- * @see RestartReason
- * @see dev.demonz.redstonereboot.common.backend.BackendRegistry
- * @since 1.0.0
- */
 public class RestartManager {
 
     private final Logger logger;
@@ -74,6 +47,7 @@ public class RestartManager {
     private final AtomicBoolean shutdownGuard = new AtomicBoolean(false);
     private final AtomicLong restartGeneration = new AtomicLong(0);
     private volatile long lockoutEndTime = 0;
+    private volatile ScheduledTaskHandle controllerSafetyTask;
 
     public RestartManager(Logger logger, ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, BackendRegistry backendRegistry, Path dataFolder) {
         this(logger, platform, scheduler, config, backendRegistry, () -> ZonedDateTime.now(config.getZoneId()), dataFolder);
@@ -112,9 +86,6 @@ public class RestartManager {
         this.history = new RestartHistory(dataFolder, nowSupplier);
     }
 
-    /**
-     * Initialize the restart manager and start the scheduling loop.
-     */
     public void initialize() {
         scheduleRestarts();
         logger.info("RestartManager initialized - Timezone: " + config.getTimezone());
@@ -171,18 +142,6 @@ public class RestartManager {
         }
     }
 
-    /**
-     * Schedule a restart with a countdown delay.
-     * <p>
-     * If a shorter restart is already in progress, this request is ignored.
-     * If the backend is in lockout, the request is rejected.
-     * </p>
-     *
-     * @param delay     countdown in seconds before the restart executes
-     * @param reason    the reason for the restart
-     * @param initiator identifier of who/what triggered the restart
-     * @return {@code true} if the restart was accepted and scheduled
-     */
     public synchronized boolean scheduleRestart(int delay, RestartReason reason, String initiator) {
         if (restartExecuting.get()) return false;
         int normalizedDelay = Math.max(0, Math.min(delay, 63072000));
@@ -212,6 +171,10 @@ public class RestartManager {
         currentRestartReason = reason;
         restartInitiator = initiator;
         history.record("SCHEDULED", reason.getDisplayName(), initiator);
+        try {
+            RedstoneRebootAPI api = RedstoneRebootAPI.getInstance();
+            if (api != null) api.fireScheduled(normalizedDelay, reason, initiator);
+        } catch (Exception ignored) {}
 
         if (normalizedDelay == 0) {
             executeRestart();
@@ -232,6 +195,10 @@ public class RestartManager {
         this.currentRestartReason = reason;
         this.restartInitiator = initiator;
         history.record("IMMEDIATE", reason.getDisplayName(), initiator);
+        try {
+            RedstoneRebootAPI api = RedstoneRebootAPI.getInstance();
+            if (api != null) api.fireScheduled(0, reason, initiator);
+        } catch (Exception ignored) {}
         executeRestart();
     }
 
@@ -332,16 +299,23 @@ public class RestartManager {
                 controllerRestartPending.set(true);
                 logger.info("Restart accepted by Controller (" + backend.getName() + "). Local process ownership relinquished.");
                 history.record("EXECUTED", reason.getDisplayName(), initiator);
+                try { RedstoneRebootAPI api = RedstoneRebootAPI.getInstance(); if (api != null) api.fireExecuting(reason, initiator); } catch (Exception ignored) {}
 
-                scheduler.runLater(() -> {
-                    if (controllerRestartPending.compareAndSet(true, false)) {
-                        logger.warning("[Reboot] Safety timeout: Panel handoff duration exceeded. Relinquishing process ownership...");
+                synchronized (this) {
+                    if (controllerSafetyTask != null) {
+                        controllerSafetyTask.cancel();
                     }
-                }, 6000L);
+                    controllerSafetyTask = scheduler.runLater(() -> {
+                        if (controllerRestartPending.compareAndSet(true, false)) {
+                            logger.warning("[Reboot] Safety timeout: Panel handoff duration exceeded. Relinquishing process ownership...");
+                        }
+                    }, 6000L);
+                }
             } else {
                 if (config.isAlertsEnabled()) {
                     platform.sendFinalRestartAlert(reason);
                 }
+                try { RedstoneRebootAPI api = RedstoneRebootAPI.getInstance(); if (api != null) api.fireExecuting(reason, initiator); } catch (Exception ignored) {}
                 platform.shutdownServer(reason.getDisplayName());
                 history.record("EXECUTED", reason.getDisplayName(), initiator);
             }
@@ -350,6 +324,7 @@ public class RestartManager {
             platform.sendPostponedAlert(detail);
             logger.severe("RESTART FAILED: " + detail);
             history.record("POSTPONED", reason.getDisplayName(), initiator);
+            try { RedstoneRebootAPI api = RedstoneRebootAPI.getInstance(); if (api != null) api.fireFailed(detail); } catch (Exception ignored) {}
         } else if (result == BackendResult.UNKNOWN) {
             int duration = backendRegistry.getConfig().getLockoutDuration();
             this.lockoutEndTime = System.currentTimeMillis() + (duration * 1000L);
@@ -358,6 +333,7 @@ public class RestartManager {
             platform.sendPostponedAlert(detail);
             logger.warning("RESTART STATE UNKNOWN: " + detail);
             history.record("LOCKOUT", reason.getDisplayName(), initiator);
+            try { RedstoneRebootAPI api = RedstoneRebootAPI.getInstance(); if (api != null) api.fireLockout(duration); } catch (Exception ignored) {}
         }
     }
 
@@ -373,7 +349,14 @@ public class RestartManager {
         String reason = currentRestartReason.getDisplayName();
         String initiator = restartInitiator;
         cancelCurrentCountdown(true);
+
+        if (controllerSafetyTask != null) {
+            controllerSafetyTask.cancel();
+            controllerSafetyTask = null;
+        }
+        controllerRestartPending.set(false);
         history.record("CANCELLED", reason, initiator);
+        try { RedstoneRebootAPI api = RedstoneRebootAPI.getInstance(); if (api != null) api.fireCancelled(reason, initiator); } catch (Exception ignored) {}
         return true;
     }
 
@@ -394,9 +377,6 @@ public class RestartManager {
         return currentRestartTask != null || restartExecuting.get();
     }
 
-    /**
-     * @return seconds until restart, or -1 if no countdown is active
-     */
     public synchronized int getSecondsUntilRestart() {
         return secondsUntilRestart.get();
     }
@@ -432,6 +412,11 @@ public class RestartManager {
             schedulerTask = null;
             logger.info("Cleanup: stopped scheduled restart checks.");
         }
+        if (controllerSafetyTask != null) {
+            controllerSafetyTask.cancel();
+            controllerSafetyTask = null;
+        }
+        controllerRestartPending.set(false);
     }
 
     public synchronized Map<String, Object> getRestartInfo() {

@@ -1,4 +1,4 @@
-# RedstoneReboot v1.5.0 Configuration
+# RedstoneReboot v1.6.0 Configuration
 # Advanced multi-platform server restart engine.
 # GitHub: https://github.com/DemonZ-Development/RedstoneReboot
 # Wiki: https://github.com/DemonZ-Development/RedstoneReboot/wiki
@@ -84,6 +84,14 @@ permissions:
 
 placeholders:
   enabled: true
+
+integrations:
+  discord:
+    enabled: false
+    webhook-url: "" # https://discord.com/api/webhooks/... - leave empty to disable
+    username: "RedstoneReboot"
+    # For custom bot instead of webhook, use Dev API:
+    # RedstoneRebootAPI.getInstance().registerMessageAdapter(context -> yourBot.send(context.toPlainText()))
 
 advanced:
   metrics-enabled: true

@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.bukkit.commands;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
@@ -33,9 +16,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Main command handler for /reboot.
- */
 public class RebootCommand implements CommandExecutor, TabCompleter {
 
     private final RedstoneRebootPlugin plugin;
@@ -66,6 +46,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             case "info" -> handleInfo(sender);
             case "doctor" -> handleDoctor(sender);
             case "history" -> handleHistory(sender);
+            case "dump" -> handleDump(sender);
             case "reload" -> handleReload(sender);
             case "help" -> {
                 sendHelp(sender);
@@ -82,7 +63,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
         if (args.length == 1) {
-            for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "doctor", "history", "reload", "help")) {
+            for (String candidate : Arrays.asList("now", "schedule", "cancel", "status", "info", "doctor", "history", "dump", "reload", "help")) {
                 if (candidate.startsWith(args[0].toLowerCase()) && hasTabPermission(sender, candidate)) {
                     completions.add(candidate);
                 }
@@ -102,6 +83,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
             case "reload" -> sender.hasPermission("redstonereboot.config.reload");
             case "doctor" -> sender.hasPermission("redstonereboot.doctor");
             case "history" -> sender.hasPermission("redstonereboot.status");
+            case "dump" -> sender.hasPermission("redstonereboot.dump");
             default -> true;
         };
     }
@@ -191,11 +173,11 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         }
 
         msg(sender, "=== Server Performance ===", NamedTextColor.GOLD);
-        
+
         double tps;
         double memoryUsage;
         boolean healthy;
-        
+
         if (plugin.getServerLoadMonitor() != null) {
             tps = plugin.getServerLoadMonitor().getLastTPS();
             memoryUsage = plugin.getServerLoadMonitor().getLastMemoryUsage();
@@ -203,7 +185,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         } else {
             tps = plugin.getTPS();
             memoryUsage = ServerLoadMonitor.getMemoryUsagePercent();
-            healthy = tps >= plugin.getConfigManager().getTpsThreshold() 
+            healthy = tps >= plugin.getConfigManager().getTpsThreshold()
                    && memoryUsage <= plugin.getConfigManager().getMemoryThreshold();
         }
 
@@ -261,6 +243,20 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleDump(CommandSender sender) {
+        if (sender instanceof Player player && !plugin.getPermissionManager().hasPermission(player, "redstonereboot.dump") && !plugin.getPermissionManager().hasAdminPermission(player)) {
+            msg(sender, "No permission.", NamedTextColor.RED);
+            return true;
+        }
+        if (!(sender instanceof Player) && !sender.hasPermission("redstonereboot.dump")) {
+            msg(sender, "No permission.", NamedTextColor.RED);
+            return true;
+        }
+
+        processor.processDump(new BukkitSender(sender));
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         msg(sender, "=== RedstoneReboot Commands ===", NamedTextColor.GOLD);
         msg(sender, "/reboot status - View restart status", NamedTextColor.GRAY);
@@ -270,6 +266,7 @@ public class RebootCommand implements CommandExecutor, TabCompleter {
         msg(sender, "/reboot cancel - Cancel restart", NamedTextColor.GRAY);
         msg(sender, "/reboot doctor - Backend diagnostics", NamedTextColor.GRAY);
         msg(sender, "/reboot history - Recent restart events", NamedTextColor.GRAY);
+        msg(sender, "/reboot dump - Create diagnostic dump", NamedTextColor.GRAY);
         msg(sender, "/reboot reload - Reload config", NamedTextColor.GRAY);
     }
 

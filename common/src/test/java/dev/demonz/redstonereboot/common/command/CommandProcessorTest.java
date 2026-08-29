@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.command;
 
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
@@ -37,10 +20,6 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Practical tests for {@link CommandProcessor} — command handling, permission logic,
- * and interaction with RestartManager.
- */
 class CommandProcessorTest {
 
     @TempDir
@@ -63,7 +42,6 @@ class CommandProcessorTest {
         core = new RedstoneRebootCore(platform, scheduler, config, tempDir);
         processor = new CommandProcessor(core);
     }
-
 
     @Test
     void isPublicPermissionReturnsTrueForStatus() {
@@ -95,13 +73,12 @@ class CommandProcessorTest {
         assertFalse(CommandProcessor.isPublicPermission("some.other.permission"));
     }
 
-
     @Test
     void processStatusSendsVersionInfo() {
         CapturingSender sender = new CapturingSender(true);
         processor.processStatus(sender);
         String allMessages = String.join(" ", sender.messages);
-        assertTrue(allMessages.contains("1.5.0"),
+        assertTrue(allMessages.contains(RedstoneRebootCore.VERSION),
             "Status should include version 1.5.0");
     }
 
@@ -113,7 +90,6 @@ class CommandProcessorTest {
         assertTrue(allMessages.contains("Normal operation"),
             "Should show normal operation when no restart in progress");
     }
-
 
     @Test
     void processCancelReportsNoRestartPending() {
@@ -134,7 +110,6 @@ class CommandProcessorTest {
         assertFalse(core.getRestartManager().isRestartInProgress());
     }
 
-
     @Test
     void processNowTriggersRestart() {
         CapturingSender sender = new CapturingSender(true);
@@ -143,7 +118,6 @@ class CommandProcessorTest {
             "Should confirm restart in 10s");
         assertTrue(core.getRestartManager().isRestartInProgress());
     }
-
 
     @Test
     void processHelpListsAllCommands() {
@@ -159,7 +133,6 @@ class CommandProcessorTest {
         assertTrue(allMessages.contains("help"));
     }
 
-
     @Test
     void processInfoShowsTPSAndMemory() {
         CapturingSender sender = new CapturingSender(true);
@@ -170,7 +143,6 @@ class CommandProcessorTest {
         assertTrue(allMessages.contains("Players"), "Info should show Players");
     }
 
-
     @Test
     void processReloadRefreshesConfig() {
         CapturingSender sender = new CapturingSender(true);
@@ -178,7 +150,6 @@ class CommandProcessorTest {
         assertTrue(sender.lastMessage.contains("re-initialized"),
             "Reload should confirm re-initialization");
     }
-
 
     private static class FakeScheduler implements PlatformTaskScheduler {
         private final List<Runnable> repeatingTasks = new ArrayList<>();

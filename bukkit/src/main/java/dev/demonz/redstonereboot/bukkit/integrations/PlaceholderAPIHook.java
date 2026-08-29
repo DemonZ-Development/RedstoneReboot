@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.bukkit.integrations;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
@@ -29,16 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
-/**
- * PlaceholderAPI expansion for RedstoneReboot.
- * <p>
- * Provides 8 placeholders for use in scoreboards, tab lists, MOTD plugins, and chat.
- * All placeholders are null-safe and will return sensible defaults during early
- * server initialization and server-list MOTD pings.
- * </p>
- *
- * @since 1.0.0
- */
 public class PlaceholderAPIHook extends PlaceholderExpansion {
 
     private static final DateTimeFormatter DATETIME_FORMAT =
@@ -142,9 +115,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
     }
 
-    /**
-     * Safely get the restart manager, returning null if the core hasn't initialized yet.
-     */
     private RestartManager safeGetRestartManager() {
         if (plugin == null) return null;
         try {
@@ -155,9 +125,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
     }
 
-    /**
-     * Safely get the configured timezone string, falling back to UTC.
-     */
     private String safeGetTimezone() {
         if (plugin == null) return "UTC";
         try {
@@ -169,9 +136,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
     }
 
-    /**
-     * Safely get the configured ZoneId, falling back to UTC.
-     */
     private java.time.ZoneId safeGetZoneId() {
         if (plugin == null) return java.time.ZoneId.of("UTC");
         try {

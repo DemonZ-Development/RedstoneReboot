@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.monitor;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
@@ -39,10 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Integration tests for {@link PlatformLoadMonitor} — TPS/memory monitoring,
- * consecutive check pattern, emergency triggers, and interaction with RestartManager.
- */
 class PlatformLoadMonitorIntegrationTest {
 
     @TempDir
@@ -67,10 +46,9 @@ class PlatformLoadMonitorIntegrationTest {
         return reg;
     }
 
-
     @Test
     void consecutiveLowTPSTriggersMonitoringRestart() {
-        platform.setTps(10.0); // Below default threshold of 18
+        platform.setTps(10.0);
         config.setMonitoringEnabled(true);
         config.setTpsThreshold(18.0);
         config.setConsecutiveChecks(3);
@@ -94,7 +72,6 @@ class PlatformLoadMonitorIntegrationTest {
             "After 3 consecutive low TPS checks, restart should be triggered");
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
     }
-
 
     @Test
     void tpsRecoveryResetsConsecutiveCounter() {
@@ -129,7 +106,6 @@ class PlatformLoadMonitorIntegrationTest {
             "After 3 consecutive low TPS checks (post-recovery), restart should trigger");
     }
 
-
     @Test
     void monitoringDisabledPreventsAutoRestart() {
         platform.setTps(5.0);
@@ -150,10 +126,9 @@ class PlatformLoadMonitorIntegrationTest {
             "Monitoring disabled should prevent auto-restart");
     }
 
-
     @Test
     void emergencyTPSUsesShorterDelay() {
-        platform.setTps(5.0); // Below emergency threshold of 12
+        platform.setTps(5.0);
         config.setMonitoringEnabled(false);
         config.setEmergencyRestartEnabled(true);
         config.setEmergencyTpsThreshold(12.0);
@@ -172,7 +147,6 @@ class PlatformLoadMonitorIntegrationTest {
         assertEquals(RestartReason.EMERGENCY_TPS, manager.getCurrentRestartReason());
         assertEquals(15, manager.getSecondsUntilRestart());
     }
-
 
     @Test
     void emergencyTPSDoesNotRetrigger() {
@@ -199,7 +173,6 @@ class PlatformLoadMonitorIntegrationTest {
             "Emergency should not re-trigger while already in progress");
     }
 
-
     @Test
     void emergencyMemoryTriggersRestart() {
         config.setEmergencyRestartEnabled(true);
@@ -209,13 +182,12 @@ class PlatformLoadMonitorIntegrationTest {
         assertEquals(10, config.getEmergencyDelay());
     }
 
-
     @Test
     void monitorTracksLastTPS() {
         platform.setTps(17.5);
         config.setMonitoringEnabled(true);
         config.setTpsThreshold(18.0);
-        config.setConsecutiveChecks(99); // High so it won't trigger
+        config.setConsecutiveChecks(99);
 
         RestartManager manager = new RestartManager(
             logger, platform, scheduler, config, backendRegistry());
@@ -228,7 +200,6 @@ class PlatformLoadMonitorIntegrationTest {
         assertEquals(17.5, monitor.getLastTPS(), 0.01,
             "Monitor should track the last TPS reading");
     }
-
 
     @Test
     void stopMonitoringCancelsTask() {
@@ -246,7 +217,6 @@ class PlatformLoadMonitorIntegrationTest {
         assertTrue(scheduler.cancelledTasks > 0,
             "Stop monitoring should cancel the task");
     }
-
 
     private static class ControllablePlatform implements ServerPlatform {
         private double tps = 20.0;

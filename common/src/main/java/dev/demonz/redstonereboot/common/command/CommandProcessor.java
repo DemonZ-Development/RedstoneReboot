@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.command;
 
 import dev.demonz.redstonereboot.common.RedstoneRebootCore;
@@ -29,16 +12,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Shared command processing logic for all platforms.
- * <p>
- * Implements the handler logic for each subcommand of {@code /reboot}.
- * Platform-specific command adapters (Bukkit {@code CommandExecutor}, Brigadier)
- * delegate to this processor after wrapping their command source into a {@link CommandSender}.
- * </p>
- *
- * @since 1.0.0
- */
 public class CommandProcessor {
 
     private static final DateTimeFormatter STATUS_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withLocale(Locale.ROOT);
@@ -48,13 +21,6 @@ public class CommandProcessor {
         this.core = core;
     }
 
-    /**
-     * Checks whether the given permission string is one of the public-facing
-     * permissions that should always be granted regardless of op level.
-     *
-     * @param permission the permission string to check
-     * @return {@code true} if the permission is a public permission
-     */
     public static boolean isPublicPermission(String permission) {
         return "redstonereboot.status".equals(permission)
             || "redstonereboot.use".equals(permission)
@@ -172,6 +138,7 @@ public class CommandProcessor {
         sender.sendMessage("\u00A77/reboot info \u00A78- \u00A7fServer performance");
         sender.sendMessage("\u00A77/reboot doctor \u00A78- \u00A7fSystem diagnostics");
         sender.sendMessage("\u00A77/reboot history \u00A78- \u00A7fRecent restart events");
+        sender.sendMessage("\u00A77/reboot dump \u00A78- \u00A7fCreate diagnostic dump");
         sender.sendMessage("\u00A77/reboot now [delay] \u00A78- \u00A7fRestart now");
         sender.sendMessage("\u00A77/reboot schedule <seconds> \u00A78- \u00A7fSchedule restart");
         sender.sendMessage("\u00A77/reboot cancel \u00A78- \u00A7fCancel restart");
@@ -189,6 +156,31 @@ public class CommandProcessor {
         }
         for (RestartHistory.Entry entry : entries) {
             sender.sendMessage("\u00A77" + entry.format());
+        }
+    }
+
+    public void processDump(CommandSender sender) {
+        try {
+            java.nio.file.Path dataFolder = core.getDataFolder();
+            java.nio.file.Path dumpFile = dev.demonz.redstonereboot.common.api.DumpGenerator.generate(core, dataFolder);
+            sender.sendMessage("\u00A7aDump created: \u00A7f" + dumpFile.getFileName());
+            sender.sendMessage("\u00A77Path: \u00A7f" + dumpFile.toAbsolutePath());
+
+            sender.sendMessage("\u00A77Share this file when asking for support. Tokens are masked.");
+
+            try {
+                dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+                if (api != null && !api.getMessageAdapters().isEmpty()) {
+                    String preview = "";
+                    try { preview = java.nio.file.Files.readString(dumpFile); if (preview.length() > 1500) preview = preview.substring(0, 1500) + "\n... (truncated)"; } catch (Exception ignored) {}
+                    api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                        dev.demonz.redstonereboot.common.api.MessageContext.Type.GENERIC_CHAT,
+                        -1, null, sender.getName(), "Dump created: " + dumpFile.getFileName() + "\n```" + preview + "```", null, null,
+                        System.currentTimeMillis(), core.getPlatform().getPlatformName(), core.getPlatform().getMinecraftVersion()));
+                }
+            } catch (Exception ignored) {}
+        } catch (Exception e) {
+            sender.sendMessage("\u00A7cDump failed: " + e.getMessage());
         }
     }
 
@@ -268,9 +260,12 @@ public class CommandProcessor {
 
                 if (!detected.isEmpty()) {
                     sender.sendMessage("\u00A77Detected Env: \u00A7f" + String.join(", ", detected));
-                    if (!detected.contains(backend.getName().toUpperCase())
-                        && !backend.getName().equals("LocalScript")
-                        && !backend.getName().equals("ShutdownOnly")) {
+                    String activeUpper = backend.getName().toUpperCase(java.util.Locale.ROOT);
+                    String normalizedActive = activeUpper.replace("_", "");
+                    boolean isShutdownHost = normalizedActive.equals("SHUTDOWNONLY") || normalizedActive.equals("DEPENDONHOST");
+                    boolean isLocalScript = normalizedActive.equals("LOCALSCRIPT");
+                    boolean isPterodactylOnDocker = normalizedActive.equals("PTERODACTYL") && detected.contains("DOCKER") && !detected.contains("PTERODACTYL");
+                    if (!detected.contains(activeUpper) && !isShutdownHost && !isLocalScript && !isPterodactylOnDocker) {
                         sender.sendMessage("\u00A7e[i] Mismatch Advice: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Ensure your external supervisor or active-backend handles reboots.");
                     }
                 } else {
@@ -280,9 +275,6 @@ public class CommandProcessor {
         }, 0);
     }
 
-    /**
-     * Platform-neutral command sender abstraction.
-     */
     public interface CommandSender {
         void sendMessage(String message);
         String getName();

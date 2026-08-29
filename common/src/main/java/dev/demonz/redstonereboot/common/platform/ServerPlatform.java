@@ -1,67 +1,16 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.platform;
 
 import dev.demonz.redstonereboot.common.manager.RestartReason;
 
-/**
- * Platform abstraction interface for RedstoneReboot.
- * <p>
- * Each server platform (Bukkit, Folia, Fabric, Forge, NeoForge)
- * implements this interface to provide platform-specific functionality
- * to the shared core engine.
- * </p>
- *
- * @author DemonZ Development
- * @since 1.0.0
- */
 public interface ServerPlatform {
 
-    /**
-     * Broadcast a message to all online players.
-     *
-     * @param message the message to broadcast (supports MiniMessage format)
-     */
     void broadcastMessage(String message);
 
-    /**
-     * Display a title and subtitle to all online players.
-     *
-     * @param title    the main title text
-     * @param subtitle the subtitle text
-     */
     void broadcastTitle(String title, String subtitle);
 
-    /**
-     * Broadcast an action bar message to all online players.
-     *
-     * @param message the action bar message
-     */
     default void broadcastActionBar(String message) {
     }
 
-    /**
-     * Send a unified alert (chat, title, action bar, etc.) based on platform configuration.
-     *
-     * @param message  the chat message
-     * @param title    the main title
-     * @param subtitle the subtitle
-     */
     default void sendAlert(String message, String title, String subtitle) {
         broadcastMessage(message);
         broadcastTitle(title, subtitle);
@@ -69,108 +18,110 @@ public interface ServerPlatform {
 
     default void sendRestartAlert(int seconds, RestartReason reason) {
         String time = formatDuration(seconds);
-        sendAlert(
-            "\u00A7c\u00A7lSERVER RESTART \u00A7e- Reason: \u00A7f" + reason.getDisplayName() + " \u00A7bin " + time,
-            "\u00A7c\u00A7lRestarting",
-            "\u00A7ein \u00A7f" + time
-        );
+        String chat = "\u00A7c\u00A7lSERVER RESTART \u00A7e- Reason: \u00A7f" + reason.getDisplayName() + " \u00A7bin " + time;
+        String title = "\u00A7c\u00A7lRestarting";
+        String subtitle = "\u00A7ein \u00A7f" + time;
+        sendAlert(chat, title, subtitle);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.SCHEDULED_ALERT,
+                    seconds, reason, "System", chat, title, subtitle,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     default void sendFinalRestartAlert(RestartReason reason) {
-        broadcastMessage("\u00A7c\u00A7lSERVER RESTARTING NOW! \u00A7eReason: \u00A7f" + reason.getDisplayName());
+        String msg = "\u00A7c\u00A7lSERVER RESTARTING NOW! \u00A7eReason: \u00A7f" + reason.getDisplayName();
+        broadcastMessage(msg);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.FINAL_ALERT,
+                    0, reason, "System", msg, null, null,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     default void sendRestartCancelledAlert() {
-        broadcastMessage("\u00A7a\u00A7lRESTART CANCELLED \u00A7e- The server will remain online.");
+        String msg = "\u00A7a\u00A7lRESTART CANCELLED \u00A7e- The server will remain online.";
+        broadcastMessage(msg);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.CANCELLED,
+                    -1, null, "System", msg, null, null,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+            }
+        } catch (Exception ignored) {}
     }
 
     default void sendEmergencyAlert(String reason) {
-        sendAlert(
-            "\u00A74\u00A7lEMERGENCY RESTART \u00A7c- " + reason,
-            "\u00A74\u00A7lEmergency Restart",
-            "\u00A7c" + reason
-        );
+        String chat = "\u00A74\u00A7lEMERGENCY RESTART \u00A7c- " + reason;
+        String title = "\u00A74\u00A7lEmergency Restart";
+        String subtitle = "\u00A7c" + reason;
+        sendAlert(chat, title, subtitle);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.EMERGENCY,
+                    -1, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS, "EmergencyMonitor", chat, title, subtitle,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+                api.fireEmergency(reason, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS);
+            }
+        } catch (Exception ignored) {}
     }
 
-    /**
-     * Notify all players and admins that a restart has been postponed due to a backend error.
-     *
-     * @param adminDetail the technical details for administrators (log/console only)
-     */
     default void sendPostponedAlert(String adminDetail) {
-        broadcastMessage("\u00A7c\u00A7lScheduled restart postponed. \u00A7eThe server will remain online.");
+        String msg = "\u00A7c\u00A7lScheduled restart postponed. \u00A7eThe server will remain online.";
+        broadcastMessage(msg);
         java.util.logging.Logger.getLogger("RedstoneReboot")
             .warning("RESTART POSTPONED - Admin Detail: " + adminDetail);
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null) {
+                api.dispatchMessage(new dev.demonz.redstonereboot.common.api.MessageContext(
+                    dev.demonz.redstonereboot.common.api.MessageContext.Type.POSTPONED,
+                    -1, null, "System", msg + " (" + adminDetail + ")", null, null,
+                    System.currentTimeMillis(), getPlatformName(), getMinecraftVersion()));
+                api.fireFailed(adminDetail);
+            }
+        } catch (Exception ignored) {}
     }
 
-    /**
-     * Reload platform-managed configuration and state if supported.
-     */
     default void reloadPlatformState() {
     }
 
-    /**
-     * Execute a command from the server console.
-     *
-     * @param command the command string (without leading /)
-     */
     void executeConsole(String command);
 
-    /**
-     * Get the current server TPS (ticks per second).
-     *
-     * @return the current TPS value (ideally 20.0)
-     */
     double getTPS();
 
-    /**
-     * Get the name of the platform (e.g., "Bukkit", "Fabric").
-     *
-     * @return platform identifier string
-     */
     default String getPlatformName() {
         return "Unknown";
     }
 
-    /**
-     * Get the Minecraft version the server is running.
-     *
-     * @return version string (e.g., "1.21.1")
-     */
     default String getMinecraftVersion() {
         return "Unknown";
     }
 
-    /**
-     * Get the number of online players.
-     *
-     * @return online player count
-     */
     default int getOnlinePlayerCount() {
         return 0;
     }
 
-    /**
-     * Get the default OP level for commands if no permission system is present.
-     *
-     * @return permission level (0-4)
-     */
     default int getDefaultPermissionLevel() {
         return 2;
     }
 
-    /**
-     * Shutdown the server gracefully.
-     */
     default void shutdownServer() {
         executeConsole("stop");
     }
 
-    /**
-     * Shutdown the server with a reason (default implementation ignores the reason).
-     *
-     * @param reason the reason for the shutdown (may be logged or displayed)
-     */
     default void shutdownServer(String reason) {
         shutdownServer();
     }

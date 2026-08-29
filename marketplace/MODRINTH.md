@@ -128,7 +128,7 @@ Choose the file that matches your server platform:
 | `%redstonereboot_reason%` | `Scheduled Restart` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.5.0` |
+| `%redstonereboot_version%` | `1.6.0` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > MOTD compatible as of v1.3.3+.

@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.6.0] — 2026-08-29
+
+### Added
+- **`/reboot dump`**: Creates `dump-YYYYMMdd-HHmmss.txt` in data folder with sanitized config, backend state, env detection, history, and adapters — `redstonereboot.dump` permission, works on Bukkit/Folia/Fabric/Forge/NeoForge.
+- **Dev API**: `RedstoneRebootAPI` singleton (`getInstance()`), `RestartListener` (scheduled/cancelled/executing/failed/lockout/emergency), `MessageAdapter`/`MessageContext` (`toPlainText()`), `DiscordWebhookAdapter` (embed POST without JDA), `DumpGenerator.generate()` — all in `common/api/` and platform-agnostic.
+- **Discord config**: `integrations.discord.enabled/webhook-url/username` in `config.yml` and `discord-enabled/webhook-url/username` in `redstonereboot.properties` auto-wire webhook via `RedstoneRebootCore.syncDiscordAdapter()`, persists across `/reboot reload`.
+- **Backend/mod config versioning**: `restart-backends.properties:config-version:2` and `redstonereboot.properties:config-version:2` with `v1.backup` migration (handles `SHUTDOWN_ONLY`→`DEPEND_ON_HOST`, missing keys).
+
+### Fixed
+- **Docker/Pterodactyl mismatch false positive**: `RedstoneRebootCore` and `CommandProcessor` doctor now suppress `PTERODACTYL` on `DOCKER` without `PTERODACTYL` env and handle `SHUTDOWNONLY`/`DEPENDONHOST` aliases.
+- **UpdateChecker**: platform-aware `findLatestForLoader()` (Paper gets `1.6.0-bukkit` not `neoforge`), base-version compare `1.6.0` vs `1.6.0-bukkit`, bumped loaders mapping, synchronized `start/stopPeriodicChecks`.
+- **RestartManager**: stored `controllerSafetyTask` cancelled on `cancelRestart`/`cleanup`, `PlatformLoadMonitor`/`ServerLoadMonitor` latch fix for `emergencyMemoryTriggered` never resetting when TPS triggered, `BackendConfig` env placeholder now returns `""` not raw `${env...}`.
+- **Permissions**: `redstonereboot.dump` added, `fabric/forge/neoforge` `hasPermission` now treats `.dump` as admin (level 4).
+
+### Changed
+- **Stripped comments** from 68 `*.java` files (kept `common/api/*` and `config.yml` docs) for cleaner codebase — build still `BUILD SUCCESSFUL`.
+- **Docs**: `wiki/Developer-API.md` rewritten for new API, `README`/`MODRINTH`/`Placeholders` version examples bumped to `1.6.0`.
+- **Version**: `build.gradle:1.6.0`, `RedstoneRebootCore.VERSION:1.6.0`, `config.yml:v1.6.0`.
+
 ## [1.5.0] — 2026-07-25 (Stable Release)
 
 ### Added

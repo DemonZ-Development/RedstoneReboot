@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.forge;
 
 import dev.demonz.redstonereboot.common.command.BrigadierCommand;
@@ -35,9 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.logging.Logger;
 
-/**
- * Forge dedicated-server bootstrap.
- */
 @Mod("redstonereboot")
 public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatform {
 
@@ -206,17 +186,17 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             if (CommandProcessor.isPublicPermission(permission) && coreRef != null && coreRef.getConfig().isPublicPermissionsEnabled()) {
                 return true;
             }
-            
-            boolean isAdmin = permission.startsWith("redstonereboot.restart.") || permission.contains(".reload") || permission.contains(".doctor");
-            
+
+            boolean isAdmin = permission.startsWith("redstonereboot.restart.") || permission.contains(".reload") || permission.contains(".doctor") || permission.contains(".dump");
+
             if (coreRef != null && coreRef.getConfig().isUseOpAsAdminEnabled() && source.hasPermission(4)) {
                 return true;
             }
-            
+
             if (isAdmin) {
                 return source.hasPermission(4);
             }
-            
+
             int level = coreRef != null ? coreRef.getConfig().getDefaultPermissionLevel() : 0;
             return level <= 0 || source.hasPermission(level);
         }
@@ -235,7 +215,7 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
         StringBuilder currentText = new StringBuilder();
         java.util.List<net.minecraft.ChatFormatting> formats = new java.util.ArrayList<>();
         net.minecraft.network.chat.TextColor activeColor = null;
-        
+
         for (int i = 0; i < text.length(); i++) {
             char c = text.charAt(i);
             if (c == '\u00A7' && i + 13 < text.length() && text.charAt(i + 1) == 'x') {

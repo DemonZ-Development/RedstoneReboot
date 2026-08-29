@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common;
 
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
@@ -40,10 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/**
- * Integration tests for {@link RedstoneRebootCore} — lifecycle, version,
- * emergency restart, and component wiring.
- */
 class RedstoneRebootCoreIntegrationTest {
 
     @TempDir
@@ -63,10 +42,9 @@ class RedstoneRebootCoreIntegrationTest {
         platform = new FakePlatform();
     }
 
-
     @Test
     void versionIs150() {
-        assertEquals("1.5.0", RedstoneRebootCore.VERSION);
+        assertEquals("1.6.0", RedstoneRebootCore.VERSION);
     }
 
     @Test
@@ -74,7 +52,6 @@ class RedstoneRebootCoreIntegrationTest {
         RedstoneRebootCore core = new RedstoneRebootCore(platform, scheduler, config, tempDir);
         assertEquals(RedstoneRebootCore.VERSION, core.getVersion());
     }
-
 
     @Test
     void onEnableInitializesComponents() {
@@ -89,7 +66,6 @@ class RedstoneRebootCoreIntegrationTest {
         assertNotNull(core.getUpdateChecker());
     }
 
-
     @Test
     void onDisableCleansUp() {
         RedstoneRebootCore core = new RedstoneRebootCore(platform, scheduler, config, tempDir);
@@ -97,7 +73,6 @@ class RedstoneRebootCoreIntegrationTest {
         core.onDisable();
 
     }
-
 
     @Test
     void reloadRuntimeStateRefreshesComponents() {
@@ -109,7 +84,6 @@ class RedstoneRebootCoreIntegrationTest {
         assertTrue(platform.reloadCalled.get(),
             "Reload should call platform.reloadPlatformState()");
     }
-
 
     @Test
     void emergencyRestartTriggersManager() {
@@ -126,7 +100,6 @@ class RedstoneRebootCoreIntegrationTest {
             core.getRestartManager().getCurrentRestartReason());
     }
 
-
     @Test
     void emergencyRestartWithZeroDelay() {
         config.setEmergencyDelay(0);
@@ -142,7 +115,6 @@ class RedstoneRebootCoreIntegrationTest {
 
     }
 
-
     @Test
     void backendsDisabledByDefault() {
         RedstoneRebootCore core = new RedstoneRebootCore(platform, scheduler, config, tempDir);
@@ -154,7 +126,6 @@ class RedstoneRebootCoreIntegrationTest {
         assertFalse(core.getBackendRegistry().getActiveBackend().isControllerOwned(),
             "Default backend should NOT be controller-owned");
     }
-
 
     private static class FakeScheduler implements PlatformTaskScheduler {
         private final List<Runnable> repeatingTasks = new ArrayList<>();

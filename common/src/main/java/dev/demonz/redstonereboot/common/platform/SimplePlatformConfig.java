@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.platform;
 
 import java.time.ZoneId;
@@ -23,10 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
-/**
- * A mutable implementation of {@link PlatformConfig} that allows mod platforms
- * to inject values parsed from their own configuration formats (JSON/TOML).
- */
 public class SimplePlatformConfig implements PlatformConfig {
 
     private static final Logger LOGGER = Logger.getLogger(SimplePlatformConfig.class.getName());
@@ -112,6 +91,9 @@ public class SimplePlatformConfig implements PlatformConfig {
     private volatile String titleSubText = "§ein §c{time}";
     private volatile boolean actionBarAlertsEnabled = true;
     private volatile String actionBarFormat = "§8[§cRedstone§8] §eRestart in: §c{time}";
+    private volatile boolean discordEnabled = false;
+    private volatile String discordWebhookUrl = "";
+    private volatile String discordUsername = "RedstoneReboot";
 
     @Override public String getPrefix() { return prefix; }
     @Override public boolean isChatAlertsEnabled() { return chatAlertsEnabled; }
@@ -121,6 +103,9 @@ public class SimplePlatformConfig implements PlatformConfig {
     @Override public String getTitleSubText() { return titleSubText; }
     @Override public boolean isActionBarAlertsEnabled() { return actionBarAlertsEnabled; }
     @Override public String getActionBarFormat() { return actionBarFormat; }
+    @Override public boolean isDiscordEnabled() { return discordEnabled; }
+    @Override public String getDiscordWebhookUrl() { return discordWebhookUrl; }
+    @Override public String getDiscordUsername() { return discordUsername; }
 
     public void setPrefix(String prefix) { this.prefix = prefix; }
     public void setChatAlertsEnabled(boolean enabled) { this.chatAlertsEnabled = enabled; }
@@ -130,4 +115,7 @@ public class SimplePlatformConfig implements PlatformConfig {
     public void setTitleSubText(String text) { this.titleSubText = text; }
     public void setActionBarAlertsEnabled(boolean enabled) { this.actionBarAlertsEnabled = enabled; }
     public void setActionBarFormat(String format) { this.actionBarFormat = format; }
+    public void setDiscordEnabled(boolean enabled) { this.discordEnabled = enabled; }
+    public void setDiscordWebhookUrl(String url) { this.discordWebhookUrl = url; }
+    public void setDiscordUsername(String username) { this.discordUsername = username; }
 }

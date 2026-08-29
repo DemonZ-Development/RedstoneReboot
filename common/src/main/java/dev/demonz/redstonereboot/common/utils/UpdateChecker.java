@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.utils;
 
 import java.io.InputStreamReader;
@@ -28,37 +11,37 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Utility class to check for updates via the Modrinth API.
- */
 public class UpdateChecker {
 
     private static final Pattern VERSION_PATTERN =
         Pattern.compile("\"version_number\"\\s*:\\s*\"([^\"]+)\"");
 
+    private static final Pattern LOADER_VERSION_PATTERN =
+        Pattern.compile("\"loaders\"\\s*:\\s*\\[(.*?)\\].*?\"version_number\"\\s*:\\s*\"([^\"]+)\"", Pattern.DOTALL);
+
     private final String projectId;
     private final String currentVersion;
     private final Logger logger;
+    private final String platformLoader;
     private volatile String latestVersion;
     private volatile boolean updateAvailable;
     private volatile dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle periodicCheckTask;
 
     public UpdateChecker(String projectId, String currentVersion, Logger logger) {
+        this(projectId, currentVersion, logger, null);
+    }
+
+    public UpdateChecker(String projectId, String currentVersion, Logger logger, String platformLoader) {
         this.projectId = projectId;
         this.currentVersion = currentVersion;
         this.logger = logger;
+        this.platformLoader = platformLoader != null ? platformLoader.toLowerCase(Locale.ROOT) : null;
     }
 
-    /**
-     * Fetches the latest version asynchronously.
-     */
     public CompletableFuture<Void> checkForUpdates() {
         return checkForUpdates(false);
     }
 
-    /**
-     * Fetches the latest version asynchronously with option to suppress "up-to-date" success logs.
-     */
     public CompletableFuture<Void> checkForUpdates(boolean silent) {
         return CompletableFuture.runAsync(() -> {
             HttpURLConnection conn = null;
@@ -77,13 +60,22 @@ public class UpdateChecker {
 
                 try (Scanner scanner = new Scanner(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
                     String response = scanner.useDelimiter("\\A").hasNext() ? scanner.next() : "";
-                    Matcher matcher = VERSION_PATTERN.matcher(response);
-                    if (!matcher.find()) {
-                        logger.warning("Update check: unexpected JSON format — version field not found.");
-                        return;
+                    String resolvedLatest = null;
+                    if (platformLoader != null && !platformLoader.isBlank()) {
+                        resolvedLatest = findLatestForLoader(response, platformLoader);
                     }
-                    latestVersion = matcher.group(1);
-                    updateAvailable = !currentVersion.equalsIgnoreCase(latestVersion);
+                    if (resolvedLatest == null) {
+                        Matcher matcher = VERSION_PATTERN.matcher(response);
+                        if (!matcher.find()) {
+                            logger.warning("Update check: unexpected JSON format — version field not found.");
+                            return;
+                        }
+                        resolvedLatest = matcher.group(1);
+                    }
+                    latestVersion = resolvedLatest;
+                    String baseCurrent = baseVersion(currentVersion);
+                    String baseLatest = baseVersion(latestVersion);
+                    updateAvailable = !baseCurrent.equalsIgnoreCase(baseLatest);
 
                     if (updateAvailable) {
                         logger.info("==========================================");
@@ -106,12 +98,12 @@ public class UpdateChecker {
         });
     }
 
-    public void startPeriodicChecks(dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler scheduler) {
+    public synchronized void startPeriodicChecks(dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler scheduler) {
         stopPeriodicChecks();
         periodicCheckTask = scheduler.runRepeating(() -> checkForUpdates(true), 432000L, 432000L);
     }
 
-    public void stopPeriodicChecks() {
+    public synchronized void stopPeriodicChecks() {
         if (periodicCheckTask != null) {
             periodicCheckTask.cancel();
             periodicCheckTask = null;
@@ -124,5 +116,47 @@ public class UpdateChecker {
 
     public String getLatestVersion() {
         return latestVersion;
+    }
+
+    private static String baseVersion(String version) {
+        if (version == null) return "";
+        int idx = version.indexOf('-');
+        return idx >= 0 ? version.substring(0, idx) : version;
+    }
+
+    private static String findLatestForLoader(String json, String desiredLoader) {
+        if (json == null || desiredLoader == null) return null;
+        String desired = desiredLoader.toLowerCase(Locale.ROOT);
+        Matcher matcher = LOADER_VERSION_PATTERN.matcher(json);
+        String firstVersion = null;
+        while (matcher.find()) {
+            String loadersRaw = matcher.group(1).toLowerCase(Locale.ROOT);
+            String version = matcher.group(2);
+            if (firstVersion == null) {
+                firstVersion = version;
+            }
+
+            if (loadersRaw.contains("\"" + desired + "\"")) {
+                return version;
+            }
+        }
+
+        if (isBukkitFamily(desired)) {
+            matcher.reset();
+            while (matcher.find()) {
+                String loadersRaw = matcher.group(1).toLowerCase(Locale.ROOT);
+                String version = matcher.group(2);
+                if (loadersRaw.contains("\"bukkit\"") || loadersRaw.contains("\"paper\"")
+                    || loadersRaw.contains("\"purpur\"") || loadersRaw.contains("\"spigot\"")) {
+                    return version;
+                }
+            }
+        }
+        return firstVersion;
+    }
+
+    private static boolean isBukkitFamily(String loader) {
+        return loader.equals("bukkit") || loader.equals("paper") || loader.equals("purpur")
+            || loader.equals("spigot") || loader.equals("craftbukkit");
     }
 }

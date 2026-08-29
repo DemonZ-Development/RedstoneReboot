@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.monitor;
 
 import dev.demonz.redstonereboot.common.manager.RestartManager;
@@ -27,17 +10,6 @@ import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-/**
- * Shared health monitor for non-Bukkit platforms (Fabric, Forge, NeoForge).
- * <p>
- * Periodically samples TPS and memory usage, compares against configured thresholds,
- * and triggers automatic or emergency restarts when conditions degrade. Uses the
- * consecutive-check pattern to avoid false positives from transient spikes.
- * </p>
- *
- * @see dev.demonz.redstonereboot.common.platform.PlatformConfig
- * @since 1.0.0
- */
 public final class PlatformLoadMonitor {
 
     private final Logger logger;
@@ -68,10 +40,6 @@ public final class PlatformLoadMonitor {
         this.restartManager = restartManager;
     }
 
-    /**
-     * Start the health monitoring loop. Cancels any existing monitor first.
-     * The check interval is read from the platform configuration.
-     */
     public synchronized void startMonitoring() {
         stopMonitoring();
         long intervalTicks = Math.max(config.getCheckInterval(), 1) * 20L;
@@ -79,9 +47,6 @@ public final class PlatformLoadMonitor {
         logger.info("Load monitoring active (interval: " + config.getCheckInterval() + "s)");
     }
 
-    /**
-     * Stop the health monitoring loop and release the scheduled task.
-     */
     public synchronized void stopMonitoring() {
         if (monitorTask != null) {
             monitorTask.cancel();
@@ -89,12 +54,10 @@ public final class PlatformLoadMonitor {
         }
     }
 
-    /** @return the most recently sampled TPS value */
     public double getLastTPS() {
         return lastTPS;
     }
 
-    /** @return the most recently sampled memory usage as a percentage (0–100) */
     public double getLastMemoryUsage() {
         return lastMemoryUsage;
     }
@@ -161,24 +124,26 @@ public final class PlatformLoadMonitor {
             return;
         }
 
-        boolean triggered = false;
+        boolean tpsTriggeredThisTick = false;
 
-        if (lastTPS < config.getEmergencyTpsThreshold()) {
+        if (lastTPS >= 0 && lastTPS < config.getEmergencyTpsThreshold()) {
             if (emergencyTpsTriggered.compareAndSet(false, true)) {
                 platform.sendEmergencyAlert("Critical TPS: " + String.format(Locale.ROOT, "%.1f", lastTPS));
                 triggerRestart(RestartReason.EMERGENCY_TPS, "EmergencyMonitor");
-                triggered = true;
+                tpsTriggeredThisTick = true;
+            } else {
+                tpsTriggeredThisTick = true;
             }
         } else {
             emergencyTpsTriggered.set(false);
         }
 
-        if (!triggered && lastMemoryUsage > config.getEmergencyMemoryThreshold()) {
-            if (emergencyMemoryTriggered.compareAndSet(false, true)) {
+        if (lastMemoryUsage > config.getEmergencyMemoryThreshold()) {
+            if (!tpsTriggeredThisTick && emergencyMemoryTriggered.compareAndSet(false, true)) {
                 platform.sendEmergencyAlert("Critical Memory: " + String.format(Locale.ROOT, "%.1f%%", lastMemoryUsage));
                 triggerRestart(RestartReason.EMERGENCY_MEMORY, "EmergencyMonitor");
             }
-        } else if (!triggered) {
+        } else {
             emergencyMemoryTriggered.set(false);
         }
     }

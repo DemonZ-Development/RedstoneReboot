@@ -1,22 +1,6 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common;
 
+import dev.demonz.redstonereboot.common.api.RedstoneRebootAPI;
 import dev.demonz.redstonereboot.common.backend.BackendConfig;
 import dev.demonz.redstonereboot.common.backend.BackendRegistry;
 import dev.demonz.redstonereboot.common.backend.EnvironmentDetector;
@@ -32,25 +16,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.logging.Logger;
 
-/**
- * Core engine for RedstoneReboot — the platform-agnostic restart orchestrator.
- * <p>
- * Initializes and manages the {@link BackendRegistry}, {@link RestartManager},
- * {@link UpdateChecker}, and environment detection. Each platform (Bukkit, Fabric,
- * Forge, NeoForge) creates a single instance and delegates lifecycle events to
- * {@link #onEnable()} and {@link #onDisable()}.
- * </p>
- *
- * @since 1.0.0
- */
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.5.0";
+    public static final String VERSION = "1.6.0";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
 
-    /** Instance getter for VERSION — useful for testability. */
     public String getVersion() { return VERSION; }
 
     private final ServerPlatform platform;
@@ -59,25 +31,47 @@ public class RedstoneRebootCore {
     private final UpdateChecker updateChecker;
     private final BackendRegistry backendRegistry;
     private final RestartManager restartManager;
+    private final Path dataFolder;
+    private volatile dev.demonz.redstonereboot.common.api.MessageAdapter discordAdapter;
 
     public RedstoneRebootCore(ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, Path dataFolder) {
         this.platform = platform;
         this.scheduler = scheduler;
         this.config = config;
-        this.updateChecker = new UpdateChecker("redstonereboot", VERSION, LOGGER);
-        
+        this.dataFolder = dataFolder;
+        this.updateChecker = new UpdateChecker("redstonereboot", VERSION, LOGGER, resolveModrinthLoader(platform.getPlatformName()));
+
         BackendConfig backendConfig = new BackendConfig(dataFolder, LOGGER);
         this.backendRegistry = new BackendRegistry(LOGGER, backendConfig, dataFolder);
         this.restartManager = new RestartManager(LOGGER, platform, scheduler, config, backendRegistry, dataFolder);
     }
 
-    /**
-     * Called when the platform enables the plugin or mod.
-     */
+    private static String resolveModrinthLoader(String platformName) {
+        if (platformName == null) return null;
+        String lower = platformName.toLowerCase(Locale.ROOT);
+        if (lower.contains("neoforge")) return "neoforge";
+        if (lower.contains("forge")) return "forge";
+        if (lower.contains("fabric")) return "fabric";
+        if (lower.contains("folia")) return "folia";
+        if (lower.contains("paper")) return "paper";
+        if (lower.contains("purpur")) return "purpur";
+        if (lower.contains("spigot")) return "spigot";
+        if (lower.contains("bukkit") || lower.contains("craftbukkit")) return "bukkit";
+
+        return null;
+    }
+
     public void onEnable() {
         printStartupBanner();
         LOGGER.info("Platform: " + platform.getPlatformName() + " (MC " + platform.getMinecraftVersion() + ")");
         LOGGER.info("TPS: " + String.format(Locale.ROOT, "%.1f", platform.getTPS()));
+
+        try {
+            RedstoneRebootAPI.setInstance(new RedstoneRebootAPI(this));
+            LOGGER.info("Developer API available: RedstoneRebootAPI.getInstance()");
+        } catch (Exception e) {
+            LOGGER.warning("Failed to initialize Developer API: " + e.getMessage());
+        }
 
         backendRegistry.initialize();
         restartManager.initialize();
@@ -86,54 +80,44 @@ public class RedstoneRebootCore {
         if (!detected.isEmpty()) {
             LOGGER.info("Detected Environment: " + String.join(", ", detected));
             String active = backendRegistry.getActiveBackend().getName().toUpperCase();
-            if (!detected.contains(active) && !active.equals("SHUTDOWNONLY") && !active.equals("LOCALSCRIPT")) {
+
+            String normalizedActive = active.replace("_", "");
+            boolean isShutdownHost = normalizedActive.equals("SHUTDOWNONLY") || normalizedActive.equals("DEPENDONHOST");
+            boolean isLocalScript = normalizedActive.equals("LOCALSCRIPT");
+            boolean isPterodactylOnDocker = normalizedActive.equals("PTERODACTYL") && detected.contains("DOCKER") && !detected.contains("PTERODACTYL");
+            if (!detected.contains(active) && !isShutdownHost && !isLocalScript && !isPterodactylOnDocker) {
                 LOGGER.warning("Mismatch detected: Running on " + String.join("/", detected) + " but backend is " + active);
+            } else if (isPterodactylOnDocker) {
+                LOGGER.info("Environment note: Pterodactyl backend active inside Docker container (expected).");
             }
         }
 
         LOGGER.info("Engine initialized successfully.");
+        syncDiscordAdapter();
         updateChecker.checkForUpdates();
         updateChecker.startPeriodicChecks(scheduler);
     }
 
-    /**
-     * Called when the platform disables the plugin or mod.
-     */
     public void onDisable() {
         LOGGER.info("RedstoneReboot engine shutting down...");
         restartManager.cleanup();
         updateChecker.stopPeriodicChecks();
+        clearDiscordAdapter();
+        try { RedstoneRebootAPI.clearInstance(); } catch (Exception ignored) {}
         LOGGER.info("Shutdown complete.");
     }
 
-    /**
-     * Reload all runtime state: platform config, backend registry, and restart schedules.
-     * <p>
-     * Called by {@code /reboot reload} — allows VPS admins to change backend configuration
-     * in {@code restart-backends.properties} without a full server restart.
-     * </p>
-     */
     public void reloadRuntimeState() {
         platform.reloadPlatformState();
         backendRegistry.initialize();
         restartManager.initialize();
+        syncDiscordAdapter();
     }
 
-    /**
-     * Trigger an emergency restart with a given reason.
-     *
-     * @param reason the human-readable reason for the emergency
-     */
     public void triggerEmergencyRestart(String reason) {
         triggerEmergencyRestart(reason, dev.demonz.redstonereboot.common.manager.RestartReason.EMERGENCY_TPS);
     }
 
-    /**
-     * Trigger an emergency restart with a given reason and restart cause.
-     *
-     * @param reason         the human-readable reason for the emergency
-     * @param restartReason  the categorized restart reason (e.g., EMERGENCY_TPS, EMERGENCY_MEMORY)
-     */
     public void triggerEmergencyRestart(String reason, dev.demonz.redstonereboot.common.manager.RestartReason restartReason) {
         LOGGER.severe("==========================================");
         LOGGER.severe("EMERGENCY RESTART TRIGGERED");
@@ -168,33 +152,64 @@ public class RedstoneRebootCore {
         }
     }
 
-    /** @return the platform abstraction for the current server environment */
     public ServerPlatform getPlatform() {
         return platform;
     }
 
-    /** @return the update checker that polls Modrinth for new versions */
     public UpdateChecker getUpdateChecker() {
         return updateChecker;
     }
 
-    /** @return the central restart manager handling scheduling, countdowns, and execution */
     public RestartManager getRestartManager() {
         return restartManager;
     }
 
-    /** @return the backend registry managing the active restart backend */
     public BackendRegistry getBackendRegistry() {
         return backendRegistry;
     }
 
-    /** @return the platform task scheduler used for tick-based scheduling */
     public PlatformTaskScheduler getScheduler() {
         return scheduler;
     }
 
-    /** @return the platform configuration providing scheduling, monitoring, and emergency settings */
     public PlatformConfig getConfig() {
         return config;
+    }
+
+    public Path getDataFolder() {
+        return dataFolder;
+    }
+
+    private void syncDiscordAdapter() {
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api == null) return;
+            if (discordAdapter != null) {
+                api.unregisterMessageAdapter(discordAdapter);
+                discordAdapter = null;
+            }
+            if (config.isDiscordEnabled()) {
+                String url = config.getDiscordWebhookUrl();
+                if (url != null && !url.isBlank() && url.startsWith("http")) {
+                    discordAdapter = new dev.demonz.redstonereboot.common.api.DiscordWebhookAdapter(LOGGER, url, config.getDiscordUsername());
+                    api.registerMessageAdapter(discordAdapter);
+                    LOGGER.info("Discord webhook integration enabled");
+                } else if (config.isDiscordEnabled()) {
+                    LOGGER.warning("Discord enabled but webhook-url is empty/invalid - integration skipped");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Failed to sync Discord adapter: " + e.getMessage());
+        }
+    }
+
+    private void clearDiscordAdapter() {
+        try {
+            dev.demonz.redstonereboot.common.api.RedstoneRebootAPI api = dev.demonz.redstonereboot.common.api.RedstoneRebootAPI.getInstance();
+            if (api != null && discordAdapter != null) {
+                api.unregisterMessageAdapter(discordAdapter);
+            }
+        } catch (Exception ignored) {}
+        discordAdapter = null;
     }
 }

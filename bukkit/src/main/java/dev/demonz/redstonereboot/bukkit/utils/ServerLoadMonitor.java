@@ -1,20 +1,3 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.bukkit.utils;
 
 import dev.demonz.redstonereboot.bukkit.RedstoneRebootPlugin;
@@ -22,9 +5,6 @@ import dev.demonz.redstonereboot.common.manager.RestartReason;
 import dev.demonz.redstonereboot.common.scheduler.ScheduledTaskHandle;
 import java.util.Locale;
 
-/**
- * Real-time TPS and memory monitoring with automatic restart triggers.
- */
 public class ServerLoadMonitor {
 
     private final RedstoneRebootPlugin plugin;
@@ -120,24 +100,26 @@ public class ServerLoadMonitor {
             return;
         }
 
-        boolean triggered = false;
+        boolean tpsTriggeredThisTick = false;
 
         if (lastTPS >= 0 && lastTPS < plugin.getConfigManager().getEmergencyTpsThreshold()) {
             if (emergencyTpsTriggered.compareAndSet(false, true)) {
                 plugin.sendEmergencyAlert("Critical TPS: " + String.format(Locale.ROOT, "%.1f", lastTPS));
                 triggerRestart(RestartReason.EMERGENCY_TPS, "EmergencyMonitor");
-                triggered = true;
+                tpsTriggeredThisTick = true;
+            } else {
+                tpsTriggeredThisTick = true;
             }
         } else {
             emergencyTpsTriggered.set(false);
         }
 
-        if (!triggered && lastMemoryUsage > plugin.getConfigManager().getEmergencyMemoryThreshold()) {
-            if (emergencyMemoryTriggered.compareAndSet(false, true)) {
+        if (lastMemoryUsage > plugin.getConfigManager().getEmergencyMemoryThreshold()) {
+            if (!tpsTriggeredThisTick && emergencyMemoryTriggered.compareAndSet(false, true)) {
                 plugin.sendEmergencyAlert("Critical Memory: " + String.format(Locale.ROOT, "%.1f%%", lastMemoryUsage));
                 triggerRestart(RestartReason.EMERGENCY_MEMORY, "EmergencyMonitor");
             }
-        } else if (!triggered) {
+        } else {
             emergencyMemoryTriggered.set(false);
         }
     }
@@ -168,12 +150,6 @@ public class ServerLoadMonitor {
             && lastMemoryUsage <= plugin.getConfigManager().getMemoryThreshold();
     }
 
-    /**
-     * Calculate the current JVM memory usage as a percentage.
-     * This is a shared utility to avoid duplicating the calculation across the codebase.
-     *
-     * @return memory usage percentage (0.0 – 100.0)
-     */
     public static double getMemoryUsagePercent() {
         Runtime runtime = Runtime.getRuntime();
         return (double) (runtime.totalMemory() - runtime.freeMemory()) / runtime.maxMemory() * 100.0D;
