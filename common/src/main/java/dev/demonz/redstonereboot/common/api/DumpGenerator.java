@@ -66,7 +66,6 @@ public final class DumpGenerator {
         sb.append("Memory: ").append(String.format(Locale.ROOT, "%.1f%%", memPct))
           .append(" (free ").append(rt.freeMemory()>>20).append("M / total ").append(rt.totalMemory()>>20).append("M / max ").append(rt.maxMemory()>>20).append("M)\n");
 
-        // Config
         sb.append("\n--- Platform Config ---\n");
         PlatformConfig cfg = core.getConfig();
         try {
@@ -86,7 +85,6 @@ public final class DumpGenerator {
             sb.append("config error: ").append(e.getMessage()).append("\n");
         }
 
-        // Backend
         sb.append("\n--- Backend ---\n");
         try {
             RestartBackend backend = core.getBackendRegistry().getActiveBackend();
@@ -112,7 +110,6 @@ public final class DumpGenerator {
             sb.append("backend error: ").append(e.getMessage()).append("\n");
         }
 
-        // RestartManager
         sb.append("\n--- RestartManager ---\n");
         try {
             RestartManager rm = core.getRestartManager();
@@ -128,7 +125,6 @@ public final class DumpGenerator {
             sb.append("restartManager error: ").append(e.getMessage()).append("\n");
         }
 
-        // History
         sb.append("\n--- Recent History (last 20) ---\n");
         try {
             RestartManager rm = core.getRestartManager();
@@ -139,7 +135,6 @@ public final class DumpGenerator {
             sb.append("history error: ").append(e.getMessage()).append("\n");
         }
 
-        // Files listing
         sb.append("\n--- Data Folder Files ---\n");
         try {
             if (Files.isDirectory(dataFolder)) {
@@ -151,7 +146,6 @@ public final class DumpGenerator {
             }
         } catch (Exception e) { sb.append("list error: ").append(e.getMessage()).append("\n"); }
 
-        // Update checker
         sb.append("\n--- UpdateChecker ---\n");
         try {
             var uc = core.getUpdateChecker();
@@ -160,7 +154,6 @@ public final class DumpGenerator {
             sb.append("currentVersion: ").append(core.getVersion()).append("\n");
         } catch (Exception e) { sb.append("updateChecker error: ").append(e.getMessage()).append("\n"); }
 
-        // Message adapters
         sb.append("\n--- Message Adapters ---\n");
         try {
             if (RedstoneRebootAPI.isAvailable()) {

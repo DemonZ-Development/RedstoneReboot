@@ -2,6 +2,10 @@ plugins {
     id 'net.neoforged.moddev' version '1.0.11'
 }
 
+repositories {
+    maven { url = 'https://maven.neoforged.net/releases/' }
+}
+
 neoForge {
     version = '21.1.1'
     

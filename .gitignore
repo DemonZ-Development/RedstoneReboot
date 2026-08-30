@@ -45,6 +45,7 @@ out/
 *.class
 release-artifacts/
 dist/
+.tools/
 
 # Tool metadata
 .antigravityignore

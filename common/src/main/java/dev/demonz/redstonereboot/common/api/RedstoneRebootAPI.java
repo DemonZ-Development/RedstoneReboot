@@ -22,6 +22,7 @@ import dev.demonz.redstonereboot.common.manager.RestartManager;
 import dev.demonz.redstonereboot.common.manager.RestartReason;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 
@@ -72,7 +73,6 @@ public final class RedstoneRebootAPI {
 
     public String getVersion() { return core != null ? core.getVersion() : RedstoneRebootCore.VERSION; }
 
-    // ---- Restart control ----
 
     public boolean scheduleRestart(int delaySeconds, RestartReason reason, String initiator) {
         RestartManager rm = getRestartManager();
@@ -96,7 +96,6 @@ public final class RedstoneRebootAPI {
         return rm != null && rm.isRestartInProgress();
     }
 
-    // ---- Listeners ----
 
     public void registerListener(RestartListener listener) {
         if (listener != null) listeners.addIfAbsent(listener);
@@ -110,7 +109,6 @@ public final class RedstoneRebootAPI {
         return List.copyOf(listeners);
     }
 
-    // ---- Message adapters (Discord etc.) ----
 
     public void registerMessageAdapter(MessageAdapter adapter) {
         if (adapter != null) adapters.addIfAbsent(adapter);
@@ -137,7 +135,6 @@ public final class RedstoneRebootAPI {
         return List.copyOf(adapters);
     }
 
-    // ---- Internal dispatch ----
 
     public void fireScheduled(int seconds, RestartReason reason, String initiator) {
         for (RestartListener l : listeners) {
@@ -176,12 +173,18 @@ public final class RedstoneRebootAPI {
     }
 
     public void dispatchMessage(MessageContext context) {
+        Objects.requireNonNull(context, "context must not be null");
         for (MessageAdapter a : adapters) {
             try {
-                // allow adapters to filter by type if needed
+                if (context.getType() == MessageContext.Type.POSTPONED && !a.handlesPostponed()) {
+                    continue;
+                }
+                if (context.getType() == MessageContext.Type.SCHEDULED_ALERT && !a.handlesAlerts()) {
+                    continue;
+                }
                 a.onMessage(context);
             } catch (Exception e) {
-                logger.warning("MessageAdapter " + a.getName() + " error: " + e.getMessage());
+                logger.log(java.util.logging.Level.WARNING, "MessageAdapter " + a.getName() + " failed", e);
             }
         }
     }

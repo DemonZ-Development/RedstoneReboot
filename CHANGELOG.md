@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.6.1] — 2026-08-30
+
+### Fixed
+- Scoped platform Maven repositories so Fabric dependencies no longer fall through to Forge infrastructure while ForgeGradle retains access to its own MCP tool artifacts.
+- Provisioned both Java 17 and Java 21 explicitly in CI and release jobs, removing reliance on an unreliable automatic toolchain download during Forge builds.
+- Serialized cross-loader Gradle execution to prevent Forge and NeoForge generated-workspace contention.
+- Applied `MessageAdapter` alert and postponed-message filters during API dispatch.
+- Kept API and Discord webhook delivery active on Bukkit-compatible servers even when no players are online.
+- Suppressed duplicate countdown chat messages in the Discord webhook adapter and retained exception stack traces in diagnostics.
+
+### Changed
+- Centralized the Discord webhook user agent on `RedstoneRebootCore.VERSION`.
+- Hardened releases with tag/version validation, exact platform artifact selection, and SHA-256 checksums.
+- Updated GitHub Actions dependencies and completed a source/configuration quality pass while preserving API documentation, license headers, and administrator guidance.
+
 ## [1.6.0] — 2026-08-29
 
 ### Added

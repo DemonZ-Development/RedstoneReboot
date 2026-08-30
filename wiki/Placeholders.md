@@ -23,7 +23,7 @@ RedstoneReboot registers the `%redstonereboot_%` expansion when PlaceholderAPI i
 | `%redstonereboot_reason%` | Reason for the current restart | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | Last recorded server TPS | `19.8` |
 | `%redstonereboot_memory%` | Current memory usage percentage | `62.4%` |
-| `%redstonereboot_version%` | Installed RedstoneReboot version | `1.6.0` |
+| `%redstonereboot_version%` | Installed RedstoneReboot version | `1.6.1` |
 | `%redstonereboot_timezone%` | Configured timezone | `Europe/London` |
 
 ## Usage Examples

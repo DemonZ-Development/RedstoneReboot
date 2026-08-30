@@ -8,7 +8,7 @@ on:
       tag:
         description: Release tag to publish
         required: true
-        default: v1.4.2
+        default: v1.6.1
       target:
         description: Branch or commit to release from
         required: true
@@ -47,23 +47,35 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # actions/checkout v4
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ steps.meta.outputs.checkout_ref }}
+          fetch-depth: 0
 
-      - name: Validate release inputs
-        if: github.event_name == 'workflow_dispatch'
+      - name: Validate release version
+        id: version
+        shell: bash
         run: |
-          if [[ ! "${{ inputs.tag }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
-            echo "::error::Tag must match semantic versioning pattern (e.g., v1.4.2)"
+          version=$(sed -n "s/^[[:space:]]*version = '\([^']*\)'.*/\1/p" build.gradle | head -n 1)
+          if [ -z "$version" ]; then
+            echo "::error::Could not read the project version"
             exit 1
           fi
+          if [ "${{ steps.meta.outputs.tag_name }}" != "v$version" ]; then
+            echo "::error::Tag ${{ steps.meta.outputs.tag_name }} does not match project version $version"
+            exit 1
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
 
-      # actions/setup-java v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: temurin
+
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: temurin
@@ -71,9 +83,8 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      # gradle/actions/setup-gradle v3
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build with Gradle
         run: ./gradlew build --no-daemon
@@ -81,66 +92,39 @@ jobs:
       - name: Collect release files
         shell: bash
         run: |
+          version="${{ steps.version.outputs.value }}"
           mkdir -p release-artifacts
-          cp bukkit/build/libs/RedstoneReboot-Bukkit-*.jar release-artifacts/
-          cp folia/build/libs/RedstoneReboot-Folia-*.jar release-artifacts/
-          cp fabric/build/libs/RedstoneReboot-Fabric-*.jar release-artifacts/
-          cp forge/build/libs/RedstoneReboot-Forge-*.jar release-artifacts/
-          cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar release-artifacts/
-          rm -f release-artifacts/*-thin.jar
-
-      - name: Generate checksums
-        run: |
+          cp "bukkit/build/libs/RedstoneReboot-Bukkit-$version.jar" release-artifacts/
+          cp "folia/build/libs/RedstoneReboot-Folia-$version.jar" release-artifacts/
+          cp "fabric/build/libs/RedstoneReboot-Fabric-$version.jar" release-artifacts/
+          cp "forge/build/libs/RedstoneReboot-Forge-$version.jar" release-artifacts/
+          cp "neoforge/build/libs/RedstoneReboot-NeoForge-$version.jar" release-artifacts/
           cd release-artifacts
           sha256sum *.jar > checksums-sha256.txt
-          sha1sum *.jar > checksums-sha1.txt
 
-      # actions/upload-artifact v4
       - name: Upload release bundle
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: RedstoneReboot-Release-${{ steps.meta.outputs.tag_name }}
           path: release-artifacts/*
           retention-days: 30
 
-      # softprops/action-gh-release v2
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.meta.outputs.tag_name }}
           target_commitish: ${{ steps.meta.outputs.target_commitish }}
           name: RedstoneReboot ${{ steps.meta.outputs.tag_name }}
-          body: |
-            ## RedstoneReboot ${{ steps.meta.outputs.tag_name }}
-
-            ### Files
-            | Platform | File |
-            |----------|------|
-            | Bukkit / Spigot / Paper / Purpur | `RedstoneReboot-Bukkit-*.jar` |
-            | Folia | `RedstoneReboot-Folia-*.jar` |
-            | Fabric | `RedstoneReboot-Fabric-*.jar` |
-            | Forge | `RedstoneReboot-Forge-*.jar` |
-            | NeoForge | `RedstoneReboot-NeoForge-*.jar` |
-
-            ### Requirements
-            - **Bukkit/Paper**: MC 1.9 to 1.21.x+, Java 8+ on legacy and Java 17+ on modern servers
-            - **Folia**: MC 1.20.1+, Java 17+
-            - **Fabric**: MC 1.20.1+, Java 17+, Fabric API required where applicable
-            - **Forge**: MC 1.20.4+, Java 17+
-            - **NeoForge**: MC 1.20.4+, Java 17+
-
-            ### Config Paths
-            - **Plugin builds**: `plugins/RedstoneReboot/config.yml`
-            - **Mod builds**: `config/redstonereboot.properties`
-
-            ### Links
-            - [Documentation](https://github.com/DemonZ-Development/RedstoneReboot/wiki)
-            - [Developer API](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/docs/api/README.md)
-            - [Issues](https://github.com/DemonZ-Development/RedstoneReboot/issues)
+          body_path: release-notes.md
           draft: false
           prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
           files: |
-            release-artifacts/*
-          generate_release_notes: true
+            release-artifacts/RedstoneReboot-Bukkit-${{ steps.version.outputs.value }}.jar
+            release-artifacts/RedstoneReboot-Folia-${{ steps.version.outputs.value }}.jar
+            release-artifacts/RedstoneReboot-Fabric-${{ steps.version.outputs.value }}.jar
+            release-artifacts/RedstoneReboot-Forge-${{ steps.version.outputs.value }}.jar
+            release-artifacts/RedstoneReboot-NeoForge-${{ steps.version.outputs.value }}.jar
+            release-artifacts/checksums-sha256.txt
+          generate_release_notes: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

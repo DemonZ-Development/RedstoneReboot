@@ -38,9 +38,6 @@ public class AlertManager {
 
         String timeString = formatTime(seconds);
         List<Player> recipients = getNotificationRecipients();
-        if (recipients.isEmpty()) {
-            return;
-        }
 
         if (configManager.isChatAlertsEnabled()) {
             Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
@@ -92,9 +89,6 @@ public class AlertManager {
         }
 
         List<Player> recipients = getNotificationRecipients();
-        if (recipients.isEmpty()) {
-            return;
-        }
 
         Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
             LegacyTextUtil.translateAlternateColorCodes(configManager.getPrefix() + " &cServer is restarting NOW! Reason: &e" + reason.getDisplayName())
@@ -122,9 +116,6 @@ public class AlertManager {
         }
 
         List<Player> recipients = getNotificationRecipients();
-        if (recipients.isEmpty()) {
-            return;
-        }
 
         Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
             LegacyTextUtil.translateAlternateColorCodes(configManager.getPrefix() + " &aScheduled restart has been CANCELLED!")
@@ -151,9 +142,6 @@ public class AlertManager {
         }
 
         List<Player> recipients = getNotificationRecipients();
-        if (recipients.isEmpty()) {
-            return;
-        }
 
         Component message = RedstoneRebootPlugin.LEGACY_SERIALIZER.deserialize(
             LegacyTextUtil.translateAlternateColorCodes(configManager.getPrefix() + " &4&lEMERGENCY RESTART&r&c - " + reason)

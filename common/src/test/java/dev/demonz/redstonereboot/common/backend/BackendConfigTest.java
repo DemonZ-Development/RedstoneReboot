@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.abort;
 
 class BackendConfigTest {
 
@@ -72,7 +73,7 @@ class BackendConfigTest {
                 java.nio.file.attribute.PosixFilePermissions.toString(perms),
                 "Config file should have owner-only permissions (rw-------)");
         } catch (UnsupportedOperationException e) {
-            System.out.println("Skipping POSIX permission test on non-POSIX filesystem");
+            abort("POSIX permissions are unavailable on this filesystem");
         }
     }
 

@@ -2,6 +2,10 @@ plugins {
     id 'fabric-loom' version '1.7.4'
 }
 
+repositories {
+    maven { url = 'https://maven.fabricmc.net/' }
+}
+
 loom {
     serverOnlyMinecraftJar()
 }

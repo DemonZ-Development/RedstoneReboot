@@ -17,6 +17,7 @@
 
 package dev.demonz.redstonereboot.common.api;
 
+import dev.demonz.redstonereboot.common.RedstoneRebootCore;
 import dev.demonz.redstonereboot.common.text.LegacyTextUtil;
 
 import java.net.URI;
@@ -52,9 +53,8 @@ public final class DiscordWebhookAdapter implements MessageAdapter {
     @Override
     public void onMessage(MessageContext context) {
         if (webhookUrl == null || webhookUrl.isBlank()) return;
-        // filter to only meaningful types to avoid spam
         if (context.getType() == MessageContext.Type.GENERIC_CHAT && context.getSecondsUntilRestart() > 0) {
-            // regular chat mirrors already covered by SCHEDULED_ALERT
+            return;
         }
         String content = LegacyTextUtil.stripLegacyFormatting(context.toPlainText());
         if (content.isBlank()) return;
@@ -95,7 +95,7 @@ public final class DiscordWebhookAdapter implements MessageAdapter {
             .uri(URI.create(webhookUrl))
             .timeout(Duration.ofSeconds(10))
             .header("Content-Type", "application/json")
-            .header("User-Agent", "RedstoneReboot-DiscordWebhook/1.6.0")
+            .header("User-Agent", "RedstoneReboot-DiscordWebhook/" + RedstoneRebootCore.VERSION)
             .POST(HttpRequest.BodyPublishers.ofString(json))
             .build();
 
@@ -106,7 +106,7 @@ public final class DiscordWebhookAdapter implements MessageAdapter {
                     logger.log(Level.WARNING, "Discord webhook failed: HTTP " + resp.statusCode() + " - " + resp.body());
                 }
             } catch (Exception e) {
-                logger.log(Level.WARNING, "Discord webhook error: " + e.getMessage());
+                logger.log(Level.WARNING, "Discord webhook request failed", e);
             }
         });
     }

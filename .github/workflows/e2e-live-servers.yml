@@ -21,10 +21,16 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: temurin
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: temurin
@@ -33,23 +39,23 @@ jobs:
         run: chmod +x gradlew
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v6
 
       - name: Build and Run Unit/Integration Tests
         run: ./gradlew build --no-daemon
 
       - name: Collect E2E JARs
         run: |
+          version=$(sed -n "s/^[[:space:]]*version = '\\([^']*\\)'.*/\\1/p" build.gradle | head -n 1)
           mkdir -p build-output
-          cp bukkit/build/libs/RedstoneReboot-Bukkit-*.jar build-output/
-          cp folia/build/libs/RedstoneReboot-Folia-*.jar build-output/
-          cp fabric/build/libs/RedstoneReboot-Fabric-*.jar build-output/
-          cp forge/build/libs/RedstoneReboot-Forge-*.jar build-output/
-          cp neoforge/build/libs/RedstoneReboot-NeoForge-*.jar build-output/
-          rm -f build-output/*-thin.jar
+          cp "bukkit/build/libs/RedstoneReboot-Bukkit-$version.jar" build-output/
+          cp "folia/build/libs/RedstoneReboot-Folia-$version.jar" build-output/
+          cp "fabric/build/libs/RedstoneReboot-Fabric-$version.jar" build-output/
+          cp "forge/build/libs/RedstoneReboot-Forge-$version.jar" build-output/
+          cp "neoforge/build/libs/RedstoneReboot-NeoForge-$version.jar" build-output/
 
       - name: Upload Build Artifacts for E2E Testing
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: E2E-Server-JARs
           path: build-output/*
@@ -61,16 +67,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: temurin
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: E2E-Server-JARs
           path: build-output
@@ -81,7 +87,6 @@ jobs:
           echo "eula=true" > paper-server/eula.txt
           cp build-output/RedstoneReboot-Bukkit-*.jar paper-server/plugins/
           
-          # Create test configuration
           cat << 'EOF' > paper-server/plugins/RedstoneReboot/config.yml
           enabled: true
           scheduled_restarts:
@@ -102,7 +107,6 @@ jobs:
       - name: Launch Live Paper Server & Verify Plugin Enable
         run: |
           cd paper-server
-          # Run paper server headlessly, pipe stop command after startup
           (sleep 30 && echo "reboot status" && sleep 5 && echo "reboot info" && sleep 5 && echo "stop") | java -Xms512M -Xmx1024M -jar paper.jar --nogui > server.log 2>&1 || true
           
           cat server.log
@@ -116,16 +120,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: temurin
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: E2E-Server-JARs
           path: build-output
@@ -156,16 +160,16 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: '21'
           distribution: temurin
 
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: E2E-Server-JARs
           path: build-output
