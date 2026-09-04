@@ -57,9 +57,9 @@ Choose the file that matches your server platform:
 ### Platform Compatibility
 - **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 1.21.x+
 - **Folia**: 1.20.1+
-- **Fabric**: 1.20.1+
-- **Forge**: 1.20.4+
-- **NeoForge**: 1.20.4+
+- **Fabric**: 1.20.1
+- **Forge**: 1.20.4 (Forge 49.x)
+- **NeoForge**: 1.21.1 (NeoForge 21.1.x)
 
 ---
 
@@ -79,9 +79,9 @@ Choose the file that matches your server platform:
 |----------|--------------------|-------|
 | Bukkit-family servers | `1.9` through `26.2+` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
 | Folia | `1.20+` through `26.2+` | Dedicated region-threaded build |
-| Fabric | `1.20.1+` through `26.2+` | Requires Fabric API |
-| Forge | `1.20.4+` through `26.2+` | Dedicated server-side mod build |
-| NeoForge | `1.21.1+` through `26.2+` | Dedicated server-side mod build |
+| Fabric | `1.20.1` | Requires Fabric API |
+| Forge | `1.20.4` | Forge 49.x server-side build |
+| NeoForge | `1.21.1` | NeoForge 21.1.x server-side build |
 
 ---
 
@@ -128,7 +128,7 @@ Choose the file that matches your server platform:
 | `%redstonereboot_reason%` | `Scheduled Restart` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.6.1` |
+| `%redstonereboot_version%` | `1.6.2` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > MOTD compatible as of v1.3.3+.

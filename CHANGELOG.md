@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.6.2] — 2026-09-04
+
+### Fixed
+- Read live TPS through each mod loader's mapped Minecraft API so Fabric, Forge, and NeoForge health monitoring no longer falls back permanently to 20 TPS.
+- Compare update versions numerically so an older loader-specific Modrinth build is not announced as an update.
+- Build Forge against the recommended 49.2.0 release with the correct Java 17 toolchain.
+- Package NeoForge with the required 1.21.1 metadata and complete development runtime classpath.
+- Restrict mod metadata and documentation to the Minecraft and loader generations actually built and tested.
+
+### Verified
+- Rebuilt Fabric, Forge, and NeoForge artifacts from a clean workspace.
+- Passed the complete shared unit and integration suite and loader-specific server smoke tests.
+
 ## [1.6.1] — 2026-08-30
 
 ### Fixed

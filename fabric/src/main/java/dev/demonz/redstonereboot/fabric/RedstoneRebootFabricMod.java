@@ -135,7 +135,16 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
 
     @Override
     public double getTPS() {
-        return dev.demonz.redstonereboot.common.utils.MinecraftTPSUtil.calculateTPS(server, getLogger());
+        MinecraftServer currentServer = server;
+        if (currentServer == null) {
+            return 20.0;
+        }
+
+        float tickTimeMillis = currentServer.getTickTime();
+        if (!Float.isFinite(tickTimeMillis) || tickTimeMillis <= 0.0F) {
+            return 20.0;
+        }
+        return Math.min(20.0, 1000.0 / tickTimeMillis);
     }
 
     @Override

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[49,)"
+loaderVersion="[49,50)"
 license="Apache-2.0"
 issueTrackerURL="https://github.com/DemonZ-Development/RedstoneReboot/issues"
 
@@ -16,13 +16,13 @@ Advanced multi-platform server restart engine.
 [[dependencies.redstonereboot]]
 modId="forge"
 mandatory=true
-versionRange="[49,)"
+versionRange="[49,50)"
 ordering="NONE"
 side="SERVER"
 
 [[dependencies.redstonereboot]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.20.4,)"
+versionRange="[1.20.4,1.20.5)"
 ordering="NONE"
 side="SERVER"

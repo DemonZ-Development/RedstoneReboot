@@ -15,14 +15,14 @@ Advanced multi-platform server restart engine.
 
 [[dependencies.redstonereboot]]
 modId="neoforge"
-mandatory=true
-versionRange="[21.1.1,)"
+type="required"
+versionRange="[21.1.1,21.2)"
 ordering="NONE"
 side="SERVER"
 
 [[dependencies.redstonereboot]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.21.1,)"
+type="required"
+versionRange="[1.21.1,1.21.2)"
 ordering="NONE"
 side="SERVER"

@@ -73,9 +73,7 @@ public class UpdateChecker {
                         resolvedLatest = matcher.group(1);
                     }
                     latestVersion = resolvedLatest;
-                    String baseCurrent = baseVersion(currentVersion);
-                    String baseLatest = baseVersion(latestVersion);
-                    updateAvailable = !baseCurrent.equalsIgnoreCase(baseLatest);
+                    updateAvailable = isNewerVersion(currentVersion, latestVersion);
 
                     if (updateAvailable) {
                         logger.info("==========================================");
@@ -122,6 +120,49 @@ public class UpdateChecker {
         if (version == null) return "";
         int idx = version.indexOf('-');
         return idx >= 0 ? version.substring(0, idx) : version;
+    }
+
+    static boolean isNewerVersion(String currentVersion, String candidateVersion) {
+        int[] current = parseVersion(baseVersion(currentVersion));
+        int[] candidate = parseVersion(baseVersion(candidateVersion));
+        if (current == null || candidate == null) {
+            return false;
+        }
+
+        int length = Math.max(current.length, candidate.length);
+        for (int index = 0; index < length; index++) {
+            int currentPart = index < current.length ? current[index] : 0;
+            int candidatePart = index < candidate.length ? candidate[index] : 0;
+            if (candidatePart != currentPart) {
+                return candidatePart > currentPart;
+            }
+        }
+        return false;
+    }
+
+    private static int[] parseVersion(String version) {
+        if (version == null || version.isBlank()) {
+            return null;
+        }
+
+        String normalized = version.trim();
+        if (normalized.startsWith("v") || normalized.startsWith("V")) {
+            normalized = normalized.substring(1);
+        }
+        if (!normalized.matches("\\d+(?:\\.\\d+)*")) {
+            return null;
+        }
+
+        String[] parts = normalized.split("\\.");
+        int[] parsed = new int[parts.length];
+        try {
+            for (int index = 0; index < parts.length; index++) {
+                parsed[index] = Integer.parseInt(parts[index]);
+            }
+            return parsed;
+        } catch (NumberFormatException exception) {
+            return null;
+        }
     }
 
     private static String findLatestForLoader(String json, String desiredLoader) {

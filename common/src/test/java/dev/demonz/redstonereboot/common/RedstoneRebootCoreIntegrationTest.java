@@ -43,8 +43,8 @@ class RedstoneRebootCoreIntegrationTest {
     }
 
     @Test
-    void versionIs150() {
-        assertEquals("1.6.1", RedstoneRebootCore.VERSION);
+    void versionIs162() {
+        assertEquals("1.6.2", RedstoneRebootCore.VERSION);
     }
 
     @Test

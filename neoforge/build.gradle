@@ -11,9 +11,11 @@ neoForge {
     
     runs {
         client {
+            client()
             systemProperty 'neoforge.enabledGameTestNamespaces', 'redstonereboot'
         }
         server {
+            server()
             systemProperty 'neoforge.enabledGameTestNamespaces', 'redstonereboot'
             programArgument '--nogui'
         }
@@ -22,6 +24,7 @@ neoForge {
     mods {
         redstonereboot {
             sourceSet sourceSets.main
+            sourceSet project(':common').sourceSets.main
         }
     }
 }
@@ -38,7 +41,7 @@ jar {
 }
 
 processResources {
-    filesMatching('META-INF/mods.toml') {
+    filesMatching('META-INF/neoforge.mods.toml') {
         expand(version: project.version)
     }
 }

@@ -1,16 +1,15 @@
-## RedstoneReboot 1.6.1
+## RedstoneReboot 1.6.2
 
-This maintenance release improves cross-platform build reliability and corrects message delivery through the public API and Discord webhook bridge.
+This patch makes the Fabric, Forge, and NeoForge packages safe to publish after full loader startup testing.
 
 ### Highlights
 
-- Isolates Fabric, Forge, NeoForge, Paper, and Spigot dependency repositories while keeping ForgeGradle's MCP tooling resolvable.
-- Uses explicit Java 17 and Java 21 toolchains in CI and releases.
-- Runs cross-loader Gradle tasks serially to avoid generated-workspace contention.
-- Honors `MessageAdapter` filters for scheduled and postponed notifications.
-- Delivers Bukkit-family webhook/API alerts even when no players are online.
-- Prevents duplicate countdown chat messages in Discord and improves failure diagnostics.
-- Publishes exactly one runtime JAR per platform plus SHA-256 checksums after validating the release tag against the project version.
+- Uses loader-mapped Minecraft APIs for accurate live TPS readings on every mod platform.
+- Prevents older loader-specific Modrinth builds from being reported as updates.
+- Builds Forge against the recommended 49.2.0 release with the correct Java 17 toolchain.
+- Corrects the NeoForge 1.21.1 mod descriptor and development runtime packaging.
+- Restricts each mod artifact to the Minecraft and loader generation it was built and tested against.
+- Retains the backend, scheduling, alert, Discord webhook, and developer API behavior from 1.6.1.
 
 ### Requirements
 

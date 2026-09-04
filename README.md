@@ -59,9 +59,9 @@ Works on single Paper instances, Folia networks, and Fabric, Forge, or NeoForge 
 |----------|------|--------------------|------|
 | Bukkit / Spigot / Paper / Purpur | Plugin | MC 1.9 to 26.2+ | 8+ (legacy), 17+ (modern), 25 (26.x+) |
 | Folia | Plugin | MC 1.20.1+ to 26.2+ | 17+, 25 (26.x+) |
-| Fabric | Mod | MC 1.20.1+ to 26.2+ | 17+ (Fabric API required) |
-| Forge | Mod | MC 1.20.4+ to 26.2+ | 17+ |
-| NeoForge | Mod | MC 1.21.1+ to 26.2+ | 21+ |
+| Fabric | Mod | MC 1.20.1 | 17+ (Fabric API required) |
+| Forge | Mod | MC 1.20.4 / Forge 49.x | 17+ |
+| NeoForge | Mod | MC 1.21.1 / NeoForge 21.1.x | 21+ |
 
 ---
 
@@ -92,7 +92,7 @@ RedstoneReboot integrates with [PlaceholderAPI](https://www.spigotmc.org/resourc
 | `%redstonereboot_reason%` | `Scheduled Restart` or `None` |
 | `%redstonereboot_tps%` | `19.8` |
 | `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.6.1` |
+| `%redstonereboot_version%` | `1.6.2` |
 | `%redstonereboot_timezone%` | `Europe/London` |
 
 > **MOTD Compatible** — v1.3.3+ includes null-safety fixes for server-list MOTD plugins.

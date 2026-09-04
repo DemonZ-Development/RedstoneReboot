@@ -123,10 +123,16 @@ public final class RedstoneRebootNeoForgeMod extends AbstractBootstrapServerPlat
 
     @Override
     public double getTPS() {
-        return dev.demonz.redstonereboot.common.utils.MinecraftTPSUtil.calculateTPS(
-            ServerLifecycleHooks.getCurrentServer(),
-            getLogger()
-        );
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server == null) {
+            return 20.0;
+        }
+
+        long tickTimeNanos = server.getAverageTickTimeNanos();
+        if (tickTimeNanos <= 0L) {
+            return 20.0;
+        }
+        return Math.min(20.0, 1_000_000_000.0 / tickTimeNanos);
     }
 
     @Override

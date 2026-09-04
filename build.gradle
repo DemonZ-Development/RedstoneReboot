@@ -6,7 +6,7 @@ allprojects {
     apply plugin: 'java'
     
     group = 'dev.demonz.redstonereboot'
-    version = '1.6.1'
+    version = '1.6.2'
 
     repositories {
         mavenCentral()
@@ -20,10 +20,11 @@ allprojects {
     }
 
     java {
-        toolchain.languageVersion = JavaLanguageVersion.of(21)
         def j21 = JavaVersion.VERSION_21
-        sourceCompatibility = project.name == 'neoforge' ? j21 : JavaVersion.VERSION_17
-        targetCompatibility = project.name == 'neoforge' ? j21 : JavaVersion.VERSION_17
+        def targetVersion = project.name == 'neoforge' ? j21 : JavaVersion.VERSION_17
+        toolchain.languageVersion = JavaLanguageVersion.of(project.name == 'neoforge' ? 21 : 17)
+        sourceCompatibility = targetVersion
+        targetCompatibility = targetVersion
     }
 
 
