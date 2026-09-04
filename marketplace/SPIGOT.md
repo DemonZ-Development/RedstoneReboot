@@ -1,7 +1,5 @@
 # RedstoneReboot — SpigotMC Resource Copy
 
-<!-- BBCode-oriented resource description for SpigotMC -->
-
 [CENTER]
 [IMG]https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png[/IMG]
 

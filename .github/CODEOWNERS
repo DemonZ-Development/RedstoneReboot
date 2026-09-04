@@ -1,11 +1,8 @@
-# CI/CD changes require review
 .github/workflows/    @DemonZ-Development/developers
 
-# Build configuration changes require review
 build.gradle          @DemonZ-Development/developers
 gradle/               @DemonZ-Development/developers
 settings.gradle       @DemonZ-Development/developers
 gradle.properties     @DemonZ-Development/developers
 
-# Security-related files
 SECURITY.md           @DemonZ-Development/developers

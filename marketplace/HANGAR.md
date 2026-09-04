@@ -1,7 +1,5 @@
 # RedstoneReboot — Hangar Project Description
 
-<!-- Paper/Folia-focused marketplace copy -->
-
 <div align="center">
 
 ![RedstoneReboot](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)

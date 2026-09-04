@@ -1,11 +1,8 @@
-# Build outputs
 build/
 */build/
 
-# Gradle
 .gradle/
 
-# IDE
 .idea/
 *.iml
 *.ipr
@@ -16,11 +13,9 @@ build/
 .classpath
 *.swp
 
-# OS
 .DS_Store
 Thumbs.db
 
-# Runtime
 run/
 logs/
 crash-reports/
@@ -28,24 +23,19 @@ crash-reports/
 *.lck
 *.tmp
 
-# Eclipse/Other bins
 bin/
 
-# Local test harnesses
 test-servers/
 test_servers/
 tests/runtime/
 tests/servers/
 
-# Secrets
 *.env
 
-# Additional build outputs
 out/
 *.class
 release-artifacts/
 dist/
 .tools/
 
-# Tool metadata
 .antigravityignore

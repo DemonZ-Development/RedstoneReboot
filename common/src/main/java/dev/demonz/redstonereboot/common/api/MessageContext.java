@@ -1,25 +1,7 @@
-/*
- * Copyright (c) 2026 DemonZ Development
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-
 package dev.demonz.redstonereboot.common.api;
 
 import dev.demonz.redstonereboot.common.manager.RestartReason;
 
-/** One alert from RedstoneReboot — passed to your MessageAdapter. Use toPlainText() for Discord. */
 public final class MessageContext {
 
     public enum Type {
@@ -70,9 +52,6 @@ public final class MessageContext {
     public String getPlatformName() { return platformName; }
     public String getMinecraftVersion() { return minecraftVersion; }
 
-    /**
-     * Plain-text representation suitable for Discord/external services.
-     */
     public String toPlainText() {
         if (chatMessage != null && !chatMessage.isBlank()) {
             return chatMessage;

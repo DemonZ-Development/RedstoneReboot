@@ -1,7 +1,5 @@
 # RedstoneReboot — Bukkit/Plugin Directory Copy
 
-<!-- Bukkit-oriented marketplace copy -->
-
 <div align="center">
 
 ![RedstoneReboot](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
