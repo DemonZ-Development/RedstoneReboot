@@ -1,22 +1,20 @@
-# RedstoneReboot — Hangar Project Description
-
 <div align="center">
 
 ![RedstoneReboot](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
 
 # RedstoneReboot
 
-**A restart engine for Bukkit-family Minecraft servers**
+**Planned and health-based restarts for Bukkit-family and Folia servers**
 
 </div>
 
 ---
 
-## Why RedstoneReboot?
+## What it does
 
-RedstoneReboot is a restart management plugin for modern Bukkit-based servers, with dedicated support for both standard Paper-style schedulers and **Folia's region-threaded model**.
+RedstoneReboot schedules routine restarts, warns players before shutdown, saves worlds, and hands the final restart to your hosting environment. It can also watch TPS and memory, then schedule an emergency restart only after the server stays below your configured limits for several checks.
 
-It gives server administrators control over restart scheduling, health-based automation, and backend handoff — from a single survival server to a multi-node network behind Pterodactyl.
+The standard build supports Bukkit-family servers. Folia has a separate build that uses its region-threaded scheduler.
 
 ---
 
@@ -40,16 +38,13 @@ This Hangar page serves the plugin builds for Paper and its forks:
 - **Health Checks & Emergency Restarts**: Real-time TPS and memory tracking with consecutive checks to prevent false triggers
 - **Graceful Shutdown**: World save delay before server stop
 
-### Backend Handoff System
-- **DEPEND_ON_HOST** — graceful shutdown for external restarters
-- **LOCALSCRIPT** — auto-generated wrapper script restart loop
-- **SYSTEMD** / **DOCKER** / **PTERODACTYL** — native environment integration
-- Hot-reload: edit `restart-backends.properties` and `/reboot reload`
-- **Do I need a custom backend?** If your server runs inside a loop script, Docker container with `restart: always`, or systemd service, **DEPEND_ON_HOST works out of the box.** The engine stops the server cleanly and your host supervisor starts it again.
-- **Why configure a custom backend then?**
-  1. *Clean handoff (Pterodactyl / panels)*: Avoid panel desyncs or false offline indicators by requesting a clean power cycle through the panel's API.
-  2. *Self-healing bootups*: The LOCALSCRIPT backend spawns a new process to bring the server back up if you don't run a loop script.
-  3. *Crash lockout safety*: Custom backends add safety lockout timers to stop endless boot hammering if files get corrupted.
+### Restart backends
+
+- **DEPEND_ON_HOST** stops Minecraft cleanly and lets your panel, service, container policy, or loop script start it again
+- **LOCALSCRIPT** uses a generated wrapper script for a local process
+- **SYSTEMD**, **DOCKER**, and **PTERODACTYL** hand the restart to those environments
+
+DEPEND_ON_HOST is the default and does not need panel credentials. Run `/reboot doctor` after choosing another backend to check its setup. Backend settings can be reloaded with `/reboot reload`.
 
 ### Rich Alerts & Integrations
 - Chat messages, titles, action bar, and configurable sounds
@@ -59,12 +54,10 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 ---
 
-### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.2+
-- **Folia**: 1.20.1+ to 26.2+
-- **Fabric**: 1.20.1+ to 26.2+
-- **Forge**: 1.20.4+ to 26.2+
-- **NeoForge**: 1.21.1+ to 26.2+ (Java 21+)
+### Platform compatibility
+
+- **Bukkit / Spigot / Paper / Purpur**: 1.9 through 26.2+
+- **Folia**: 1.20.1 through 26.2+
 
 ---
 
@@ -122,7 +115,7 @@ This Hangar page serves the plugin builds for Paper and its forks:
 
 [![nexeu-sponsor](https://whodoesntloveavatars.s3.fra.databucket.eu/assets/promo.png)](https://nexeu.zip/)
 
-High-performance, affordable hosting for your Minecraft server. Premium hardware, instant setup, 24/7 support.
+Server hosting for this project is sponsored by Nexeu Hosting.
 
 ---
 

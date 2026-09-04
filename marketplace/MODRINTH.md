@@ -4,7 +4,7 @@
 
 # RedstoneReboot
 
-**A restart engine for Minecraft servers across every major platform**
+**Scheduled and health-based restarts for plugins and server-side mods**
 
 </div>
 
@@ -18,35 +18,30 @@
 
 </div>
 
-RedstoneReboot manages automated restarts, performance monitoring, and backend process integration across single servers and server networks.
+RedstoneReboot handles the part of server maintenance that is easy to forget until something goes wrong: planned restarts, warning countdowns, world saves, and a clean handoff to whatever starts the server process again. It can also watch TPS and memory and schedule an emergency restart after repeated unhealthy readings.
 
-- **Scheduling** — Multiple daily restart times with timezone support and day-of-week filters
-- **Health Checks** — Real-time TPS and memory tracking with consecutive checks to prevent false triggers
-- **Emergency Restarts** — Triggers restarts if TPS drops or memory usage exceeds safety limits
-- **Notifications** — Countdown alerts via chat, titles, action bar, and sounds
-- **Backend Handoff** — Delegates process restarts to Pterodactyl API, systemd, Docker, or custom scripts
-- **Hot Reload** — Apply backend configuration changes using `/reboot reload`
-- **PlaceholderAPI** — 8 placeholders for scoreboards, tab lists, and MOTD plugins (Bukkit/Folia)
+- Multiple daily restart times, timezones, and day-of-week filters
+- TPS and memory checks with configurable thresholds and consecutive-check protection
+- Emergency restart scheduling when the server stays unhealthy
+- Countdown messages through chat, titles, the action bar, and sounds
+- World-save delay before shutdown
+- Restart handoff for host-managed servers, Pterodactyl, systemd, Docker, or a local script
+- Configuration reloads through `/reboot reload`
+- Eight PlaceholderAPI values on Bukkit-family and Folia servers
 
 ---
 
 ## Backend System & Startup Loops
 
-RedstoneReboot separates "when to restart" from "how to restart":
+RedstoneReboot decides when a restart should happen, then passes the final action to the backend you choose:
 
-- **DEPEND_ON_HOST** — Clean shutdown (your panel, Docker policy, or script restarts the process)
-- **LOCALSCRIPT** — Auto-generated shell script handles process restarts
-- **SYSTEMD** — System service integration on Linux
-- **DOCKER** — Container restart policy integration
-- **PTERODACTYL** — Direct panel API power actions
+- **DEPEND_ON_HOST** — Stops Minecraft cleanly and relies on your panel, container policy, service, or loop script to start it again
+- **LOCALSCRIPT** — Uses a generated wrapper script for local process restarts
+- **SYSTEMD** — Hands the restart to a Linux systemd service
+- **DOCKER** — Works with a container restart policy
+- **PTERODACTYL** — Sends a power action through the panel API
 
-### Do I need a custom backend?
-If your server runs inside a loop script, Docker container with `restart: always`, or systemd service, **DEPEND_ON_HOST works out of the box.** When the countdown ends, the engine shuts down the server cleanly and your supervisor starts it again.
-
-### Why configure a custom backend?
-1. **API Integration (Pterodactyl / panels):** Triggers power cycles directly through panel APIs to avoid false offline status indicators.
-2. **Auto Startup Scripts:** LOCALSCRIPT generates and manages process wrappers for standalone VPS setups.
-3. **Safety Lockouts:** Enforces cooldown lockouts to prevent rapid crash loops if server files are corrupt.
+The default, **DEPEND_ON_HOST**, needs no API credentials. Use it when your host already restarts the process after a clean shutdown. Choose Pterodactyl or another explicit backend only when you want RedstoneReboot to make that handoff itself. `/reboot doctor` checks the selected backend before you rely on it.
 
 ---
 
@@ -55,11 +50,11 @@ If your server runs inside a loop script, Docker container with `restart: always
 Choose the file that matches your server platform:
 
 ### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 1.21.x+
-- **Folia**: 1.20.1+
+- **Bukkit / Spigot / Paper / Purpur**: 1.9 through 26.2+
+- **Folia**: 1.20.1 through 26.2+
 - **Fabric**: 1.20.1
-- **Forge**: 1.20.4 (Forge 49.x)
-- **NeoForge**: 1.21.1 (NeoForge 21.1.x)
+- **Forge**: 1.20.4 with Forge 49.x
+- **NeoForge**: 1.21.1 with NeoForge 21.1.x
 
 ---
 
@@ -98,7 +93,7 @@ Choose the file that matches your server platform:
 1. Download the correct mod file.
 2. Place it in `mods/` (Fabric requires Fabric API).
 3. Start the server.
-4. Configure `config/redstonereboot.properties` and `config/restart-backends.properties`.
+4. Configure `config/redstonereboot/redstonereboot.properties` and `config/redstonereboot/restart-backends.properties`.
 5. Run `/reboot reload` to apply.
 
 ---
@@ -160,10 +155,8 @@ Choose the file that matches your server platform:
 
 [![nexeu-sponsor](https://whodoesntloveavatars.s3.fra.databucket.eu/assets/promo.png)](https://nexeu.zip/)
 
-High-performance, affordable hosting for your Minecraft server. Premium hardware, instant setup, 24/7 support.
+Server hosting for this project is sponsored by Nexeu Hosting.
 
 ---
 
 Made by [**DemonZ Development**](https://demonzdevelopment.online)
-
-*Minecraft server tooling built by DemonZ Development.*

@@ -1,29 +1,22 @@
-# RedstoneReboot — SpigotMC Resource Copy
-
 [CENTER]
 [IMG]https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png[/IMG]
 
 [SIZE=6][B][COLOR=#DC2626]RedstoneReboot[/COLOR][/B][/SIZE]
-[SIZE=4][I]A restart engine for Minecraft servers across multiple platforms.[/I][/SIZE]
+[SIZE=4][I]Planned and health-based restarts for Bukkit-family and Folia servers.[/I][/SIZE]
 
 [SIZE=5][B]Platform Compatibility[/B][/SIZE]
 
 [LIST]
-[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: 1.9.x to 26.2+
-[*] [B]Folia[/B]: 1.20.1+ to 26.2+
-[*] [B]Fabric[/B]: 1.20.1+ to 26.2+
-[*] [B]Forge[/B]: 1.20.4+ to 26.2+
-[*] [B]NeoForge[/B]: 1.21.1+ to 26.2+ (Java 21+)
+[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: 1.9 through 26.2+
+[*] [B]Folia[/B]: 1.20.1 through 26.2+
 [/LIST]
 [/CENTER]
 
 [HR][/HR]
 
-[SIZE=5][B]Why RedstoneReboot?[/B][/SIZE]
+[SIZE=5][B]What it does[/B][/SIZE]
 
-RedstoneReboot is a server lifecycle tool — not just a "restart plugin." It gives you control over when, why, and how your server restarts, using live health monitoring and a backend handoff system.
-
-Whether you're running a single survival server or a multi-node network behind Pterodactyl, RedstoneReboot handles the restart plumbing for you.
+RedstoneReboot schedules routine restarts, warns players before shutdown, saves worlds, and hands the final restart to your hosting environment. It can also watch TPS and memory, then schedule an emergency restart only after the server stays below your configured limits for several checks.
 
 This page provides builds for [B]Bukkit-family servers and Folia[/B]. [I](Fabric, Forge, and NeoForge mod variants are distributed separately on Modrinth and GitHub)[/I]
 
@@ -93,22 +86,14 @@ This page provides builds for [B]Bukkit-family servers and Folia[/B]. [I](Fabric
 RedstoneReboot separates "when to restart" from "how to restart":
 
 [LIST]
-[*] [B]SHUTDOWN_ONLY[/B] — Graceful shutdown only (external process manager restarts).
+[*] [B]DEPEND_ON_HOST[/B] — Stops Minecraft cleanly and relies on your panel, service, container policy, or loop script to start it again.
 [*] [B]LOCALSCRIPT[/B] — Auto-generated wrapper script handles the restart loop.
 [*] [B]SYSTEMD[/B] — Linux servers managed by systemd services.
 [*] [B]DOCKER[/B] — Docker containers with restart policies.
 [*] [B]PTERODACTYL[/B] — Pterodactyl panel API integration.
 [/LIST]
 
-[B]Do I need a custom backend?[/B]
-If your server is already wrapped in a startup loop script (a `.sh` or `.bat` file with a `while true` loop, a Docker container set to `restart: always`, or a systemd service), [B]SHUTDOWN_ONLY works out of the box[/B]. When the restart timer runs out, the plugin stops the server cleanly and your script starts it again.
-
-[B]Why use a custom backend then?[/B]
-[LIST=1]
-[*] [B]Clean handoff (Pterodactyl, Multicraft)[/B] — Avoid panel desyncs or false offline indicators. Instead of just shutting down, the plugin talks to your panel's API to request a clean power cycle.
-[*] [B]Self-healing bootups[/B] — If you don't run a startup loop script, the [B]LOCALSCRIPT[/B] backend spawns a new process to bring the server back up.
-[*] [B]Crash lockout safety[/B] — Simple loops can get stuck in endless crash loops if a file gets corrupted. Custom backends add safety lockout timers to stop boot hammering.
-[/LIST]
+[B]DEPEND_ON_HOST[/B] is the default and does not need panel credentials. Use it when your host already restarts the server after a clean shutdown. Choose another backend only when you want RedstoneReboot to make that handoff itself, then run [CODE]/reboot doctor[/CODE] to check the setup.
 
 Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE] — changes apply instantly.
 
@@ -129,7 +114,7 @@ Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE
 
 [URL='https://nexeu.zip/'][IMG]https://whodoesntloveavatars.s3.fra.databucket.eu/assets/promo.png[/IMG][/URL]
 
-High-performance, affordable hosting for your Minecraft server. Premium hardware, instant setup, 24/7 support.
+Server hosting for this project is sponsored by Nexeu Hosting.
 
 [I]Made by [URL='https://demonzdevelopment.online']DemonZ Development[/URL][/I]
 [/CENTER]
