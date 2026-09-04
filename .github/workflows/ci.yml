@@ -45,10 +45,11 @@ jobs:
 
       - name: Test Report
         if: always()
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v6
         with:
           report_paths: '**/build/test-results/test/TEST-*.xml'
           check_name: 'JUnit Test Results'
+          annotate_only: true
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
