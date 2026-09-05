@@ -49,6 +49,54 @@ class RestartManagerConcurrencyTest {
     }
 
     @Test
+    void queuedTickCannotRestartAfterCancellation() {
+        TickableScheduler scheduler = new TickableScheduler();
+        RestartManager manager = new RestartManager(logger, platform, scheduler, config, backendRegistry);
+        manager.scheduleRestart(60, RestartReason.MANUAL, "CancelTest");
+        Runnable queuedTick = scheduler.repeatingTask;
+
+        assertTrue(manager.cancelRestart());
+        queuedTick.run();
+
+        assertFalse(platform.shutdownCalled.get());
+        assertFalse(manager.isRestartInProgress());
+        assertEquals(-1, manager.getSecondsUntilRestart());
+    }
+
+    @Test
+    void queuedTickCannotAdvanceReplacementCountdown() {
+        TickableScheduler scheduler = new TickableScheduler();
+        RestartManager manager = new RestartManager(logger, platform, scheduler, config, backendRegistry);
+        manager.scheduleRestart(60, RestartReason.MANUAL, "First");
+        Runnable queuedTick = scheduler.repeatingTask;
+        assertTrue(manager.scheduleRestart(10, RestartReason.MANUAL, "Replacement"));
+        int remaining = manager.getSecondsUntilRestart();
+
+        queuedTick.run();
+
+        assertEquals(remaining, manager.getSecondsUntilRestart());
+        assertEquals("Replacement", manager.getRestartInitiator());
+        assertFalse(platform.shutdownCalled.get());
+        scheduler.tickRepeating();
+        assertEquals(remaining - 1, manager.getSecondsUntilRestart());
+    }
+
+    @Test
+    void queuedTickCannotRestartAfterCleanup() {
+        TickableScheduler scheduler = new TickableScheduler();
+        RestartManager manager = new RestartManager(logger, platform, scheduler, config, backendRegistry);
+        manager.scheduleRestart(60, RestartReason.MANUAL, "Cleanup");
+        Runnable queuedTick = scheduler.repeatingTask;
+
+        manager.cleanup();
+        queuedTick.run();
+
+        assertFalse(platform.shutdownCalled.get());
+        assertFalse(manager.isRestartInProgress());
+        assertEquals(-1, manager.getSecondsUntilRestart());
+    }
+
+    @Test
     void concurrentScheduleRestartOnlyOneWins() throws Exception {
         int threadCount = 8;
         java.util.concurrent.CyclicBarrier barrier = new java.util.concurrent.CyclicBarrier(threadCount);

@@ -46,6 +46,7 @@ public class RestartManager {
     private final AtomicBoolean restartExecuting = new AtomicBoolean(false);
     private final AtomicBoolean shutdownGuard = new AtomicBoolean(false);
     private final AtomicLong restartGeneration = new AtomicLong(0);
+    private long countdownGeneration;
     private volatile long lockoutEndTime = 0;
     private volatile ScheduledTaskHandle controllerSafetyTask;
 
@@ -203,9 +204,13 @@ public class RestartManager {
     }
 
     private synchronized void startCountdown(int seconds) {
+        final long generation = ++countdownGeneration;
         secondsUntilRestart.set(seconds);
         currentRestartTask = scheduler.runRepeating(() -> {
             synchronized (this) {
+                if (generation != countdownGeneration || shutdownGuard.get()) {
+                    return;
+                }
                 int remaining = secondsUntilRestart.get();
                 if (remaining <= 0) {
                     executeRestart();
@@ -361,6 +366,7 @@ public class RestartManager {
     }
 
     private synchronized void cancelCurrentCountdown(boolean notify) {
+        countdownGeneration++;
         if (currentRestartTask != null) {
             currentRestartTask.cancel();
             currentRestartTask = null;
