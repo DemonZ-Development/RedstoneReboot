@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- Separate Java 25 mod builds for Minecraft 26.1 and 26.2 on Fabric, Forge, and NeoForge.
+
+### Fixed
+- Ignore countdown ticks queued before cancellation, replacement, or engine shutdown.
+- Declare Fabric API as a required dependency in the stable Fabric artifact.
+- Run the Paper and Folia CI checks on their actual server distributions and fail when startup or restart evidence is missing.
+- Correct Java requirements and separate stable mod compatibility from the 26.x development ports.
+
 ## [1.6.2] — 2026-09-04
 
 ### Fixed
@@ -49,7 +60,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **Permissions**: `redstonereboot.dump` added, `fabric/forge/neoforge` `hasPermission` now treats `.dump` as admin (level 4).
 
 ### Changed
-- **Stripped comments** from 68 `*.java` files (kept `common/api/*` and `config.yml` docs) for cleaner codebase — build still `BUILD SUCCESSFUL`.
 - **Docs**: `wiki/Developer-API.md` rewritten for new API, `README`/`MODRINTH`/`Placeholders` version examples bumped to `1.6.0`.
 - **Version**: `build.gradle:1.6.0`, `RedstoneRebootCore.VERSION:1.6.0`, `config.yml:v1.6.0`.
 

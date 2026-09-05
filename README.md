@@ -57,11 +57,13 @@ Works on single Paper instances, Folia networks, and Fabric, Forge, or NeoForge 
 
 | Platform | Type | Minecraft Versions | Java |
 |----------|------|--------------------|------|
-| Bukkit / Spigot / Paper / Purpur | Plugin | MC 1.9 to 26.2+ | 8+ (legacy), 17+ (modern), 25 (26.x+) |
-| Folia | Plugin | MC 1.20.1+ to 26.2+ | 17+, 25 (26.x+) |
+| Bukkit / Spigot / Paper / Purpur | Plugin | API 1.13+; maintainer-tested on 26.1 and 26.2 | 17 minimum; use the Java version required by your server |
+| Folia | Plugin | Separate region-threaded artifact; verify against your server build | 17 minimum; use the Java version required by your server |
 | Fabric | Mod | MC 1.20.1 | 17+ (Fabric API required) |
 | Forge | Mod | MC 1.20.4 / Forge 49.x | 17+ |
 | NeoForge | Mod | MC 1.21.1 / NeoForge 21.1.x | 21+ |
+
+The stable mod artifacts above do not support 26.x. Separate 26.1 and 26.2 ports are being tested in [`modern/`](modern/README.md), using Java 25. A build for one Minecraft version is not a compatibility claim for later versions.
 
 ---
 

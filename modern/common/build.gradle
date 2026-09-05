@@ -1,0 +1,32 @@
+def generatedSources = layout.buildDirectory.dir('generated/sources/common')
+def generatedTests = layout.buildDirectory.dir('generated/sources/tests')
+tasks.register('prepareCommonSources', Sync) {
+    from '../../common/src/main/java'
+    into generatedSources
+    inputs.property 'modVersion', project.version
+    filter { line -> line.replace('String VERSION = "1.6.2"', "String VERSION = \"${project.version}\"") }
+}
+
+tasks.register('prepareCommonTests', Sync) {
+    from '../../common/src/test/java'
+    into generatedTests
+    inputs.property 'modVersion', project.version
+    filter { line -> line.replace('assertEquals("1.6.2", RedstoneRebootCore.VERSION)', "assertEquals(\"${project.version}\", RedstoneRebootCore.VERSION)") }
+}
+
+sourceSets {
+    main.java.srcDir generatedSources
+    main.resources.srcDir '../../common/src/main/resources'
+    test.java.srcDir generatedTests
+    test.resources.srcDir '../../common/src/test/resources'
+}
+
+tasks.named('compileJava') { dependsOn 'prepareCommonSources' }
+tasks.named('compileTestJava') { dependsOn 'prepareCommonTests' }
+
+dependencies {
+    compileOnly 'com.mojang:brigadier:1.0.18'
+    testImplementation platform('org.junit:junit-bom:5.11.3')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}

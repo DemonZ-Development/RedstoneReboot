@@ -34,6 +34,8 @@ tests/servers/
 
 out/
 *.class
+__pycache__/
+*.pyc
 release-artifacts/
 dist/
 .tools/

@@ -12,11 +12,13 @@ Use the build that matches your server platform. Do not mix Bukkit, Folia, Fabri
 
 | Platform | Artifact | Minecraft | Runtime Java |
 |----------|----------|-----------|--------------|
-| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | `1.9` to `26.2+` | Java `8+` (legacy), `17+` (modern), `25` (26.x+) |
-| Folia | `RedstoneReboot-Folia-<version>.jar` | `1.20.1` to `26.2+` | Java `17+`, `25` (26.x+) |
-| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1` to `26.2+` | Java `17+`, `25` (26.x+) |
-| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4` to `26.2+` | Java `17+`, `25` (26.x+) |
-| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.21.1` to `26.2+` | Java `21+`, `25` (26.x+) |
+| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | API `1.13+`; maintainer-tested on `26.1` and `26.2` | Java `17` minimum; follow the server requirement |
+| Folia | `RedstoneReboot-Folia-<version>.jar` | Use the dedicated artifact and verify your Folia build | Follow the server requirement; minimum Java `17` |
+| Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1` | Java `17+`, Fabric API required |
+| Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4`, Forge `49.x` | Java `17+` |
+| NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.21.1`, NeoForge `21.1.x` | Java `21+` |
+
+The 26.1 and 26.2 mod ports are separate development artifacts with `mc26.1` or `mc26.2` in their filenames. They require Java 25. See [the port build instructions](../modern/README.md); do not install the stable mod jars on 26.x.
 
 ## Bukkit, Spigot, Paper, and Similar Servers
 
@@ -44,7 +46,7 @@ Folia uses its own scheduler adapter internally. You do not need a separate Foli
 
 1. Download the Fabric jar.
 2. Place it in `mods/`.
-3. Install Fabric API if your server setup requires it.
+3. Install Fabric API for the same Minecraft version.
 4. Start the server once.
 5. Edit the loader-generated RedstoneReboot config.
 6. Configure backend handoff if you want restart ownership beyond a normal stop.

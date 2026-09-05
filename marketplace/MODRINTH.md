@@ -50,8 +50,8 @@ The default, **DEPEND_ON_HOST**, needs no API credentials. Use it when your host
 Choose the file that matches your server platform:
 
 ### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: 1.9 through 26.2+
-- **Folia**: 1.20.1 through 26.2+
+- **Bukkit / Spigot / Paper / Purpur**: API 1.13+; maintainer-tested on 26.1 and 26.2. Java 17 minimum, or the version required by your server.
+- **Folia**: use the dedicated region-threaded artifact and verify it on your Folia build.
 - **Fabric**: 1.20.1
 - **Forge**: 1.20.4 with Forge 49.x
 - **NeoForge**: 1.21.1 with NeoForge 21.1.x
@@ -72,8 +72,8 @@ Choose the file that matches your server platform:
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
-| Bukkit-family servers | `1.9` through `26.2+` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
-| Folia | `1.20+` through `26.2+` | Dedicated region-threaded build |
+| Bukkit-family servers | API `1.13+`; maintainer-tested on `26.1` and `26.2` | Java 17 minimum; follow the server's Java requirement |
+| Folia | Verify your exact server build | Dedicated region-threaded artifact |
 | Fabric | `1.20.1` | Requires Fabric API |
 | Forge | `1.20.4` | Forge 49.x server-side build |
 | NeoForge | `1.21.1` | NeoForge 21.1.x server-side build |

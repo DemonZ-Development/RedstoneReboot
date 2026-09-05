@@ -7,8 +7,8 @@
 [SIZE=5][B]Platform Compatibility[/B][/SIZE]
 
 [LIST]
-[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: 1.9 through 26.2+
-[*] [B]Folia[/B]: 1.20.1 through 26.2+
+[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: API 1.13+; maintainer-tested on 26.1 and 26.2. Java 17 minimum, or the version required by your server.
+[*] [B]Folia[/B]: use the dedicated region-threaded artifact and verify it on your Folia build.
 [/LIST]
 [/CENTER]
 

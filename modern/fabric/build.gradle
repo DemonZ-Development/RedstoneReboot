@@ -1,0 +1,9 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version '1.18.0-alpha.17'
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    implementation 'net.fabricmc:fabric-loader:0.19.3'
+    implementation "net.fabricmc.fabric-api:fabric-api:${minecraftVersion == '26.1' ? '0.145.1+26.1' : '0.159.0+26.2'}"
+}

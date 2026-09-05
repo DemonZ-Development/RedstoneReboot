@@ -1,0 +1,21 @@
+plugins {
+    id 'net.minecraftforge.gradle' version '7.0.17'
+}
+
+repositories {
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+}
+
+dependencies {
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion == '26.1' ? '26.1-62.0.9' : '26.2-65.1.3'}")
+}
+
+minecraft {
+    runs {
+        register('server') {
+            args '--nogui'
+        }
+    }
+}

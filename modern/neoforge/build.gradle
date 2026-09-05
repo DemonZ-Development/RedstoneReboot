@@ -1,0 +1,16 @@
+plugins {
+    id 'net.neoforged.moddev' version '2.0.146'
+}
+
+neoForge {
+    version = project.minecraftVersion == '26.1' ? '26.1.0.19-beta' : '26.2.0.76'
+    runs {
+        server { server(); programArgument '--nogui' }
+    }
+    mods {
+        redstonereboot {
+            sourceSet sourceSets.main
+            sourceSet project(':common').sourceSets.main
+        }
+    }
+}

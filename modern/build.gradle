@@ -1,0 +1,46 @@
+plugins {
+    id 'base'
+}
+
+def mc = providers.gradleProperty('minecraftVersion').getOrElse('26.2')
+if (!(mc in ['26.1', '26.2'])) {
+    throw new GradleException('minecraftVersion must be 26.1 or 26.2')
+}
+
+allprojects {
+    group = 'dev.demonz.redstonereboot'
+    version = '1.6.2'
+    ext.minecraftVersion = mc
+    layout.buildDirectory = file("build/${mc}")
+    repositories {
+        mavenCentral()
+        maven { url = 'https://libraries.minecraft.net/' }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 25
+    }
+    tasks.withType(Test).configureEach { useJUnitPlatform() }
+    if (name != 'common') {
+        sourceSets.main.java.srcDir rootProject.file('shared/src/main/java')
+        sourceSets.main.resources.srcDir rootProject.file('shared/src/main/resources')
+        dependencies { implementation project(':common') }
+        tasks.named('jar') {
+            from project(':common').sourceSets.main.output
+            archiveBaseName = "RedstoneReboot-${project.name.capitalize()}"
+            archiveClassifier = "mc${mc}"
+        }
+        tasks.named('processResources') {
+            inputs.property 'minecraftVersion', mc
+            inputs.property 'version', project.version
+            filesMatching(['fabric.mod.json', 'META-INF/*.toml', 'pack.mcmeta']) {
+                expand(version: project.version, minecraftVersion: mc, forgeMajor: mc == '26.1' ? '62' : '65', dataFormat: mc == '26.1' ? '101' : '107')
+            }
+        }
+    }
+}

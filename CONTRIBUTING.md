@@ -4,7 +4,8 @@ This repository builds multiple platform targets from one shared restart engine.
 
 ## Prerequisites
 
-- Java `21+` for a full local build
+- Java 17 and 21 toolchains for the stable modules
+- Java 25 and Gradle 9.7.1 for the separate [26.x ports](modern/README.md)
 - Git
 - A test server for the platform you touched when behavior changes need runtime verification
 
@@ -28,6 +29,7 @@ RedstoneReboot/
 |- fabric/      Fabric server module
 |- forge/       Forge server module
 |- neoforge/    NeoForge server module
+|- modern/      Separate Minecraft 26.1 and 26.2 mod builds
 |- wiki/        User & Developer API documentation
 |- marketplace/ Store listing copy
 `- assets/      Images and branding assets

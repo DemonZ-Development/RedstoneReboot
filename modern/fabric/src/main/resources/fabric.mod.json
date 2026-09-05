@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "redstonereboot",
+  "version": "${version}",
+  "name": "RedstoneReboot",
+  "description": "Scheduled and health-based server restarts.",
+  "authors": ["DemonZ Development"],
+  "license": "Apache-2.0",
+  "environment": "server",
+  "entrypoints": {"server": ["dev.demonz.redstonereboot.modern.fabric.RedstoneRebootFabric"]},
+  "depends": {
+    "minecraft": "${minecraftVersion}",
+    "java": ">=25",
+    "fabricloader": ">=0.19.3",
+    "fabric-api": "*"
+  }
+}

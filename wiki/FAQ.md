@@ -10,9 +10,10 @@
 
 ### What Java version do I need?
 
-- **Bukkit-family servers** (1.9–1.16): Java 8+
-- **Modern servers** (1.17+), Folia, Fabric, Forge, NeoForge: Java 17+
-- **Building from source**: Java 21+ (required by the NeoForge module toolchain)
+- **Plugin builds**: Java 17 minimum, or the newer Java version required by your server. These jars do not run on Java 8.
+- **Stable mods**: Java 17+ for Fabric 1.20.1 and Forge 1.20.4; Java 21+ for NeoForge 1.21.1.
+- **26.1 / 26.2 mod ports**: Java 25 and the artifact matching your loader and exact Minecraft version.
+- **Building from source**: the stable build uses Java 17 and 21 toolchains; the separate `modern/` build uses Java 25 and Gradle 9.7.1.
 
 ### Does RedstoneReboot support Folia?
 

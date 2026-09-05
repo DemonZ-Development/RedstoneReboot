@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "RedstoneReboot",
+    "min_format": [${dataFormat}, 1],
+    "max_format": [${dataFormat}, 1]
+  }
+}

@@ -1,0 +1,18 @@
+modLoader="javafml"
+loaderVersion="[10,)"
+license="Apache-2.0"
+
+[[mods]]
+modId="redstonereboot"
+version="${version}"
+displayName="RedstoneReboot"
+authors="DemonZ Development"
+displayTest="IGNORE_SERVER_VERSION"
+description="Scheduled and health-based server restarts."
+
+[[dependencies.redstonereboot]]
+modId="minecraft"
+type="required"
+versionRange="[${minecraftVersion}]"
+ordering="NONE"
+side="SERVER"
