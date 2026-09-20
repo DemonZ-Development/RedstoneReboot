@@ -2,6 +2,8 @@ plugins {
     id 'net.minecraftforge.gradle' version '7.0.17'
 }
 
+evaluationDependsOn(':common')
+
 repositories {
     minecraft.mavenizer(it)
     maven fg.forgeMaven
@@ -9,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion == '26.1' ? '26.1-62.0.9' : '26.2-65.1.3'}")
+    implementation minecraft.dependency("net.minecraftforge:forge:${minecraftVersion == '26.1' ? '26.1-62.0.9' : (minecraftVersion == '26.2' ? '26.2-65.1.3' : '26.3-66.0.2')}")
 }
 
 minecraft {

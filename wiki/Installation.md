@@ -12,13 +12,13 @@ Use the build that matches your server platform. Do not mix Bukkit, Folia, Fabri
 
 | Platform | Artifact | Minecraft | Runtime Java |
 |----------|----------|-----------|--------------|
-| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | API `1.13+`; maintainer-tested on `26.1` and `26.2` | Java `17` minimum; follow the server requirement |
+| Bukkit / Spigot / Paper / Purpur and compatible forks | `RedstoneReboot-Bukkit-<version>.jar` | API `1.13+`; maintainer-tested on `26.1`, `26.2`, and `26.3` | Java `17` minimum; follow the server requirement |
 | Folia | `RedstoneReboot-Folia-<version>.jar` | Use the dedicated artifact and verify your Folia build | Follow the server requirement; minimum Java `17` |
 | Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1` | Java `17+`, Fabric API required |
 | Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4`, Forge `49.x` | Java `17+` |
 | NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.21.1`, NeoForge `21.1.x` | Java `21+` |
 
-The 26.1 and 26.2 mod ports are separate development artifacts with `mc26.1` or `mc26.2` in their filenames. They require Java 25. See [the port build instructions](../modern/README.md); do not install the stable mod jars on 26.x.
+The 26.1, 26.2, and 26.3 mod ports are separate development artifacts with `mc26.1`, `mc26.2`, or `mc26.3` in their filenames. They require Java 25. See [the port build instructions](../modern/README.md); do not install the stable mod jars on 26.x.
 
 ## Bukkit, Spigot, Paper, and Similar Servers
 
@@ -94,6 +94,6 @@ Run `/reboot doctor` and compare the active backend with the environment Redston
 <div align="center">
 
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
-*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+*Maintained by [DemonZ Development](https://demonz.org)*
 
 </div>

@@ -82,6 +82,6 @@ If a backend execution returns an uncertain state, RedstoneReboot enforces a tem
 <div align="center">
 
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
-*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+*Maintained by [DemonZ Development](https://demonz.org)*
 
 </div>

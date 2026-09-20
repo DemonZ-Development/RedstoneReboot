@@ -262,6 +262,6 @@ Or in-game: `/reboot dump` (perm `redstonereboot.dump`) creates `plugins/Redston
 <div align="center">
 
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
-*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+*Maintained by [DemonZ Development](https://demonz.org)*
 
 </div>

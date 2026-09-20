@@ -9,7 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ## [Unreleased]
 
 ### Added
-- Separate Java 25 mod builds for Minecraft 26.1 and 26.2 on Fabric, Forge, and NeoForge.
+- 26.3 mod builds for fabric, forge, and neoforge (still requires java 25)
+
+### Changed
+- finally updated all the old demonzdevelopment.online links to demonz.org
 
 ### Fixed
 - Ignore countdown ticks queued before cancellation, replacement, or engine shutdown.

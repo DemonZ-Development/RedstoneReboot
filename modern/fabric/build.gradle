@@ -2,8 +2,10 @@ plugins {
     id 'net.fabricmc.fabric-loom' version '1.18.0-alpha.17'
 }
 
+evaluationDependsOn(':common')
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraftVersion}"
-    implementation 'net.fabricmc:fabric-loader:0.19.3'
-    implementation "net.fabricmc.fabric-api:fabric-api:${minecraftVersion == '26.1' ? '0.145.1+26.1' : '0.159.0+26.2'}"
+    implementation "net.fabricmc:fabric-loader:${minecraftVersion == '26.3' ? '0.19.5' : '0.19.3'}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${minecraftVersion == '26.1' ? '0.145.1+26.1' : (minecraftVersion == '26.2' ? '0.159.0+26.2' : '0.160.6+26.3')}"
 }

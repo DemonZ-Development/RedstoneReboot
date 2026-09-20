@@ -50,7 +50,7 @@ The default, **DEPEND_ON_HOST**, needs no API credentials. Use it when your host
 Choose the file that matches your server platform:
 
 ### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: API 1.13+; maintainer-tested on 26.1 and 26.2. Java 17 minimum, or the version required by your server.
+- **Bukkit / Spigot / Paper / Purpur**: API 1.13+; maintainer-tested on 26.1, 26.2, and 26.3. Java 17 minimum, or the version required by your server.
 - **Folia**: use the dedicated region-threaded artifact and verify it on your Folia build.
 - **Fabric**: 1.20.1
 - **Forge**: 1.20.4 with Forge 49.x
@@ -72,7 +72,7 @@ Choose the file that matches your server platform:
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
-| Bukkit-family servers | API `1.13+`; maintainer-tested on `26.1` and `26.2` | Java 17 minimum; follow the server's Java requirement |
+| Bukkit-family servers | API `1.13+`; maintainer-tested on `26.1`, `26.2`, and `26.3` | Java 17 minimum; follow the server's Java requirement |
 | Folia | Verify your exact server build | Dedicated region-threaded artifact |
 | Fabric | `1.20.1` | Requires Fabric API |
 | Forge | `1.20.4` | Forge 49.x server-side build |
@@ -159,4 +159,4 @@ Server hosting for this project is sponsored by Nexeu Hosting.
 
 ---
 
-Made by [**DemonZ Development**](https://demonzdevelopment.online)
+Made by [**DemonZ Development**](https://demonz.org)

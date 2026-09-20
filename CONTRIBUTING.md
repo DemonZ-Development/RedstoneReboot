@@ -29,7 +29,7 @@ RedstoneReboot/
 |- fabric/      Fabric server module
 |- forge/       Forge server module
 |- neoforge/    NeoForge server module
-|- modern/      Separate Minecraft 26.1 and 26.2 mod builds
+|- modern/      Separate Minecraft 26.1, 26.2, and 26.3 mod builds
 |- wiki/        User & Developer API documentation
 |- marketplace/ Store listing copy
 `- assets/      Images and branding assets

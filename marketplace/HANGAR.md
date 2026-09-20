@@ -56,7 +56,7 @@ DEPEND_ON_HOST is the default and does not need panel credentials. Run `/reboot 
 
 ### Platform compatibility
 
-- **Bukkit / Spigot / Paper / Purpur**: API 1.13+; maintainer-tested on 26.1 and 26.2. Java 17 minimum, or the version required by your server.
+- **Bukkit / Spigot / Paper / Purpur**: API 1.13+; maintainer-tested on 26.1, 26.2, and 26.3. Java 17 minimum, or the version required by your server.
 - **Folia**: use the dedicated region-threaded artifact and verify it on your Folia build.
 
 ---
@@ -119,4 +119,4 @@ Server hosting for this project is sponsored by Nexeu Hosting.
 
 ---
 
-Made by [**DemonZ Development**](https://demonzdevelopment.online)
+Made by [**DemonZ Development**](https://demonz.org)

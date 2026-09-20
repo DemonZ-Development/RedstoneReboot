@@ -76,6 +76,6 @@ Backend handoff is configured separately through `restart-backends.properties`.
 <div align="center">
 
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
-*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+*Maintained by [DemonZ Development](https://demonz.org)*
 
 </div>

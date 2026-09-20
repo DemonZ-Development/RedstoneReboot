@@ -7,7 +7,7 @@
 [SIZE=5][B]Platform Compatibility[/B][/SIZE]
 
 [LIST]
-[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: API 1.13+; maintainer-tested on 26.1 and 26.2. Java 17 minimum, or the version required by your server.
+[*] [B]Bukkit / Spigot / Paper / Purpur[/B]: API 1.13+; maintainer-tested on 26.1, 26.2, and 26.3. Java 17 minimum, or the version required by your server.
 [*] [B]Folia[/B]: use the dedicated region-threaded artifact and verify it on your Folia build.
 [/LIST]
 [/CENTER]
@@ -116,5 +116,5 @@ Edit [CODE]restart-backends.properties[/CODE] and run [CODE]/reboot reload[/CODE
 
 Server hosting for this project is sponsored by Nexeu Hosting.
 
-[I]Made by [URL='https://demonzdevelopment.online']DemonZ Development[/URL][/I]
+[I]Made by [URL='https://demonz.org']DemonZ Development[/URL][/I]
 [/CENTER]

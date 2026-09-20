@@ -1,9 +1,11 @@
 plugins {
-    id 'net.neoforged.moddev' version '2.0.146'
+    id 'net.neoforged.moddev' version '2.0.147'
 }
 
+evaluationDependsOn(':common')
+
 neoForge {
-    version = project.minecraftVersion == '26.1' ? '26.1.0.19-beta' : '26.2.0.76'
+    version = project.minecraftVersion == '26.1' ? '26.1.0.19-beta' : (project.minecraftVersion == '26.2' ? '26.2.0.76' : '26.3.0.7-beta')
     runs {
         server { server(); programArgument '--nogui' }
     }

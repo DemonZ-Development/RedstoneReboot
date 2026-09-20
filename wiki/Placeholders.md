@@ -59,6 +59,6 @@ RedstoneReboot registers the `%redstonereboot_%` expansion when PlaceholderAPI i
 <div align="center">
 
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
-*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+*Maintained by [DemonZ Development](https://demonz.org)*
 
 </div>

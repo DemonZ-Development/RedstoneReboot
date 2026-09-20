@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minecraft: ['26.1', '26.2']
+        minecraft: ['26.1', '26.2', '26.3']
         loader: [fabric, forge, neoforge]
     steps:
       - uses: actions/checkout@v7

@@ -12,7 +12,7 @@
 
 - **Plugin builds**: Java 17 minimum, or the newer Java version required by your server. These jars do not run on Java 8.
 - **Stable mods**: Java 17+ for Fabric 1.20.1 and Forge 1.20.4; Java 21+ for NeoForge 1.21.1.
-- **26.1 / 26.2 mod ports**: Java 25 and the artifact matching your loader and exact Minecraft version.
+- **26.1 / 26.2 / 26.3 mod ports**: Java 25 and the artifact matching your loader and exact Minecraft version.
 - **Building from source**: the stable build uses Java 17 and 21 toolchains; the separate `modern/` build uses Java 25 and Gradle 9.7.1.
 
 ### Does RedstoneReboot support Folia?
@@ -105,6 +105,6 @@ Set `metrics-enabled: false` under the `advanced:` section in `config.yml`. Alte
 <div align="center">
 
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
-*Maintained by [DemonZ Development](https://demonzdevelopment.online)*
+*Maintained by [DemonZ Development](https://demonz.org)*
 
 </div>
