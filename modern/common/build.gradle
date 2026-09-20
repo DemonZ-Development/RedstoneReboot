@@ -4,14 +4,14 @@ tasks.register('prepareCommonSources', Sync) {
     from '../../common/src/main/java'
     into generatedSources
     inputs.property 'modVersion', project.version
-    filter { line -> line.replace('String VERSION = "1.6.2"', "String VERSION = \"${project.version}\"") }
+    filter { line -> line.replace('String VERSION = "1.6.3"', "String VERSION = \"${project.version}\"") }
 }
 
 tasks.register('prepareCommonTests', Sync) {
     from '../../common/src/test/java'
     into generatedTests
     inputs.property 'modVersion', project.version
-    filter { line -> line.replace('assertEquals("1.6.2", RedstoneRebootCore.VERSION)', "assertEquals(\"${project.version}\", RedstoneRebootCore.VERSION)") }
+    filter { line -> line.replace('assertEquals("1.6.3", RedstoneRebootCore.VERSION)', "assertEquals(\"${project.version}\", RedstoneRebootCore.VERSION)") }
 }
 
 sourceSets {

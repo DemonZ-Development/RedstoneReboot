@@ -1,6 +1,6 @@
 # Minecraft 26.1, 26.2, and 26.3 ports
 
-These are the Minecraft 26.1, 26.2, and 26.3 mod builds of RedstoneReboot 1.6.2. Install only the jar matching your loader and exact Minecraft version. All ports require Java 25.
+These are the Minecraft 26.1, 26.2, and 26.3 mod builds of RedstoneReboot 1.6.3. Install only the jar matching your loader and exact Minecraft version. All ports require Java 25.
 
 | Minecraft | Fabric Loader / Fabric API | Forge | NeoForge |
 | --- | --- | --- | --- |

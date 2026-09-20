@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## [Unreleased]
+## [1.6.3] — 2026-09-20
 
 ### Added
 - 26.3 mod builds for fabric, forge, and neoforge (still requires java 25)
