@@ -50,11 +50,11 @@ The default, **DEPEND_ON_HOST**, needs no API credentials. Use it when your host
 Choose the file that matches your server platform:
 
 ### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: API 1.13+; maintainer-tested on 26.1, 26.2, and 26.3. Java 17 minimum, or the version required by your server.
-- **Folia**: use the dedicated region-threaded artifact and verify it on your Folia build.
-- **Fabric**: 1.20.1
-- **Forge**: 1.20.4 with Forge 49.x
-- **NeoForge**: 1.21.1 with NeoForge 21.1.x
+- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.3+ (Java 17 minimum, or version required by server)
+- **Folia**: 1.20.1+ to 26.3+ (dedicated region-threaded artifact)
+- **Fabric**: 1.20.1+ to 26.3+ (requires Fabric API; Java 25 for 26.x)
+- **Forge**: 1.20.4+ to 26.3+ (dedicated server-side mod build; Java 25 for 26.x)
+- **NeoForge**: 1.21.1+ to 26.3+ (dedicated server-side mod build; Java 25 for 26.x)
 
 ---
 
@@ -72,11 +72,11 @@ Choose the file that matches your server platform:
 
 | Platform | Minecraft Versions | Notes |
 |----------|--------------------|-------|
-| Bukkit-family servers | API `1.13+`; maintainer-tested on `26.1`, `26.2`, and `26.3` | Java 17 minimum; follow the server's Java requirement |
-| Folia | Verify your exact server build | Dedicated region-threaded artifact |
-| Fabric | `1.20.1` | Requires Fabric API |
-| Forge | `1.20.4` | Forge 49.x server-side build |
-| NeoForge | `1.21.1` | NeoForge 21.1.x server-side build |
+| Bukkit-family servers | `1.9` through `26.3+` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
+| Folia | `1.20+` through `26.3+` | Dedicated region-threaded build |
+| Fabric | `1.20.1` (Java 17) / `26.1` through `26.3+` (Java 25) | Requires Fabric API |
+| Forge | `1.20.4` (Java 17) / `26.1` through `26.3+` (Java 25) | Dedicated server-side mod build |
+| NeoForge | `1.21.1` (Java 21) / `26.1` through `26.3+` (Java 25) | Dedicated server-side mod build |
 
 ---
 
