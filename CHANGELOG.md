@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## [1.6.4] — 2026-10-05
+
+### Added
+- A secret Halloween Easter egg was added.
+
 ## [1.6.3] — 2026-09-20
 
 ### Added

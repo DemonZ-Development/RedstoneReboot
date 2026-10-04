@@ -6,6 +6,9 @@ public interface ServerPlatform {
 
     void broadcastMessage(String message);
 
+    default void notifyHalloweenOperators() {
+    }
+
     void broadcastTitle(String title, String subtitle);
 
     default void broadcastActionBar(String message) {

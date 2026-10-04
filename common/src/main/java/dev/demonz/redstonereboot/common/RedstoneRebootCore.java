@@ -10,6 +10,7 @@ import dev.demonz.redstonereboot.common.platform.ServerPlatform;
 import dev.demonz.redstonereboot.common.scheduler.PlatformTaskScheduler;
 import dev.demonz.redstonereboot.common.text.LegacyTextUtil;
 import dev.demonz.redstonereboot.common.utils.UpdateChecker;
+import dev.demonz.redstonereboot.common.utils.HalloweenEasterEgg;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.6.3";
+    public static final String VERSION = "1.6.4";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
@@ -33,6 +34,7 @@ public class RedstoneRebootCore {
     private final RestartManager restartManager;
     private final Path dataFolder;
     private volatile dev.demonz.redstonereboot.common.api.MessageAdapter discordAdapter;
+    private volatile HalloweenEasterEgg halloween;
 
     public RedstoneRebootCore(ServerPlatform platform, PlatformTaskScheduler scheduler, PlatformConfig config, Path dataFolder) {
         this.platform = platform;
@@ -96,15 +98,28 @@ public class RedstoneRebootCore {
         syncDiscordAdapter();
         updateChecker.checkForUpdates();
         updateChecker.startPeriodicChecks(scheduler);
+        if (halloween != null) halloween.close();
+        halloween = new HalloweenEasterEgg(BRAND, LOGGER::info, () ->
+            scheduler.runLater(platform::notifyHalloweenOperators, 1L));
+        halloween.start();
     }
 
     public void onDisable() {
+        if (halloween != null) {
+            halloween.close();
+            halloween = null;
+        }
         LOGGER.info("RedstoneReboot engine shutting down...");
         restartManager.cleanup();
         updateChecker.stopPeriodicChecks();
         clearDiscordAdapter();
         try { RedstoneRebootAPI.clearInstance(); } catch (Exception ignored) {}
         LOGGER.info("Shutdown complete.");
+    }
+
+    public void greetHalloween(java.util.UUID playerId, java.util.function.Consumer<String> sendMessage) {
+        HalloweenEasterEgg current = halloween;
+        if (current != null) current.greetPlayer(playerId, sendMessage);
     }
 
     public void reloadRuntimeState() {

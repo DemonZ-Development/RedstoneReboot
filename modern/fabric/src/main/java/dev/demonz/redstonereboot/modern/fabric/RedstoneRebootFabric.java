@@ -4,6 +4,7 @@ import dev.demonz.redstonereboot.modern.ModernServerPlatform;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 
 public final class RedstoneRebootFabric extends ModernServerPlatform implements DedicatedServerModInitializer {
@@ -17,5 +18,6 @@ public final class RedstoneRebootFabric extends ModernServerPlatform implements 
         CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> registerCommands(dispatcher));
         ServerLifecycleEvents.SERVER_STARTED.register(this::started);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> stopping());
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> greetHalloween(handler.player));
     }
 }

@@ -19,6 +19,10 @@
 
 Yes. The Bukkit build includes an automatic Folia scheduler bridge that detects Folia at runtime and switches to the region-threaded `GlobalRegionScheduler`. There is also a dedicated `RedstoneReboot-Folia` jar for explicit Folia deployments.
 
+### Why does the startup log mention Halloween?
+
+Version 1.6.4 adds a seasonal Easter egg that runs during October based on the server JVM's local calendar.
+
 ---
 
 ## Configuration

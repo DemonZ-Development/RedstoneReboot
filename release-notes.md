@@ -1,13 +1,10 @@
-## RedstoneReboot 1.6.3
+## RedstoneReboot 1.6.4
 
-Quick patch release adding modern 26.3 mod builds alongside 26.1 and 26.2, plus updating domain URLs and countdown cleanup.
+A seasonal patch release for RedstoneReboot.
 
 ### Highlights
 
-- Adds Minecraft 26.3 builds for Fabric, Forge, and NeoForge in the modern ports branch.
-- Cancels lingering countdown tasks immediately when a restart is replaced or stopped.
-- Updates official website URLs from demonzdevelopment.online to demonz.org.
-- Retains all scheduling, backend, health monitoring, and placeholder integrations.
+- A secret Halloween Easter egg was added.
 
 ### Requirements
 

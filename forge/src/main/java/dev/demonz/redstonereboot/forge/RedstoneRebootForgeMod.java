@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -46,6 +47,7 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
             MinecraftForge.EVENT_BUS.addListener(this::onServerStarted);
             MinecraftForge.EVENT_BUS.addListener(this::onServerStopping);
+            MinecraftForge.EVENT_BUS.addListener(this::onPlayerLoggedIn);
 
             getLogger().info("Forge dedicated-server bootstrap initialized.");
         } catch (Exception exception) {
@@ -81,6 +83,26 @@ public final class RedstoneRebootForgeMod extends AbstractBootstrapServerPlatfor
             server.getPlayerList().broadcastSystemMessage(parseLegacyComponent(message), false);
         }
         getLogger().info("[broadcast] " + LegacyTextUtil.stripLegacyFormatting(message));
+    }
+
+    private void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {
+            greetHalloween(player);
+        }
+    }
+
+    private void greetHalloween(net.minecraft.server.level.ServerPlayer player) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (core != null && server != null && server.getPlayerList().isOp(player.getGameProfile())) {
+            core.greetHalloween(player.getUUID(), message ->
+                player.sendSystemMessage(Component.literal("[RedstoneReboot] " + message)));
+        }
+    }
+
+    @Override
+    public void notifyHalloweenOperators() {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (server != null) server.getPlayerList().getPlayers().forEach(this::greetHalloween);
     }
 
     @Override

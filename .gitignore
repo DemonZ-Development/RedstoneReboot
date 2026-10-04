@@ -9,6 +9,8 @@ build/
 *.iws
 .vscode/
 .settings/
+.eclipse/
+*/.eclipse/
 .project
 .classpath
 *.swp

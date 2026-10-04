@@ -49,6 +49,20 @@ public abstract class ModernServerPlatform extends AbstractBootstrapServerPlatfo
         if (current != null) current.execute(task);
     }
 
+    public final void greetHalloween(net.minecraft.server.level.ServerPlayer player) {
+        MinecraftServer current = server;
+        if (current != null && current.getPlayerList().isOp(player.nameAndId())) {
+            core.greetHalloween(player.getUUID(), message ->
+                player.sendSystemMessage(Component.literal("[RedstoneReboot] " + message)));
+        }
+    }
+
+    @Override
+    public void notifyHalloweenOperators() {
+        MinecraftServer current = server;
+        if (current != null) current.getPlayerList().getPlayers().forEach(this::greetHalloween);
+    }
+
     @Override
     public void broadcastMessage(String message) {
         MinecraftServer current = server;

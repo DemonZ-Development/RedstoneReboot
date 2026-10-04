@@ -23,6 +23,7 @@ public class ServerEventListener implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        plugin.greetHalloween(event.getPlayer());
         if (plugin.getPermissionManager() == null || !plugin.getPermissionManager().hasAdminPermission(event.getPlayer())) {
             return;
         }

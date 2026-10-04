@@ -120,6 +120,33 @@ public class RedstoneRebootPlugin extends JavaPlugin implements ServerPlatform {
         }
     }
 
+    public void greetHalloween(org.bukkit.entity.Player player) {
+        RedstoneRebootCore current = core;
+        if (current != null && player.isOnline()
+            && (player.isOp() || player.hasPermission("redstonereboot.admin"))) {
+            current.greetHalloween(player.getUniqueId(), message -> player.sendMessage("[RedstoneReboot] " + message));
+        }
+    }
+
+    @Override
+    public void notifyHalloweenOperators() {
+        for (org.bukkit.entity.Player player : Bukkit.getOnlinePlayers()) {
+            if (!taskScheduler.isFolia()) {
+                greetHalloween(player);
+                continue;
+            }
+            try {
+                Object scheduler = player.getClass().getMethod("getScheduler").invoke(player);
+                scheduler.getClass().getMethod("run", org.bukkit.plugin.Plugin.class,
+                        java.util.function.Consumer.class, Runnable.class)
+                    .invoke(scheduler, this, (java.util.function.Consumer<Object>) ignored -> greetHalloween(player),
+                        (Runnable) () -> {});
+            } catch (ReflectiveOperationException exception) {
+                getLogger().log(Level.WARNING, "Failed to schedule Halloween player greeting", exception);
+            }
+        }
+    }
+
     @Override
     public void broadcastMessage(String message) {
         if (adventure != null) {

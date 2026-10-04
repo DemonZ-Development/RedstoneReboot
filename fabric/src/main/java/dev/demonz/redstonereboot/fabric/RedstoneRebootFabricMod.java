@@ -8,6 +8,7 @@ import dev.demonz.redstonereboot.common.text.LegacyTextUtil;
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.server.MinecraftServer;
@@ -69,6 +70,7 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
             ServerLifecycleEvents.SERVER_STOPPED.register(stoppedServer -> {
                 this.server = null;
             });
+            ServerPlayConnectionEvents.JOIN.register((handler, sender, joinedServer) -> greetHalloween(handler.player));
 
             CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
                 if (core == null) return;
@@ -88,6 +90,17 @@ public final class RedstoneRebootFabricMod extends AbstractBootstrapServerPlatfo
             server.getPlayerManager().broadcast(parseLegacyText(message), false);
         }
         getLogger().info("[broadcast] " + LegacyTextUtil.stripLegacyFormatting(message));
+    }
+
+    private void greetHalloween(net.minecraft.server.network.ServerPlayerEntity player) {
+        if (core != null && server != null && server.getPlayerManager().isOperator(player.getGameProfile())) {
+            core.greetHalloween(player.getUuid(), message -> player.sendMessage(Text.literal("[RedstoneReboot] " + message), false));
+        }
+    }
+
+    @Override
+    public void notifyHalloweenOperators() {
+        if (server != null) server.getPlayerManager().getPlayerList().forEach(this::greetHalloween);
     }
 
     @Override
