@@ -9,7 +9,7 @@
   "environment": "server",
   "entrypoints": {"server": ["dev.demonz.redstonereboot.modern.fabric.RedstoneRebootFabric"]},
   "depends": {
-    "minecraft": "${minecraftVersion}",
+    "minecraft": "${fabricMinecraftRange}",
     "java": ">=25",
     "fabricloader": ">=0.19.3",
     "fabric-api": "*"

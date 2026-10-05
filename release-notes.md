@@ -5,6 +5,8 @@ A seasonal patch release for RedstoneReboot.
 ### Highlights
 
 - A secret Halloween Easter egg was added.
+- Bundled dedicated Minecraft 26.x mod builds for all loaders directly into release assets.
+- Fixed version range dependency on modern 26.x mod ports to properly allow minor patch releases (e.g. 26.1.x).
 
 ### Requirements
 

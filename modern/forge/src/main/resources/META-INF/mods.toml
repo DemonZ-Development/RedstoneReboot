@@ -20,6 +20,6 @@ side="SERVER"
 [[dependencies.redstonereboot]]
 modId="minecraft"
 mandatory=true
-versionRange="[${minecraftVersion}]"
+versionRange="${minecraftRange}"
 ordering="NONE"
 side="SERVER"

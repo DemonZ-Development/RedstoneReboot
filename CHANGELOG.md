@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 - A secret Halloween Easter egg was added.
+- Bundled dedicated 26.x mod builds for all loaders and versions directly into release packages.
+
+### Fixed
+- Allow minor point and patch versions (e.g. 26.1.x) in modern Minecraft dependency version ranges.
 
 ## [1.6.3] — 2026-09-20
 

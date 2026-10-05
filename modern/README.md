@@ -8,7 +8,7 @@ These are the Minecraft 26.1, 26.2, and 26.3 mod builds of RedstoneReboot 1.6.4.
 | 26.2 | 0.19.3+ / 0.159.0+26.2 | 65.1.3 | 26.2.0.76 |
 | 26.3 | 0.19.5+ / 0.160.6+26.3 | 66.0.2 | 26.3.0.7-beta |
 
-NeoForge's exact 26.1 and 26.3 targets use beta loaders. These version numbers do not imply support for minor versions, snapshots, or later releases.
+Dependency version ranges support patch releases (e.g. 26.1.x, 26.2.x, 26.3.x). NeoForge's 26.1 and 26.3 targets use beta loaders.
 
 ## Build
 

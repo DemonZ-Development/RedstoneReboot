@@ -13,6 +13,6 @@ description="Scheduled and health-based server restarts."
 [[dependencies.redstonereboot]]
 modId="minecraft"
 type="required"
-versionRange="[${minecraftVersion}]"
+versionRange="${minecraftRange}"
 ordering="NONE"
 side="SERVER"
