@@ -9,7 +9,7 @@ if (!(mc in ['26.1', '26.2', '26.3'])) {
 
 allprojects {
     group = 'dev.demonz.redstonereboot'
-    version = '1.6.4'
+    version = '1.6.5'
     ext.minecraftVersion = mc
     layout.buildDirectory = file("build/${mc}")
     repositories {

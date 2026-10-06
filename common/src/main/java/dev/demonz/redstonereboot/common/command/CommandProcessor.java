@@ -246,16 +246,20 @@ public class CommandProcessor {
                 sender.sendMessage("\u00A77Backend State: " + stateColor + "\u00A7l" + state.name());
 
                 if (state == RestartBackend.BackendState.GENERATED) {
-                    sender.sendMessage("\u00A7e[!] Script generated, but no 'Wired' proof found.");
-                    sender.sendMessage("\u00A7e    Add \u00A7f-Dredstonereboot.active=true \u00A7eto startup.");
+                    sender.sendMessage("\u00A7e[!] Supervisor backend script generated, but wiring proof is missing.");
+                    sender.sendMessage("\u00A7e    Launch via the generated script or add \u00A7f-Dredstonereboot.active=true\u00A7e.");
+                    sender.sendMessage("\u00A77[i] Note: If your hosting panel already restarts stopped servers, use \u00A7bDEPEND_ON_HOST \u00A77instead.");
                 } else if (state == RestartBackend.BackendState.ASSISTED) {
                     if ("Pterodactyl".equalsIgnoreCase(backend.getName())) {
                         sender.sendMessage("\u00A7e[!] Pterodactyl API verification failed. Please verify your ptero-url, ptero-token, and ptero-id settings.");
+                        sender.sendMessage("\u00A77[i] Note: If your panel restarts stopped servers automatically, you can also use \u00A7bDEPEND_ON_HOST\u00A77.");
                     } else {
-                        sender.sendMessage("\u00A7e[!] Backend is not wired! Please add -Dredstonereboot.active=true to your server startup command or set environment variable REDSTONEREBOOT_ACTIVE=1.");
+                        sender.sendMessage("\u00A7e[!] Supervisor backend is in ASSISTED state (no wiring proof detected).");
+                        sender.sendMessage("\u00A7e    To wire: add \u00A7f-Dredstonereboot.active=true \u00A7eto startup or set \u00A7fREDSTONEREBOOT_ACTIVE=1\u00A7e.");
+                        sender.sendMessage("\u00A77[i] Note: If your hosting panel already auto-restarts stopped servers, use \u00A7bDEPEND_ON_HOST \u00A77instead.");
                     }
                 } else if (state == RestartBackend.BackendState.DEPEND_ON_HOST || state == RestartBackend.BackendState.SHUTDOWN_ONLY) {
-                    sender.sendMessage("\u00A77[i] Mode: \u00A7bDEPEND_ON_HOST \u00A77— Server relies on your hosting environment (Pterodactyl, systemd, Docker, auto-restart script, etc.) to perform the reboot after shutdown.");
+                    sender.sendMessage("\u00A77[i] Mode: \u00A7bDEPEND_ON_HOST \u00A77(Works out of the box for most hosting panels; server shuts down cleanly and your host environment handles the reboot).");
                 }
 
                 if (!detected.isEmpty()) {
@@ -265,7 +269,9 @@ public class CommandProcessor {
                     boolean isShutdownHost = normalizedActive.equals("SHUTDOWNONLY") || normalizedActive.equals("DEPENDONHOST");
                     boolean isLocalScript = normalizedActive.equals("LOCALSCRIPT");
                     boolean isPterodactylOnDocker = normalizedActive.equals("PTERODACTYL") && detected.contains("DOCKER") && !detected.contains("PTERODACTYL");
-                    if (!detected.contains(activeUpper) && !isShutdownHost && !isLocalScript && !isPterodactylOnDocker) {
+                    if (isShutdownHost) {
+                        sender.sendMessage("\u00A7a[i] Environment supported: Your host environment (" + String.join(", ", detected) + ") automatically handles reboots post-shutdown.");
+                    } else if (!detected.contains(activeUpper) && !isLocalScript && !isPterodactylOnDocker) {
                         sender.sendMessage("\u00A7e[i] Mismatch Advice: Detected " + String.join("/", detected) + " but backend is " + backend.getName() + ". Ensure your external supervisor or active-backend handles reboots.");
                     }
                 } else {

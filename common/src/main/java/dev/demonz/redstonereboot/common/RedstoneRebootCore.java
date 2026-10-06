@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 
 public class RedstoneRebootCore {
 
-    public static final String VERSION = "1.6.4";
+    public static final String VERSION = "1.6.5";
     public static final String BRAND = "RedstoneReboot";
 
     private static final Logger LOGGER = Logger.getLogger(BRAND);
@@ -87,7 +87,9 @@ public class RedstoneRebootCore {
             boolean isShutdownHost = normalizedActive.equals("SHUTDOWNONLY") || normalizedActive.equals("DEPENDONHOST");
             boolean isLocalScript = normalizedActive.equals("LOCALSCRIPT");
             boolean isPterodactylOnDocker = normalizedActive.equals("PTERODACTYL") && detected.contains("DOCKER") && !detected.contains("PTERODACTYL");
-            if (!detected.contains(active) && !isShutdownHost && !isLocalScript && !isPterodactylOnDocker) {
+            if (isShutdownHost) {
+                LOGGER.info("Host-managed environment detected (" + String.join(", ", detected) + "). Panel or container supervisor will handle post-shutdown restart.");
+            } else if (!detected.contains(active) && !isLocalScript && !isPterodactylOnDocker) {
                 LOGGER.warning("Mismatch detected: Running on " + String.join("/", detected) + " but backend is " + active);
             } else if (isPterodactylOnDocker) {
                 LOGGER.info("Environment note: Pterodactyl backend active inside Docker container (expected).");

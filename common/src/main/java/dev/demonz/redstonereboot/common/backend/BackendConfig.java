@@ -115,8 +115,8 @@ public class BackendConfig {
         try (OutputStream out = Files.newOutputStream(configPath)) {
             out.write("# RedstoneReboot Backend Configuration\n".getBytes());
             out.write(("# config-version: " + CURRENT_BACKEND_CONFIG_VERSION + " (do not edit manually)\n").getBytes());
-            out.write("# Set backends-enabled=true to enable automatic server restart backends.\n".getBytes());
-            out.write("# When disabled (default), the plugin will only stop the server without auto-restart.\n".getBytes());
+            out.write("# Set backends-enabled=true to enable external supervisor backends (LocalScript, Systemd, Docker, Pterodactyl).\n".getBytes());
+            out.write("# When disabled (default), the plugin performs clean shutdowns and relies on your host panel or supervisor to reboot.\n".getBytes());
             out.write("#\n".getBytes());
             out.write("# WARNING: Storing API tokens in plaintext is insecure. Use environment variable REBOOT_PTERO_TOKEN instead.\n".getBytes());
             properties.store(out, null);
@@ -140,8 +140,8 @@ public class BackendConfig {
         try (OutputStream out = Files.newOutputStream(configPath)) {
             out.write("# RedstoneReboot Backend Configuration\n".getBytes());
             out.write(("# config-version: " + CURRENT_BACKEND_CONFIG_VERSION + " (do not edit manually)\n").getBytes());
-            out.write("# Set backends-enabled=true to enable automatic server restart backends.\n".getBytes());
-            out.write("# When disabled (default), the plugin will only stop the server without auto-restart.\n".getBytes());
+            out.write("# Set backends-enabled=true to enable external supervisor backends (LocalScript, Systemd, Docker, Pterodactyl).\n".getBytes());
+            out.write("# When disabled (default), the plugin performs clean shutdowns and relies on your host panel or supervisor to reboot.\n".getBytes());
             out.write("#\n".getBytes());
             out.write("# WARNING: Storing API tokens in plaintext is insecure. Use environment variable REBOOT_PTERO_TOKEN instead.\n".getBytes());
             properties.store(out, null);

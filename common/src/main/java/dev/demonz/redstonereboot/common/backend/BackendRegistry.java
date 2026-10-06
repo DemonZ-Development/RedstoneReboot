@@ -30,8 +30,8 @@ public class BackendRegistry {
         }
 
         if (!config.isBackendsEnabled()) {
-            logger.info("Backends are disabled in configuration. Using shutdown-only mode. "
-                + "Enable backends in restart-backends.properties if you need automatic server restart.");
+            logger.info("Host-managed restart mode active (DEPEND_ON_HOST). "
+                + "Server will shut down cleanly and allow your hosting environment to reboot it.");
             if (activeBackend != null) {
                 activeBackend.cleanup();
             }
