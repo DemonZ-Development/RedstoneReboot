@@ -4,150 +4,118 @@
 
 # RedstoneReboot
 
-**Scheduled and health-based restarts for plugins and server-side mods**
+**Automated scheduled restarts and health monitoring for Paper, Folia, Fabric, Forge, and NeoForge servers.**
 
 </div>
+
+---
+
+## What is RedstoneReboot?
+
+RedstoneReboot manages routine restarts and monitors server performance. It handles scheduled daily reboots, watches TPS and memory for emergency restarts, broadcasts customizable countdown warnings across chat, titles, action bar, and sounds, delays shutdown for world saving, and coordinates process reboots with your hosting panel or environment.
 
 ---
 
 ## Features
 
-<div align="center">
-
-![RedstoneReboot Features](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/features.png)
-
-</div>
-
-RedstoneReboot handles the part of server maintenance that is easy to forget until something goes wrong: planned restarts, warning countdowns, world saves, and a clean handoff to whatever starts the server process again. It can also watch TPS and memory and schedule an emergency restart after repeated unhealthy readings.
-
-- Multiple daily restart times, timezones, and day-of-week filters
-- TPS and memory checks with configurable thresholds and consecutive-check protection
-- Emergency restart scheduling when the server stays unhealthy
-- Countdown messages through chat, titles, the action bar, and sounds
-- World-save delay before shutdown
-- Restart handoff for host-managed servers, Pterodactyl, systemd, Docker, or a local script
-- Configuration reloads through `/reboot reload`
-- Eight PlaceholderAPI values on Bukkit-family and Folia servers
+- **Scheduled Restarts**: Set multiple daily restart times with timezone support and day-of-week filters.
+- **Performance Watchdog**: Continuously tracks TPS and RAM usage. Consecutive check thresholds prevent false alarms.
+- **Emergency Restarts**: Triggers a reboot countdown if TPS remains critically low or memory stays near exhaustion.
+- **Player Alerts**: Configurable countdown warnings in chat, titles, action bar, and note block sounds.
+- **World Save Protection**: Configurable delay to ensure chunks save before the process exits.
+- **Backend Integrations**: Supports host panels, Pterodactyl API, Docker policies, systemd, and local restart scripts.
+- **Hot Reload**: Update settings live using `/reboot reload`.
+- **PlaceholderAPI Support**: 8 placeholders for tab lists, scoreboards, and MOTDs on Bukkit and Folia servers.
 
 ---
 
-## Backend System & Startup Loops
+## How Restarts Work (Backends)
 
-RedstoneReboot decides when a restart should happen, then passes the final action to the backend you choose:
+A Minecraft plugin cannot boot itself back up from inside a terminated Java process. When the restart countdown finishes, RedstoneReboot shuts down the server cleanly. Bringing the server back online requires an external watcher:
 
-- **DEPEND_ON_HOST** — Stops Minecraft cleanly and relies on your panel, container policy, service, or loop script to start it again
-- **LOCALSCRIPT** — Uses a generated wrapper script for local process restarts
-- **SYSTEMD** — Hands the restart to a Linux systemd service
-- **DOCKER** — Works with a container restart policy
-- **PTERODACTYL** — Sends a power action through the panel API
+- **DEPEND_ON_HOST** *(Default)*: The server stops cleanly, and your game hosting panel (Pterodactyl, Bloom, PebbleHost, Bisect, etc.) or container supervisor boots it back up. No startup flags or API keys needed.
+- **LOCALSCRIPT**: Uses an auto-generated wrapper script (`redstonereboot-start.sh` / `.bat`) with a restart loop for local machines or dedicated servers.
+- **SYSTEMD**: Coordinates restarts through Linux systemd services.
+- **DOCKER**: Works with Docker container restart policies (`restart: always`).
+- **PTERODACTYL**: Sends power restart signals directly through the Pterodactyl Client API.
 
-The default, **DEPEND_ON_HOST**, needs no API credentials. Use it when your host already restarts the process after a clean shutdown. Choose Pterodactyl or another explicit backend only when you want RedstoneReboot to make that handoff itself. `/reboot doctor` checks the selected backend before you rely on it.
+### What does the ASSISTED state mean in `/reboot doctor`?
 
----
+When you enable an external supervisor backend (`LOCALSCRIPT`, `SYSTEMD`, or `DOCKER`), RedstoneReboot checks for proof that an outside restart loop is actually watching the process. It checks for `-Dredstonereboot.active=true` in your Java startup arguments or `REDSTONEREBOOT_ACTIVE=1` in your environment.
 
-## File Selection
+If that flag is missing, `/reboot doctor` flags the state as **ASSISTED**. This safety check stops the server from shutting down into an unmonitored state where it stays offline forever.
 
-Choose the file that matches your server platform:
-
-### Platform Compatibility
-- **Bukkit / Spigot / Paper / Purpur**: 1.9.x to 26.3+ (Java 17 minimum, or version required by server)
-- **Folia**: 1.20.1+ to 26.3+ (dedicated region-threaded artifact)
-- **Fabric**: 1.20.1+ to 26.3+ (requires Fabric API; Java 25 for 26.x)
-- **Forge**: 1.20.4+ to 26.3+ (dedicated server-side mod build; Java 25 for 26.x)
-- **NeoForge**: 1.21.1+ to 26.3+ (dedicated server-side mod build; Java 25 for 26.x)
+If your game host already boots stopped servers automatically, you do not need supervisor wiring or startup flags. Keep `backends-enabled=false` or set `active-backend=DEPEND_ON_HOST` in `restart-backends.properties`.
 
 ---
 
-| Platform | Distribution Type | File |
-|-----------|------------------|------|
-| **Bukkit / Spigot / Paper / Purpur** | Plugin | `RedstoneReboot-Bukkit-<version>.jar` |
-| **Folia** | Plugin | `RedstoneReboot-Folia-<version>.jar` |
-| **Fabric** | Mod | `RedstoneReboot-Fabric-<version>.jar` |
-| **Forge** | Mod | `RedstoneReboot-Forge-<version>.jar` |
-| **NeoForge** | Mod | `RedstoneReboot-NeoForge-<version>.jar` |
+## Platform Compatibility & Downloads
 
----
+Download the jar built for your loader:
 
-## Supported Versions
-
-| Platform | Minecraft Versions | Notes |
-|----------|--------------------|-------|
-| Bukkit-family servers | `1.9` through `26.3+` | Java 8+ *(legacy)*, Java 17+ *(modern)*, Java 25 *(26.x+)* |
-| Folia | `1.20+` through `26.3+` | Dedicated region-threaded build |
-| Fabric | `1.20.1` (Java 17) / `26.1` through `26.3+` (Java 25) | Requires Fabric API |
-| Forge | `1.20.4` (Java 17) / `26.1` through `26.3+` (Java 25) | Dedicated server-side mod build |
-| NeoForge | `1.21.1` (Java 21) / `26.1` through `26.3+` (Java 25) | Dedicated server-side mod build |
+| Platform | Type | File Name | Java Version | Supported MC |
+|---|---|---|---|---|
+| **Paper / Purpur / Spigot** | Plugin | `RedstoneReboot-Bukkit-<version>.jar` | Java 17+ / Java 25 (26.x+) | 1.9 to 26.3+ |
+| **Folia** | Plugin | `RedstoneReboot-Folia-<version>.jar` | Java 17+ / Java 25 (26.x+) | 1.20 to 26.3+ |
+| **Fabric** | Mod | `RedstoneReboot-Fabric-<version>.jar` | Java 17 (1.20.1) / Java 25 (26.x+) | 1.20.1, 26.1, 26.2, 26.3+ |
+| **Forge** | Mod | `RedstoneReboot-Forge-<version>.jar` | Java 17 (1.20.4) / Java 25 (26.x+) | 1.20.4, 26.1, 26.2, 26.3+ |
+| **NeoForge** | Mod | `RedstoneReboot-NeoForge-<version>.jar` | Java 21 (1.21.1) / Java 25 (26.x+) | 1.21.1, 26.1, 26.2, 26.3+ |
 
 ---
 
 ## Installation
 
-### Plugin Install (Bukkit/Folia)
-1. Download the correct plugin file.
-2. Place it in `plugins/`.
-3. Start the server — config files are generated automatically.
-4. Configure `plugins/RedstoneReboot/config.yml` and `restart-backends.properties`.
-5. Run `/reboot reload` to apply.
+### Paper, Purpur, Spigot, Folia
+1. Place the plugin jar into your server's `plugins/` directory.
+2. Start the server to generate configuration files.
+3. Edit `plugins/RedstoneReboot/config.yml` and `restart-backends.properties`.
+4. Run `/reboot reload` to apply your changes.
 
-### Mod Install (Fabric/Forge/NeoForge)
-1. Download the correct mod file.
-2. Place it in `mods/` (Fabric requires Fabric API).
-3. Start the server.
-4. Configure `config/redstonereboot/redstonereboot.properties` and `config/redstonereboot/restart-backends.properties`.
-5. Run `/reboot reload` to apply.
+### Fabric, Forge, NeoForge
+1. Place the mod jar into your server's `mods/` directory (Fabric requires Fabric API).
+2. Start the server to generate configuration files.
+3. Edit `config/redstonereboot/redstonereboot.properties` and `config/redstonereboot/restart-backends.properties`.
+4. Run `/reboot reload` to apply your changes.
 
 ---
 
-## Commands
+## Commands & Permissions
 
-| Command | Description |
-|---------|-------------|
-| `/reboot` | View status and help |
-| `/reboot now [delay]` | Trigger a restart countdown |
-| `/reboot schedule <seconds>` | Schedule a future restart |
-| `/reboot cancel` | Cancel a pending restart |
-| `/reboot status` | Show restart schedule status |
-| `/reboot info` | Show health information |
-| `/reboot doctor` | Run backend & environment diagnostics |
-| `/reboot reload` | Hot-reload all configuration |
-
----
-
-## PlaceholderAPI (Bukkit Builds)
-
-| Placeholder | Example Output |
-|-------------|----------------|
-| `%redstonereboot_next_restart%` | `2026-04-15 06:00:00 Europe/London` |
-| `%redstonereboot_time_until%` | `2h 30m` |
-| `%redstonereboot_status%` | `Normal operation` |
-| `%redstonereboot_reason%` | `Scheduled Restart` |
-| `%redstonereboot_tps%` | `19.8` |
-| `%redstonereboot_memory%` | `62.4%` |
-| `%redstonereboot_version%` | `1.6.4` |
-| `%redstonereboot_timezone%` | `Europe/London` |
-
-> MOTD compatible as of v1.3.3+.
+| Command | Permission | Description |
+|---|---|---|
+| `/reboot` | `redstonereboot.use` | View current status and command overview |
+| `/reboot now [seconds]` | `redstonereboot.now` | Trigger a restart countdown immediately |
+| `/reboot schedule <seconds>` | `redstonereboot.schedule` | Schedule a restart after a set delay |
+| `/reboot cancel` | `redstonereboot.cancel` | Cancel an active countdown |
+| `/reboot status` | `redstonereboot.status` | Display the next scheduled restart time |
+| `/reboot info` | `redstonereboot.info` | Display live TPS, memory, and uptime |
+| `/reboot doctor` | `redstonereboot.doctor` | Run backend and environment diagnostics |
+| `/reboot reload` | `redstonereboot.reload` | Reload configuration files live |
 
 ---
 
-## Quick Links
+## PlaceholderAPI (Bukkit & Folia)
 
-- [**Complete Wiki**](https://github.com/DemonZ-Development/RedstoneReboot/wiki)
-- [**GitHub Repository**](https://github.com/DemonZ-Development/RedstoneReboot)
-- [**Developer API Docs**](https://github.com/DemonZ-Development/RedstoneReboot/blob/main/wiki/Developer-API.md)
-- [**bStats**](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
-- [**Bug Reports & Issues**](https://github.com/DemonZ-Development/RedstoneReboot/issues)
-- [**Discord Support**](https://discord.gg/GYsTt96ypf)
+| Placeholder | Example Output | Description |
+|---|---|---|
+| `%redstonereboot_next_restart%` | `2026-10-06 06:00:00 Europe/London` | Next scheduled restart time |
+| `%redstonereboot_time_until%` | `2h 30m` | Time remaining until next reboot |
+| `%redstonereboot_status%` | `Normal operation` | Active status or countdown info |
+| `%redstonereboot_reason%` | `Scheduled Restart` | Initiator or trigger reason |
+| `%redstonereboot_tps%` | `19.8` | Current server TPS |
+| `%redstonereboot_memory%` | `62.4%` | Current RAM consumption percentage |
+| `%redstonereboot_version%` | `1.6.5` | Installed plugin version |
+| `%redstonereboot_timezone%` | `Europe/London` | Active configured timezone |
 
 ---
 
-## Live Telemetry
+## Links & Community
 
-<div align="center">
-
-[![bStats Chart](https://bstats.org/signatures/bukkit/RedstoneReboot.svg)](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
-
-</div>
+- [Documentation Wiki](https://github.com/DemonZ-Development/RedstoneReboot/wiki)
+- [Source Code](https://github.com/DemonZ-Development/RedstoneReboot)
+- [Issue Tracker](https://github.com/DemonZ-Development/RedstoneReboot/issues)
+- [Discord Server](https://discord.gg/GYsTt96ypf)
+- [bStats Metrics](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 ---
 
@@ -159,4 +127,4 @@ Server hosting for this project is sponsored by Nexeu Hosting.
 
 ---
 
-Made by [**DemonZ Development**](https://demonz.org)
+Maintained by [**DemonZ Development**](https://demonz.org)

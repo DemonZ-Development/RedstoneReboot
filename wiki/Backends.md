@@ -68,9 +68,9 @@ Use this when the Pterodactyl panel API manages the restart lifecycle.
 Backend states:
 
 - `FULL`: Configured and verified
-- `ASSISTED`: Configured with partial verification
+- `ASSISTED`: Configured with partial verification. For supervisor backends, this indicates wiring proof has not been detected. If your hosting panel already auto-reboots stopped servers, you can safely use `DEPEND_ON_HOST`.
 - `GENERATED`: Script or configuration exists, wiring incomplete
-- `DEPEND_ON_HOST`: Relies on host environment post-shutdown
+- `DEPEND_ON_HOST`: Relies on host environment post-shutdown (works out of the box for most game hosting panels)
 - `MISCONFIGURED`: Missing or invalid settings
 
 ## Lockout Behavior

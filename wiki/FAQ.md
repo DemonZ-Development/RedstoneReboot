@@ -92,6 +92,12 @@ The doctor output reports `DEPEND_ON_HOST` because RedstoneReboot hands off proc
 
 Check the **Detected Env** line in `/reboot doctor`. If it displays SYSTEMD, DOCKER, or PTERODACTYL alongside DEPEND_ON_HOST, your setup is healthy. You can configure the matching backend in `restart-backends.properties` if you prefer direct API control.
 
+### Why does `/reboot doctor` show the ASSISTED state?
+
+When an external supervisor backend (such as `LOCALSCRIPT`, `SYSTEMD`, or `DOCKER`) is configured, RedstoneReboot verifies whether an external watcher or restart loop is active (`-Dredstonereboot.active=true` or `REDSTONEREBOOT_ACTIVE=1`). Until that proof is present, it reports the **`ASSISTED`** state to prevent the server from shutting down and staying offline permanently.
+
+If your hosting panel already restarts stopped servers automatically (like Pterodactyl, Bloom, or PebbleHost), you do not need external backends or startup flags! Simply keep `backends-enabled=false` or set `active-backend=DEPEND_ON_HOST`.
+
 ### What is the lockout?
 
 When a backend returns an uncertain result (e.g., a Pterodactyl API timeout), RedstoneReboot enforces a temporary lockout period (`lockout-duration-seconds` in backend config) to prevent conflicting restart calls.
