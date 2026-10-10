@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class ConfigManager implements PlatformConfig {
 
-    public static final int CURRENT_CONFIG_VERSION = 3;
+    public static final int CURRENT_CONFIG_VERSION = 4;
 
     private final Plugin plugin;
     private volatile FileConfiguration config;
@@ -79,6 +79,12 @@ public class ConfigManager implements PlatformConfig {
             }
             if (!cfg.contains("advanced.shutdown-delay-ticks")) {
                 cfg.set("advanced.shutdown-delay-ticks", 60);
+            }
+        }
+
+        if (version < 4) {
+            if (!cfg.contains("advanced.history-file")) {
+                cfg.set("advanced.history-file", "logs/redstonereboot/restarts.log");
             }
         }
 
@@ -349,6 +355,15 @@ public class ConfigManager implements PlatformConfig {
 
     public String getDiscordUsername() {
         return config.getString("integrations.discord.username", "RedstoneReboot");
+    }
+
+    @Override
+    public String getRestartHistoryFile() {
+        String path = config.getString("advanced.history-file");
+        if (path == null || path.isBlank()) {
+            path = config.getString("general.history-file");
+        }
+        return (path != null && !path.isBlank()) ? path.trim() : "logs/redstonereboot/restarts.log";
     }
 
     public FileConfiguration getRawConfig() {

@@ -70,4 +70,6 @@ public interface PlatformConfig {
     default String getDiscordWebhookUrl() { return ""; }
 
     default String getDiscordUsername() { return "RedstoneReboot"; }
+
+    default String getRestartHistoryFile() { return "logs/redstonereboot/restarts.log"; }
 }

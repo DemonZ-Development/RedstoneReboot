@@ -94,6 +94,7 @@ public class SimplePlatformConfig implements PlatformConfig {
     private volatile boolean discordEnabled = false;
     private volatile String discordWebhookUrl = "";
     private volatile String discordUsername = "RedstoneReboot";
+    private volatile String restartHistoryFile = "logs/redstonereboot/restarts.log";
 
     @Override public String getPrefix() { return prefix; }
     @Override public boolean isChatAlertsEnabled() { return chatAlertsEnabled; }
@@ -106,6 +107,7 @@ public class SimplePlatformConfig implements PlatformConfig {
     @Override public boolean isDiscordEnabled() { return discordEnabled; }
     @Override public String getDiscordWebhookUrl() { return discordWebhookUrl; }
     @Override public String getDiscordUsername() { return discordUsername; }
+    @Override public String getRestartHistoryFile() { return restartHistoryFile; }
 
     public void setPrefix(String prefix) { this.prefix = prefix; }
     public void setChatAlertsEnabled(boolean enabled) { this.chatAlertsEnabled = enabled; }
@@ -118,4 +120,5 @@ public class SimplePlatformConfig implements PlatformConfig {
     public void setDiscordEnabled(boolean enabled) { this.discordEnabled = enabled; }
     public void setDiscordWebhookUrl(String url) { this.discordWebhookUrl = url; }
     public void setDiscordUsername(String username) { this.discordUsername = username; }
+    public void setRestartHistoryFile(String restartHistoryFile) { this.restartHistoryFile = restartHistoryFile; }
 }

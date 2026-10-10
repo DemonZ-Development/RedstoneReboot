@@ -1,13 +1,14 @@
-## RedstoneReboot 1.6.5
+## RedstoneReboot 1.6.6
 
-A maintenance and documentation release clarifying host-managed restart workflows.
+A quality of life patch release protecting restart history across modpack updates.
 
 ### Highlights
 
-- Clarified default restart mode messaging: `DEPEND_ON_HOST` is the standard mode for panel environments (Pterodactyl, Bloom, PebbleHost, Bisect, Docker) where the host automatically restarts stopped processes.
-- Improved `/reboot doctor` diagnostics to explain what `ASSISTED` means on supervisor backends and confirm container-managed environments safely.
-- Updated documentation and marketplace listings across Modrinth, CurseForge, Hangar, SpigotMC, and Bukkit.
-- Split CurseForge documentation into dedicated listings for Minecraft Mods and Bukkit Plugins.
+- Moved default restart history logging from the config/plugin folder to a dedicated subfolder at `logs/redstonereboot/restarts.log` so modpack updates wiping `config/` preserve your restart logs without cluttering the root logs folder.
+- Added a configurable `history-file` setting across all platforms (Paper, Purpur, Folia, Fabric, Forge, NeoForge).
+- Bumped configuration versions (Bukkit v4, Mod Platforms v3) with automatic migration to preserve existing user setups seamlessly.
+- Added automatic legacy migration: existing `restarts.log` files found in the data directory are safely relocated on first boot.
+- Added automatic directory creation to ensure custom log paths create missing folders reliably.
 
 ### Requirements
 

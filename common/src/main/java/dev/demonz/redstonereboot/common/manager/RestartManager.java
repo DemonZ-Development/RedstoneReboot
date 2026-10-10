@@ -84,12 +84,16 @@ public class RestartManager {
         this.config = config;
         this.backendRegistry = backendRegistry;
         this.nowSupplier = nowSupplier;
-        this.history = new RestartHistory(dataFolder, nowSupplier);
+        String historyFile = (config != null) ? config.getRestartHistoryFile() : "logs/redstonereboot/restarts.log";
+        this.history = new RestartHistory(dataFolder, historyFile, nowSupplier);
     }
 
     public void initialize() {
         scheduleRestarts();
         logger.info("RestartManager initialized - Timezone: " + config.getTimezone());
+        if (history.getLogFile() != null) {
+            logger.info("Restart history file: " + history.getLogFile());
+        }
     }
 
     public synchronized void scheduleRestarts() {

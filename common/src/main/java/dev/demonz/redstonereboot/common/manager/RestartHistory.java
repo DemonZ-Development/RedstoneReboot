@@ -1,5 +1,6 @@
 package dev.demonz.redstonereboot.common.manager;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -23,12 +24,73 @@ public class RestartHistory {
     private final Supplier<ZonedDateTime> nowSupplier;
 
     public RestartHistory(Path dataFolder) {
-        this(dataFolder, ZonedDateTime::now);
+        this(dataFolder, "logs/redstonereboot/restarts.log", ZonedDateTime::now);
     }
 
     public RestartHistory(Path dataFolder, Supplier<ZonedDateTime> nowSupplier) {
-        this.logFile = (dataFolder != null) ? dataFolder.resolve("restarts.log") : null;
+        this(dataFolder, "logs/redstonereboot/restarts.log", nowSupplier);
+    }
+
+    public RestartHistory(Path dataFolder, String customLogPath, Supplier<ZonedDateTime> nowSupplier) {
+        this.logFile = resolveLogFile(dataFolder, customLogPath);
         this.nowSupplier = nowSupplier;
+        migrateLegacyLog(dataFolder, this.logFile);
+    }
+
+    public Path getLogFile() {
+        return logFile;
+    }
+
+    private static Path resolveLogFile(Path dataFolder, String customPath) {
+        if (customPath == null || customPath.isBlank()) {
+            return Path.of("logs", "redstonereboot", "restarts.log");
+        }
+        String trimmed = customPath.trim();
+        if (dataFolder != null && (trimmed.startsWith("{dataFolder}") || trimmed.startsWith("dataFolder"))) {
+            String remainder = trimmed.replaceFirst("^\\{?dataFolder\\}?[/\\\\]?", "");
+            return remainder.isBlank() ? dataFolder.resolve("restarts.log") : dataFolder.resolve(remainder);
+        }
+        return Path.of(trimmed);
+    }
+
+    private static void migrateLegacyLog(Path dataFolder, Path targetLog) {
+        if (targetLog == null) {
+            return;
+        }
+        try {
+            Path normalizedTarget = targetLog.toAbsolutePath().normalize();
+            if (Files.exists(normalizedTarget)) {
+                return;
+            }
+            if (dataFolder != null) {
+                Path legacyLog = dataFolder.resolve("restarts.log");
+                if (Files.exists(legacyLog)) {
+                    Path normalizedLegacy = legacyLog.toAbsolutePath().normalize();
+                    if (!normalizedLegacy.equals(normalizedTarget)) {
+                        relocateLog(legacyLog, targetLog);
+                        return;
+                    }
+                }
+            }
+            Path legacyRootLog = Path.of("logs", "restarts.log");
+            if (Files.exists(legacyRootLog)) {
+                Path normalizedRoot = legacyRootLog.toAbsolutePath().normalize();
+                if (!normalizedRoot.equals(normalizedTarget)) {
+                    relocateLog(legacyRootLog, targetLog);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void relocateLog(Path source, Path target) throws IOException {
+        Path targetParent = target.toAbsolutePath().getParent();
+        if (targetParent != null && !Files.exists(targetParent)) {
+            Files.createDirectories(targetParent);
+        }
+        if (!Files.exists(target)) {
+            Files.move(source, target);
+        }
     }
 
     public synchronized void record(String type, String reason, String initiator) {
@@ -40,6 +102,10 @@ public class RestartHistory {
         }
         if (logFile != null) {
             try {
+                Path parent = logFile.toAbsolutePath().getParent();
+                if (parent != null && !Files.exists(parent)) {
+                    Files.createDirectories(parent);
+                }
                 Files.writeString(logFile, entry.toLogLine() + System.lineSeparator(),
                     StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             } catch (Exception ignored) {

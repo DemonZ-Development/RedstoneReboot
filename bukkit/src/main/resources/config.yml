@@ -70,5 +70,6 @@ advanced:
   metrics-enabled: true
   shutdown-delay-ticks: 60
   backup-on-migration: true
+  history-file: "logs/redstonereboot/restarts.log"
 
-config-version: 3
+config-version: 4

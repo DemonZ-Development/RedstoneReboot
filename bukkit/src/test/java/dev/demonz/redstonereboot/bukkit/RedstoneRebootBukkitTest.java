@@ -186,6 +186,7 @@ public class RedstoneRebootBukkitTest {
         assertTrue(fileConfig.getBoolean("placeholders.enabled"));
         assertTrue(fileConfig.getBoolean("advanced.metrics-enabled"));
         assertEquals(60, fileConfig.getInt("advanced.shutdown-delay-ticks"));
+        assertEquals("logs/redstonereboot/restarts.log", fileConfig.getString("advanced.history-file"));
 
         assertFalse(fileConfig.contains("permissions.luckperms.default-permission"));
         assertFalse(fileConfig.contains("permissions.luckperms.admin-permission"));
@@ -195,6 +196,35 @@ public class RedstoneRebootBukkitTest {
         File backupFile = new File(plugin.getDataFolder(), "config.yml.v1.backup");
         assertTrue(backupFile.exists());
 
+        backupFile.delete();
+    }
+
+    @Test
+    public void testConfigMigrationFromV3ToV4() throws Exception {
+        File configFile = new File(plugin.getDataFolder(), "config.yml");
+        assertTrue(configFile.exists());
+
+        try (FileWriter writer = new FileWriter(configFile)) {
+            writer.write("general:\n" +
+                         "  plugin-prefix: \"§8[§cRedstone§8] §aReboot\"\n" +
+                         "  debug-mode: false\n" +
+                         "  strict-validation: true\n" +
+                         "advanced:\n" +
+                         "  metrics-enabled: true\n" +
+                         "  shutdown-delay-ticks: 60\n" +
+                         "config-version: 3\n");
+        }
+
+        plugin.reloadPluginState();
+
+        ConfigManager cfg = plugin.getConfigManager();
+        assertEquals(ConfigManager.CURRENT_CONFIG_VERSION, cfg.getConfigVersion());
+
+        FileConfiguration fileConfig = plugin.getConfig();
+        assertEquals("logs/redstonereboot/restarts.log", fileConfig.getString("advanced.history-file"));
+
+        File backupFile = new File(plugin.getDataFolder(), "config.yml.v3.backup");
+        assertTrue(backupFile.exists());
         backupFile.delete();
     }
 }

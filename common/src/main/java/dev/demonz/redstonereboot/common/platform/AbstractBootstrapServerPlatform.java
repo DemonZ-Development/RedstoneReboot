@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 
 public abstract class AbstractBootstrapServerPlatform implements ServerPlatform {
 
-    public static final int CURRENT_MOD_CONFIG_VERSION = 2;
+    public static final int CURRENT_MOD_CONFIG_VERSION = 3;
 
     private final Logger logger;
     private final String platformName;
@@ -172,6 +172,13 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             String discordUser = props.getProperty("discord-username");
             if (discordUser != null && !discordUser.isBlank()) {
                 config.setDiscordUsername(discordUser);
+            }
+            String historyFile = props.getProperty("history-file");
+            if (historyFile == null) {
+                historyFile = props.getProperty("restart-history-file");
+            }
+            if (historyFile != null && !historyFile.isBlank()) {
+                config.setRestartHistoryFile(historyFile.trim());
             }
         } catch (IOException exception) {
             logger.warning("Failed to load config: " + exception.getMessage());
@@ -453,6 +460,7 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         props.setProperty("discord-enabled", "false");
         props.setProperty("discord-webhook-url", "");
         props.setProperty("discord-username", "RedstoneReboot");
+        props.setProperty("history-file", "logs/redstonereboot/restarts.log");
 
         try (OutputStream out = Files.newOutputStream(configPath)) {
             out.write(("# config-version: " + CURRENT_MOD_CONFIG_VERSION + " (do not edit manually)\n").getBytes());
@@ -480,13 +488,6 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             }
         }
         if (oldVersion < 2) {
-
-            if (!props.containsKey("config-version")) {
-                props.setProperty("config-version", String.valueOf(CURRENT_MOD_CONFIG_VERSION));
-            } else {
-                props.setProperty("config-version", String.valueOf(CURRENT_MOD_CONFIG_VERSION));
-            }
-
             props.putIfAbsent("scheduled-restarts-enabled", "false");
             props.putIfAbsent("scheduled-times", "06:00,18:00");
             props.putIfAbsent("scheduled-days", "ALL");
@@ -519,6 +520,10 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
             props.putIfAbsent("discord-webhook-url", "");
             props.putIfAbsent("discord-username", "RedstoneReboot");
         }
+        if (oldVersion < 3) {
+            props.putIfAbsent("history-file", "logs/redstonereboot/restarts.log");
+        }
+        props.setProperty("config-version", String.valueOf(CURRENT_MOD_CONFIG_VERSION));
 
         try (OutputStream out = Files.newOutputStream(configPath)) {
             out.write(("# config-version: " + CURRENT_MOD_CONFIG_VERSION + " (migrated from v" + oldVersion + ")\n").getBytes());
@@ -624,5 +629,6 @@ public abstract class AbstractBootstrapServerPlatform implements ServerPlatform 
         target.setDiscordEnabled(source.isDiscordEnabled());
         target.setDiscordWebhookUrl(source.getDiscordWebhookUrl());
         target.setDiscordUsername(source.getDiscordUsername());
+        target.setRestartHistoryFile(source.getRestartHistoryFile());
     }
 }
