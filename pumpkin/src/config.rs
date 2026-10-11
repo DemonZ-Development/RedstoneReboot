@@ -139,11 +139,15 @@ impl Default for AlertsConfig {
     }
 }
 
+pub const CURRENT_CONFIG_VERSION: u32 = 4;
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "kebab-case", default)]
 pub struct AdvancedConfig {
     pub history_file: String,
     pub shutdown_delay_ticks: u32,
+    pub backup_on_migration: bool,
+    pub check_updates: bool,
 }
 
 impl Default for AdvancedConfig {
@@ -151,6 +155,8 @@ impl Default for AdvancedConfig {
         Self {
             history_file: "logs/redstonereboot/restarts.log".to_string(),
             shutdown_delay_ticks: 60,
+            backup_on_migration: true,
+            check_updates: true,
         }
     }
 }
@@ -194,7 +200,7 @@ impl Default for PluginConfig {
             alerts: AlertsConfig::default(),
             advanced: AdvancedConfig::default(),
             backend: BackendConfig::default(),
-            config_version: 4,
+            config_version: CURRENT_CONFIG_VERSION,
         }
     }
 }
@@ -208,6 +214,49 @@ impl PluginConfig {
     pub fn load_from_path(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
         let content = fs::read_to_string(path)?;
         Self::load_from_str(&content)
+    }
+
+    pub fn load_and_migrate(path: &Path) -> Result<Self, Box<dyn std::error::Error>> {
+        if !path.exists() {
+            let default_cfg = Self::default();
+            default_cfg.save_to_path(path)?;
+            return Ok(default_cfg);
+        }
+
+        let content = fs::read_to_string(path)?;
+        let raw_value: serde_yaml::Value = serde_yaml::from_str(&content)?;
+
+        let detected_version = raw_value
+            .get("config-version")
+            .and_then(|v| v.as_u64())
+            .unwrap_or(1) as u32;
+
+        let mut config: PluginConfig = serde_yaml::from_value(raw_value.clone())
+            .or_else(|_| Self::load_from_str(&content))?;
+
+        if detected_version < CURRENT_CONFIG_VERSION {
+            let backup_enabled = raw_value
+                .get("advanced")
+                .and_then(|a| a.get("backup-on-migration"))
+                .and_then(|b| b.as_bool())
+                .unwrap_or(true);
+
+            if backup_enabled {
+                let backup_path = path.with_file_name(format!(
+                    "{}.v{}.backup",
+                    path.file_name()
+                        .and_then(|n| n.to_str())
+                        .unwrap_or("config.yml"),
+                    detected_version
+                ));
+                let _ = fs::copy(path, &backup_path);
+            }
+
+            config.config_version = CURRENT_CONFIG_VERSION;
+            config.save_to_path(path)?;
+        }
+
+        Ok(config)
     }
 
     pub fn save_to_path(&self, path: &Path) -> Result<(), Box<dyn std::error::Error>> {

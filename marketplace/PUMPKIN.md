@@ -20,7 +20,9 @@ RedstoneReboot schedules restarts, alerts players before downtime, and saves wor
 • Loop scripts: Generates `run.bat` and `run.sh` so your server boots after shutdown.  
 • Data safety: Saves chunks and player data before stopping Pumpkin.  
 • Marker check: Differentiates `/reboot` commands from `/stop` so manual shutdowns stay off.  
-• Commands: Manage reboots with `/reboot now`, `/reboot cancel`, `/reboot status`, and `/reboot history`.  
+• Commands: Manage reboots with `/reboot now`, `/reboot cancel`, `/reboot status`, `/reboot checkupdate`, and `/reboot history`.  
+• Updates: Checks demonz.org for the newest plugin releases and patch notifications.  
+• Config migration: Automatically creates backups and upgrades older configurations.  
 • Logging: Writes restart timestamps and trigger reasons to `logs/redstonereboot/restarts.log`.  
 
 ***
@@ -126,7 +128,7 @@ done
 ### Step 1: Install Plugin
 1. Place `redstonereboot_pumpkin.wasm` in your server's `plugins/` directory.
 2. Launch the server once so Pumpkin loads the plugin.
-3. Type `y` in the server console when prompted to grant plugin permissions (`fs.read.data`, `fs.write.data`, `sys.env`). Pumpkin records this approval in `plugins/permission_cache.json`.
+3. Type `y` in the server console when prompted to grant plugin permissions (`fs.read.data`, `fs.write.data`, `sys.env`, `http.outbound`, `network.dns`). Pumpkin records this approval in `plugins/permission_cache.json`.
 
 ### Step 2: Choose Launch Method
 • **Game Panels and Docker Containers**: Start your server normally through the panel interface. RedstoneReboot detects the environment and uses `DEPEND_ON_HOST`.  
@@ -148,6 +150,7 @@ Edit `plugins/data/RedstoneReboot/config.yml` to set restart schedules, warning 
 | `/reboot cancel` | `redstonereboot.use` | Cancel an active reboot countdown |
 | `/reboot history` | `redstonereboot.use` | View recent server restarts and reasons |
 | `/reboot reload` | `redstonereboot.use` | Reload configuration from disk without restarting |
+| `/reboot checkupdate` | `redstonereboot.use` | Check demonz.org for the latest plugin releases |
 | `/reboot help` | `redstonereboot.use` | Display available command syntax |
 
 ***
@@ -208,6 +211,8 @@ alerts:
 advanced:
   history-file: "logs/redstonereboot/restarts.log"
   shutdown-delay-ticks: 60
+  backup-on-migration: true
+  check-updates: true
 
 backend:
   active-backend: "AUTO"

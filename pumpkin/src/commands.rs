@@ -3,7 +3,7 @@ use crate::manager::{RestartManager, RestartReason};
 use std::path::PathBuf;
 use std::sync::Arc;
 
-pub const VERSION: &str = "1.6.6";
+pub const VERSION: &str = "1.6.7";
 pub const PLATFORM: &str = "Pumpkin";
 
 pub trait MessageSender {
@@ -87,6 +87,17 @@ impl CommandProcessor {
                 next.format("%Y-%m-%d %H:%M:%S"),
                 status.timezone
             ));
+        }
+
+        if let Some(update) = crate::updater::get_cached_update() {
+            if update.has_update || crate::updater::is_newer_version(VERSION, &update.latest_version) {
+                sender.send(&format!(
+                    "§eUpdate: §aNew v{} available! §7(Run /reboot checkupdate or visit demonz.org)",
+                    update.latest_version
+                ));
+            } else {
+                sender.send(&format!("§aUpdate: §fUp to date (v{})", VERSION));
+            }
         }
     }
 
@@ -178,6 +189,32 @@ impl CommandProcessor {
         }
     }
 
+    pub fn handle_check_update(&self, sender: &mut dyn MessageSender) {
+        sender.send("§7Checking for updates from demonz.org...");
+        match crate::updater::fetch_updates(VERSION) {
+            Ok(update) => {
+                if update.has_update || crate::updater::is_newer_version(VERSION, &update.latest_version) {
+                    sender.send(&format!(
+                        "§aA new version is available: §ev{} §7(Current: §f{}§7)",
+                        update.latest_version, VERSION
+                    ));
+                    if let Some(dl) = update
+                        .download
+                        .as_ref()
+                        .and_then(|d| d.direct_url.as_ref().or(d.url.as_ref()))
+                    {
+                        sender.send(&format!("§7Download: §b{}", dl));
+                    }
+                } else {
+                    sender.send(&format!("§aRedstoneReboot is up to date (v{}).", VERSION));
+                }
+            }
+            Err(err) => {
+                sender.send(&format!("§cFailed to check updates: {}", err));
+            }
+        }
+    }
+
     pub fn handle_help(&self, sender: &mut dyn MessageSender) {
         sender.send("§6=== RedstoneReboot Commands ===");
         sender.send("§7/reboot status §8- §fView restart status");
@@ -186,6 +223,7 @@ impl CommandProcessor {
         sender.send("§7/reboot cancel §8- §fCancel restart");
         sender.send("§7/reboot reload §8- §fReload config");
         sender.send("§7/reboot history §8- §fRecent restart events");
+        sender.send("§7/reboot checkupdate §8- §fCheck for updates");
         sender.send("§7/reboot help §8- §fShow this menu");
     }
 
@@ -222,6 +260,7 @@ impl CommandProcessor {
             "cancel" => self.handle_cancel(sender, sender_name),
             "reload" => self.handle_reload(sender),
             "history" => self.handle_history(sender),
+            "checkupdate" | "update" => self.handle_check_update(sender),
             "help" => self.handle_help(sender),
             _ => {
                 sender.send("§cUnknown subcommand. Use /reboot help for command list.");

@@ -609,3 +609,123 @@ fn test_status_includes_backend() {
     processor.dispatch(&mut sender, "Cyrusbye720", &["status"]);
     assert!(sender.messages.iter().any(|m| m.contains("Backend:")));
 }
+
+#[test]
+fn test_config_load_and_migrate_from_v1() {
+    let dir = tempdir().unwrap();
+    let config_path = dir.path().join("config.yml");
+
+    let legacy_yaml = r#"
+general:
+  plugin-prefix: "§c[OldPrefix] "
+  debug-mode: true
+  strict-validation: false
+scheduled-restarts:
+  enabled: true
+  times:
+    - "04:00"
+  timezone: "UTC"
+  days:
+    - "ALL"
+  warning-time: 120
+config-version: 1
+"#;
+    fs::write(&config_path, legacy_yaml).unwrap();
+
+    let migrated = PluginConfig::load_and_migrate(&config_path).unwrap();
+    assert_eq!(migrated.config_version, 4);
+    assert_eq!(migrated.general.plugin_prefix, "§c[OldPrefix] ");
+    assert!(migrated.general.debug_mode);
+    assert_eq!(migrated.scheduled_restarts.times, vec!["04:00"]);
+    assert_eq!(migrated.advanced.history_file, "logs/redstonereboot/restarts.log");
+    assert!(migrated.advanced.check_updates);
+    assert!(migrated.advanced.backup_on_migration);
+
+    let backup_file = dir.path().join("config.yml.v1.backup");
+    assert!(backup_file.exists());
+    let backup_content = fs::read_to_string(&backup_file).unwrap();
+    assert!(backup_content.contains("config-version: 1"));
+
+    let reloaded = PluginConfig::load_from_path(&config_path).unwrap();
+    assert_eq!(reloaded.config_version, 4);
+    assert_eq!(reloaded.advanced.history_file, "logs/redstonereboot/restarts.log");
+}
+
+#[test]
+fn test_config_load_and_migrate_from_v3() {
+    let dir = tempdir().unwrap();
+    let config_path = dir.path().join("config.yml");
+
+    let v3_yaml = r#"
+general:
+  plugin-prefix: "§8[§cRedstone§8] §aReboot"
+advanced:
+  shutdown-delay-ticks: 40
+  backup-on-migration: true
+config-version: 3
+"#;
+    fs::write(&config_path, v3_yaml).unwrap();
+
+    let migrated = PluginConfig::load_and_migrate(&config_path).unwrap();
+    assert_eq!(migrated.config_version, 4);
+    assert_eq!(migrated.advanced.shutdown_delay_ticks, 40);
+    assert_eq!(migrated.advanced.history_file, "logs/redstonereboot/restarts.log");
+
+    let backup_file = dir.path().join("config.yml.v3.backup");
+    assert!(backup_file.exists());
+}
+
+#[test]
+fn test_updater_is_newer_version() {
+    use redstonereboot_pumpkin::updater::is_newer_version;
+
+    assert!(is_newer_version("1.6.6", "1.6.7"));
+    assert!(is_newer_version("1.6.7", "1.6.8"));
+    assert!(is_newer_version("1.6.7", "1.7.0"));
+    assert!(is_newer_version("1.6.7", "2.0.0"));
+    assert!(is_newer_version("v1.6.6", "1.6.7"));
+    assert!(is_newer_version("1.6.7-beta", "1.6.8"));
+
+    assert!(!is_newer_version("1.6.7", "1.6.7"));
+    assert!(!is_newer_version("1.6.7", "1.6.6"));
+    assert!(!is_newer_version("2.0.0", "1.6.7"));
+    assert!(!is_newer_version("1.7.0", "1.6.7"));
+}
+
+#[test]
+fn test_updater_parse_response_json() {
+    use redstonereboot_pumpkin::updater::UpdateResponse;
+
+    let json_data = r#"{
+        "project": {"name": "RedstoneReboot"},
+        "current_version": "1.6.7",
+        "latest_version": "1.6.8",
+        "has_update": true,
+        "update_type": "patch",
+        "platform": "pumpkin",
+        "download": {
+            "url": "https://demonz.org/api/projects/download/redstonereboot?platform=pumpkin",
+            "direct_url": "https://github.com/DemonZ-Development/RedstoneReboot/releases/download/v1.6.8/redstonereboot_pumpkin.wasm",
+            "file_name": "redstonereboot_pumpkin.wasm"
+        },
+        "changelog": {
+            "latest": {
+                "version": "1.6.8",
+                "notes": "Bug fixes and enhancements"
+            }
+        }
+    }"#;
+
+    let parsed: UpdateResponse = serde_json::from_str(json_data).unwrap();
+    assert_eq!(parsed.latest_version, "1.6.8");
+    assert!(parsed.has_update);
+    assert_eq!(parsed.update_type.as_deref(), Some("patch"));
+    assert_eq!(parsed.platform.as_deref(), Some("pumpkin"));
+    let download = parsed.download.unwrap();
+    assert_eq!(
+        download.direct_url.as_deref(),
+        Some("https://github.com/DemonZ-Development/RedstoneReboot/releases/download/v1.6.8/redstonereboot_pumpkin.wasm")
+    );
+    let changelog = parsed.changelog.unwrap();
+    assert_eq!(changelog.latest.unwrap().version.as_deref(), Some("1.6.8"));
+}

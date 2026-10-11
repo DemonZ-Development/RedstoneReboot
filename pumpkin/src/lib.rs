@@ -5,6 +5,7 @@ pub mod config;
 pub mod history;
 pub mod manager;
 pub mod schedule;
+pub mod updater;
 
 use alerts::AlertFormatter;
 use commands::{CommandProcessor, MessageSender};
@@ -242,6 +243,28 @@ impl CommandHandler for HelpSubcommandHandler {
     }
 }
 
+struct CheckUpdateSubcommandHandler;
+
+impl CommandHandler for CheckUpdateSubcommandHandler {
+    fn handle(
+        &self,
+        sender: pumpkin_plugin_api::command::CommandSender,
+        _server: Server,
+        _args: ConsumedArgs,
+    ) -> Result<i32, CommandError> {
+        let lock = GLOBAL_PROCESSOR.read().unwrap();
+        if let Some(processor) = lock.as_ref() {
+            let mut wrapped = PumpkinSender { sender: &sender };
+            processor.handle_check_update(&mut wrapped);
+            Ok(0)
+        } else {
+            Err(CommandError::CommandFailed(TextComponent::text(
+                "RedstoneReboot engine not initialized",
+            )))
+        }
+    }
+}
+
 pub struct RedstoneRebootPlugin;
 
 impl Default for RedstoneRebootPlugin {
@@ -267,6 +290,8 @@ impl Plugin for RedstoneRebootPlugin {
                 pumpkin_plugin_api::permissions::FS_READ_DATA.to_string(),
                 pumpkin_plugin_api::permissions::FS_WRITE_DATA.to_string(),
                 pumpkin_plugin_api::permissions::SYS_ENV.to_string(),
+                pumpkin_plugin_api::permissions::HTTP_OUTBOUND.to_string(),
+                pumpkin_plugin_api::permissions::NETWORK_DNS.to_string(),
             ],
         }
     }
@@ -277,13 +302,7 @@ impl Plugin for RedstoneRebootPlugin {
         let _ = fs::create_dir_all(&data_folder);
 
         let config_path = data_folder.join("config.yml");
-        let config = if config_path.exists() {
-            PluginConfig::load_from_path(&config_path).unwrap_or_default()
-        } else {
-            let default_cfg = PluginConfig::default();
-            let _ = default_cfg.save_to_path(&config_path);
-            default_cfg
-        };
+        let config = PluginConfig::load_and_migrate(&config_path).unwrap_or_default();
 
         let history_path = config.resolve_history_path(&data_folder);
         let history = RestartHistory::new_with_data_folder(history_path, Some(&data_folder));
@@ -301,6 +320,14 @@ impl Plugin for RedstoneRebootPlugin {
                 &format!("Restart wrapper script ready at: {}/run.bat", data_dir_str),
             );
         }
+
+        if config.advanced.check_updates {
+            updater::check_and_log(commands::VERSION);
+            context.schedule_repeating_task(864000, 864000, |_| {
+                updater::check_and_log(commands::VERSION);
+            });
+        }
+
         let manager = Arc::new(RestartManager::new(config, history, backend));
         let processor = Arc::new(CommandProcessor::new(
             Arc::clone(&manager),
@@ -331,6 +358,9 @@ impl Plugin for RedstoneRebootPlugin {
         let cancel_node = CommandNode::literal("cancel").execute(CancelSubcommandHandler);
         let reload_node = CommandNode::literal("reload").execute(ReloadSubcommandHandler);
         let history_node = CommandNode::literal("history").execute(HistorySubcommandHandler);
+        let checkupdate_node =
+            CommandNode::literal("checkupdate").execute(CheckUpdateSubcommandHandler);
+        let update_node = CommandNode::literal("update").execute(CheckUpdateSubcommandHandler);
         let help_node = CommandNode::literal("help").execute(HelpSubcommandHandler);
 
         let command = Command::new(
@@ -344,6 +374,8 @@ impl Plugin for RedstoneRebootPlugin {
         .then(cancel_node)
         .then(reload_node)
         .then(history_node)
+        .then(checkupdate_node)
+        .then(update_node)
         .then(help_node);
 
         context.register_command(command, "redstonereboot.use");
