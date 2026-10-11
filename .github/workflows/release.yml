@@ -152,8 +152,38 @@ jobs:
           path: modern/${{ matrix.loader }}/build/${{ matrix.minecraft }}/libs/*.jar
           retention-days: 1
 
+  build-pumpkin:
+    needs: metadata
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.metadata.outputs.checkout_ref }}
+          fetch-depth: 0
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip2
+
+      - name: Build Pumpkin WASM plugin
+        run: cargo build --manifest-path pumpkin/Cargo.toml --target wasm32-wasip2 --release
+
+      - name: Collect Pumpkin release file
+        run: |
+          mkdir -p pumpkin-artifacts
+          cp target/wasm32-wasip2/release/redstonereboot_pumpkin.wasm pumpkin-artifacts/
+
+      - name: Upload pumpkin artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: pumpkin-wasm
+          path: pumpkin-artifacts/*.wasm
+          retention-days: 1
+
   publish:
-    needs: [metadata, build-stable, build-modern]
+    needs: [metadata, build-stable, build-modern, build-pumpkin]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -172,7 +202,7 @@ jobs:
         shell: bash
         run: |
           cd release-artifacts
-          sha256sum *.jar > checksums-sha256.txt
+          sha256sum *.jar *.wasm > checksums-sha256.txt
 
       - name: Upload full release bundle
         uses: actions/upload-artifact@v7
@@ -192,6 +222,7 @@ jobs:
           prerelease: ${{ needs.metadata.outputs.prerelease == 'true' }}
           files: |
             release-artifacts/*.jar
+            release-artifacts/*.wasm
             release-artifacts/checksums-sha256.txt
           generate_release_notes: false
         env:
