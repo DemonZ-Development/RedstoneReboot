@@ -1,12 +1,8 @@
-<div align="center">
-
 ![RedstoneReboot](https://raw.githubusercontent.com/DemonZ-Development/RedstoneReboot/main/assets/banner.png)
 
 # RedstoneReboot for Pumpkin MC
 
 **Scheduled restarts, countdown alerts, and restart management for Pumpkin Minecraft servers.**
-
-</div>
 
 ***
 
@@ -44,12 +40,13 @@ Use this for game hosting panels and containers (Docker, Pterodactyl, Bloom, Peb
 • The panel daemon or Docker restart policy boots the server back up.
 • Requires no extra scripts.
 
-### LOCAL_SCRIPT Mode
-Use this for standalone desktop or dedicated servers:
-• RedstoneReboot writes `run.bat` (Windows) and `run.sh` (Linux) to `plugins/data/RedstoneReboot/`.
-• A reboot command touches `.redstonereboot_restart` and halts Pumpkin.
-• The script finds the marker, deletes it, waits 5 seconds, and launches the server.
-• When an operator types `/stop`, no marker exists, and the script exits.
+### LOCAL_SCRIPT Mode (Standalone Desktop & Dedicated Servers)
+Operating systems exit halted applications by default. On standalone machines without a panel supervisor, automated rebooting requires a loop wrapper script:
+• RedstoneReboot automatically generates `run.bat` (Windows) and `run.sh` (Linux) in your server root on first startup.
+• Always start your server using `run.bat` (Windows) or `run.sh` (Linux) rather than double clicking the raw `pumpkin.exe` binary.
+• When a scheduled reboot or `/reboot now` occurs, RedstoneReboot places a `.redstonereboot_restart` marker file and halts Pumpkin.
+• The script detects the marker, clears it, counts down 5 seconds, and automatically launches Pumpkin again.
+• When an administrator stops the server using `/stop`, no marker is created, and the script exits normally without restarting.
 
 ***
 
@@ -66,7 +63,7 @@ Use this for standalone desktop or dedicated servers:
 
 ### 2. Launch
 • Panels and Docker: start your server through the panel interface.
-• Standalone servers: run `run.bat` (Windows) or `run.sh` (Linux) from `plugins/data/RedstoneReboot/` or your server root.
+• Standalone servers: run `run.bat` (Windows) or `run.sh` (Linux) from your server directory.
 
 ### 3. Configure
 Edit `plugins/data/RedstoneReboot/config.yml` to change schedules, alerts, sounds, and timezone. Apply edits with `/reboot reload`.
@@ -156,9 +153,5 @@ config-version: 4
 
 ***
 
-<div align="center">
-
 **RedstoneReboot** · Multi-Platform Minecraft Server Restart Engine  
 *Maintained by [DemonZ Development](https://demonz.org)*
-
-</div>
