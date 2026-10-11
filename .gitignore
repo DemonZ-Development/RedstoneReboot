@@ -1,5 +1,6 @@
 build/
 */build/
+target/
 
 .gradle/
 
@@ -41,5 +42,3 @@ __pycache__/
 release-artifacts/
 dist/
 .tools/
-
-.antigravityignore

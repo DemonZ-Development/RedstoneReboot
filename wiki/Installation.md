@@ -17,6 +17,7 @@ Use the build that matches your server platform. Do not mix Bukkit, Folia, Fabri
 | Fabric | `RedstoneReboot-Fabric-<version>.jar` | `1.20.1` | Java `17+`, Fabric API required |
 | Forge | `RedstoneReboot-Forge-<version>.jar` | `1.20.4`, Forge `49.x` | Java `17+` |
 | NeoForge | `RedstoneReboot-NeoForge-<version>.jar` | `1.21.1`, NeoForge `21.1.x` | Java `21+` |
+| Pumpkin MC | `redstonereboot_pumpkin.wasm` | Supported on Pumpkin 0.2.0+ (Minecraft 1.21.4+) | WASI Component Model (`wasm32-wasip2`) |
 
 The 26.1, 26.2, and 26.3 mod ports are separate development artifacts with `mc26.1`, `mc26.2`, or `mc26.3` in their filenames. They require Java 25. See [the port build instructions](../modern/README.md); do not install the stable mod jars on 26.x.
 
@@ -66,6 +67,17 @@ Folia uses its own scheduler adapter internally. You do not need a separate Foli
 3. Start the server once.
 4. Edit the loader-generated RedstoneReboot config.
 5. Configure backend handoff if needed.
+
+## Pumpkin MC
+
+1. Download `redstonereboot_pumpkin.wasm` from releases or the marketplace.
+2. Put `redstonereboot_pumpkin.wasm` in your `plugins/` directory.
+3. Start Pumpkin.
+4. Type `y` when Pumpkin prompts for sandbox permissions (`fs.read.data`, `fs.write.data`, `sys.env`).
+5. Panels and Docker: start the server from your panel interface.
+6. Standalone servers: start using `run.bat` (Windows) or `run.sh` (Linux) from `plugins/data/RedstoneReboot/` or the server root.
+7. Edit `plugins/data/RedstoneReboot/config.yml` to adjust schedules and warnings.
+8. Check your setup with `/reboot status`.
 
 ## First Startup Checklist
 

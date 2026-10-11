@@ -50,13 +50,14 @@
 | Fabric | Mod | `config/redstonereboot/redstonereboot.properties` |
 | Forge | Mod | `config/redstonereboot/redstonereboot.properties` |
 | NeoForge | Mod | `config/redstonereboot/redstonereboot.properties` |
+| Pumpkin MC | WASM Plugin | `plugins/data/RedstoneReboot/config.yml` |
 
-Backend handoff is configured separately through `restart-backends.properties`.
+Backend handoff is configured separately through `restart-backends.properties` on Java editions, and inline within `config.yml` under the `backend:` section on Pumpkin MC.
 
 ## Integrations
 
-- **PlaceholderAPI**: 8 placeholders for scoreboards, tab lists, and MOTD — see [Placeholders](Placeholders.md)
-- **LuckPerms**: Full permission resolution — see [Permissions](Permissions.md)
+- **PlaceholderAPI**: 8 placeholders for scoreboards, tab lists, and MOTD (see [Placeholders](Placeholders.md))
+- **LuckPerms**: Full permission resolution (see [Permissions](Permissions.md))
 - **bStats**: Anonymous usage metrics at [bstats.org/plugin/bukkit/RedstoneReboot/30751](https://bstats.org/plugin/bukkit/RedstoneReboot/30751)
 
 ## Repository Docs
