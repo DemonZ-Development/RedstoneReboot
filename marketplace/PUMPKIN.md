@@ -50,23 +50,90 @@ Operating systems exit halted applications by default. On standalone machines wi
 
 ***
 
-## Installation
+## How the run.bat / run.sh Wrapper Script Works
+
+When running on standalone servers in `LOCAL_SCRIPT` mode, RedstoneReboot creates and uses wrapper scripts to achieve automated restarts:
+
+### Windows (`run.bat`)
+```bat
+@echo off
+title Pumpkin Server Wrapper
+set REDSTONEREBOOT_ACTIVE=1
+
+if exist "%~dp0pumpkin-X64-Windows.exe" cd /d "%~dp0"
+if exist "%~dp0pumpkin.exe" cd /d "%~dp0"
+
+set PUMPKIN_EXE=
+if exist "pumpkin-X64-Windows.exe" set PUMPKIN_EXE=pumpkin-X64-Windows.exe
+if exist "pumpkin.exe" set PUMPKIN_EXE=pumpkin.exe
+
+:start
+echo Starting Pumpkin Server...
+%PUMPKIN_EXE%
+
+if not exist ".redstonereboot_restart" goto end
+del /f /q ".redstonereboot_restart" >nul 2>&1
+echo Server stopped by RedstoneReboot. Restarting in 5 seconds... (Press Ctrl+C to cancel)
+timeout /t 5
+goto start
+
+:end
+echo Server shut down normally. Exiting.
+pause
+exit /b 0
+```
+
+### Linux (`run.sh`)
+```bash
+#!/bin/bash
+export REDSTONEREBOOT_ACTIVE=1
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$SCRIPT_DIR"
+
+PUMPKIN_BIN=""
+if [ -f "./pumpkin-X64-Linux" ]; then
+    PUMPKIN_BIN="./pumpkin-X64-Linux"
+elif [ -f "./pumpkin" ]; then
+    PUMPKIN_BIN="./pumpkin"
+fi
+
+while true; do
+    echo "Starting Pumpkin Server..."
+    $PUMPKIN_BIN
+    if [ ! -f ".redstonereboot_restart" ]; then
+        echo "Server shut down normally. Exiting."
+        exit 0
+    fi
+    rm -f ".redstonereboot_restart" 2>/dev/null
+    echo "Server stopped by RedstoneReboot. Restarting in 5 seconds... (Press Ctrl+C to cancel)"
+    sleep 5
+done
+```
+
+### Key Behaviors of the Script Loop:
+• **Restart vs Stop Detection**: A scheduled reboot or `/reboot now` command creates `.redstonereboot_restart`. The script sees this marker, removes it, waits 5 seconds, and restarts. If `/stop` is used, no marker exists, and the wrapper exits cleanly.  
+• **Path Resolution**: The script automatically finds the Pumpkin executable in current and parent directories.  
+• **Safety Timeout**: A 5 second cooldown prevents boot loops if the server stops unexpectedly.  
+
+***
+
+## Installation & Setup
 
 ### Requirements
 • Pumpkin server binary (`pumpkin-X64-Windows.exe`, `pumpkin-X64-Linux`, or source build)  
 • Plugin file (`redstonereboot_pumpkin.wasm`)  
 
-### 1. Install
-1. Put `redstonereboot_pumpkin.wasm` in your `plugins/` directory.
-2. Start the server.
-3. Type `y` in console when Pumpkin asks to approve permissions (`fs.read.data`, `fs.write.data`, `sys.env`). Pumpkin saves this choice to `plugins/permission_cache.json`.
+### Step 1: Install Plugin
+1. Place `redstonereboot_pumpkin.wasm` in your server's `plugins/` directory.
+2. Launch the server once so Pumpkin loads the plugin.
+3. Type `y` in the server console when prompted to grant plugin permissions (`fs.read.data`, `fs.write.data`, `sys.env`). Pumpkin records this approval in `plugins/permission_cache.json`.
 
-### 2. Launch
-• Panels and Docker: start your server through the panel interface.
-• Standalone servers: run `run.bat` (Windows) or `run.sh` (Linux) from your server directory.
+### Step 2: Choose Launch Method
+• **Game Panels and Docker Containers**: Start your server normally through the panel interface. RedstoneReboot detects the environment and uses `DEPEND_ON_HOST`.  
+• **Standalone Servers**: Launch your server with `run.bat` (Windows) or `run.sh` (Linux) to enable automated looping in `LOCAL_SCRIPT` mode.
 
-### 3. Configure
-Edit `plugins/data/RedstoneReboot/config.yml` to change schedules, alerts, sounds, and timezone. Apply edits with `/reboot reload`.
+### Step 3: Configure
+Edit `plugins/data/RedstoneReboot/config.yml` to set restart schedules, warning countdown intervals, timezone, and sound cues. Reload changes anytime using `/reboot reload`.
 
 ***
 
